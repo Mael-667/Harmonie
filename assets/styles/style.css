@@ -1,0 +1,49 @@
+html{
+    --main-color: #A81848;
+    --secondary-color: #F0DEB8;
+
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body{
+    min-height: 100vh;
+    background: #161616;
+    background: linear-gradient(135deg, rgba(22, 22, 22, 1) 0%, rgb(22 17 17) 16%, rgb(7 0 2) 90%, rgba(10, 9, 9, 1) 100%);
+    color: white;
+}
+
+#title{
+    padding-top: 20vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+h1{
+  font-family: "Cabin Sketch", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+  color: var(--secondary-color);
+  font-size: 6.5rem;
+}
+
+#titleButtons{
+    display: flex;
+    gap: 3rem;
+    &>a{
+        text-decoration: none;
+        color: var(--secondary-color);
+        font-size: 1.25rem;
+    }
+}
+
+.button{
+    border: 1px solid var(--main-color);
+    padding: 1rem;
+    border-radius: 0.9rem;
+}
+
+.crimsonButton{
+    background-color: var(--main-color);
+}
