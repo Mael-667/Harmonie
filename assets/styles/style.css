@@ -70,6 +70,7 @@ h2::after{
     text-decoration: none;
     color: var(--secondary-color);
     transition: 250ms;
+    cursor: pointer;
 }
 
 .button:hover{
