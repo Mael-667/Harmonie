@@ -7,12 +7,16 @@ use React\Socket\SocketServer;
 
 $socket = new SocketServer('0.0.0.0:8080');
 
+// Implémentation du protocole websocket tel que décrit sur cette documentation
+// https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_servers
+
 // Gestion des requetes websocket
 $socket->on("connection", function (ConnectionInterface $conn){
     $handshake = false;
     $buffer = '';
+    $message = '';
 
-    $conn->on("data", function (string $data) use ($conn, &$handshake, $buffer){
+    $conn->on("data", function (string $data) use ($conn, &$handshake, &$buffer, &$message){
         $buffer .= $data;
     
         if(!$handshake){
@@ -20,31 +24,19 @@ $socket->on("connection", function (ConnectionInterface $conn){
             $buffer = '';
             $handshake = true;
         } else {
-            // l'ordre de lecture des bits est exactement comme indiqué dans la docu
-            $byte1 = ord($buffer[0]);
-            $FIN = $byte1 >> 7;
-            $opcode = ($byte1 & 15);
+            $result = decodeFrame($buffer);
+            $message.= $result['data'];
 
-            $byte2 = ord($buffer[1]);
-            $mask = $byte2 >> 7;
-            $payloadLen = $byte2 & 127;
+            if($result["FIN"] != 0){
+                // Message entier
 
-            $start = 2;
-            $maskingKeyLength = 4; 
-            for ($i=$start; $i < $start+$maskingKeyLength; $i++) { 
-                $maskingKey[] = $buffer[$i];
+                // TODO: Traiter la data
+
+                $conn->write(encodeFrame($message));
+
+                $message = '';
             }
-
-            $index = 6;
-            for ($i=$index; $i < strlen($buffer); $i++) { 
-                $decodedPayload[] = $buffer[$i] ^ $maskingKey[($i-$index)%4];
-            }
-
-            $decodedPayload = implode($decodedPayload);
-
-            var_dump($decodedPayload);
-
-            // echo ord($buffer[1]);
+            $buffer = '';
         }
     });
 });
@@ -79,8 +71,94 @@ function handshake(&$buffer, &$conn){
     return;
 }
 
-function decode(){
+function decodeFrame(&$buffer){
+    // l'ordre de lecture des bits est exactement comme indiqué dans la docu
 
+    //ex: $byte1 = 129 = 10000001
+    $byte1 = ord($buffer[0]);
+    $FIN = $byte1 >> 7;
+    $opcode = ($byte1 & 15);
+
+    //ex: $byte2 = 137 = 10001001
+    $byte2 = ord($buffer[1]);
+    $mask = $byte2 >> 7;
+    $payloadLen = $byte2 & 127;
+    // echo $byte2.PHP_EOL;
+
+    if($payloadLen < 126){
+        $index = 2;
+    } else if($payloadLen == 126){
+        $index = 4;
+        $payloadLen = (ord($buffer[2]) << 8) + ord($buffer[3]);
+    } else if($payloadLen == 127){
+        $index = 10;
+        $start = 2;
+        $payloadLen = 0;
+        for ($i=0; $i < 7; $i++) { 
+            $payloadLen += ord($buffer[$i+$start]);
+            $payloadLen <<= 8;
+        }
+        $payloadLen += ord($buffer[9]);
+    }
+
+    $maskingKeyLength = 4; 
+    for ($i=$index; $i < $index+$maskingKeyLength; $i++) { 
+        $maskingKey[] = $buffer[$i];
+    }
+
+    $index +=4;
+
+    for ($i=0; $i < $payloadLen; $i++) { 
+        $decodedPayload[] = $buffer[$i+$index] ^ $maskingKey[($i)%4];
+    }
+
+    $decodedPayload = implode($decodedPayload);
+
+    var_dump($decodedPayload);
+
+    return [
+        "opcode" => $opcode,
+        "FIN" => $FIN,
+        "data" => $decodedPayload
+    ];
+}
+
+function encodeFrame($data){
+    $payload = '';
+    $maskingKey = [7, 107, 67, 18];
+    // $encodedPayload = '';
+    // for ($i = 0; $i < strlen($data); $i++) { 
+    //     $encodedPayload.= chr(ord($data[$i])^$maskingKey[($i)%4]);
+    // }
+    
+    // Set fin then opcode
+    $payload[0] = chr((0 | 128) | 1);
+
+    // Set mask
+    // $payload[1] = chr(0 | 128);
+
+    // Set payloadLength
+    $dataLen = strlen($data);
+    if($dataLen < 126){
+        // $payload[1] = chr(ord($payload[1]) | $dataLen);
+        $payload[1] = chr(0 | $dataLen);
+    } else if($dataLen >= 126 && $dataLen < 65535){
+        $payload[1] = chr(0 | 126);
+        $payload .= pack('n', $dataLen);   // 16-bit big-endian
+    } else {
+        $payload[1] = chr(0 | 127);
+        $payload .= pack('J', $dataLen);   // 64-bit big-endian
+    }
+
+    // On ajoute pas la maskey key a la frame si le masking bit est off
+
+    // for ($i=0; $i < count($maskingKey); $i++) { 
+    //     $payload.=chr($maskingKey[$i]);
+    // }
+    // $payload.=$encodedPayload;
+    $payload.=$data;
+
+    return $payload;
 }
 
 echo "Serveur WebSocket sur ws://localhost:8080\n";
