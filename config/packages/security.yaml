@@ -23,10 +23,15 @@ security:
                 login_path: login
                 check_path: login
                 enable_csrf: true
+                remember_me: true
             logout:
                 path: logout
                 # where to redirect after logout
                 target: home_index
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 15768000 # 6 month in seconds
+                path: /
 
             # Activate different ways to authenticate:
             # https://symfony.com/doc/current/security.html#the-firewall

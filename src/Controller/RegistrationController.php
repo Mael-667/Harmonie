@@ -20,9 +20,14 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 class RegistrationController extends AbstractController
 {
     #[Route('/register', name: 'register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, EntityManagerInterface $entityManager, SluggerInterface $slugger,
-    #[Autowire('%kernel.project_dir%/public/uploads/pdp')] string $pdpDirectory): Response
-    {
+    public function register(
+        Request $request,
+        UserPasswordHasherInterface $userPasswordHasher,
+        Security $security,
+        EntityManagerInterface $entityManager,
+        SluggerInterface $slugger,
+        #[Autowire('%kernel.project_dir%/public/uploads/pdp')] string $pdpDirectory
+    ): Response {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
@@ -35,13 +40,14 @@ class RegistrationController extends AbstractController
             $uuid = Uuid::v4();
             $user->setUuid($uuid);
 
+
             $pdp = $form->get("pdp")->getData();
 
-            if($pdp){
+            if ($pdp) {
                 $originalFilename = pathinfo($pdp->getClientOriginalName(), PATHINFO_FILENAME);
                 // this is needed to safely include the file name as part of the URL
                 $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename.'-'.uniqid().'.'.$pdp->guessExtension();
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $pdp->guessExtension();
 
                 // Move the file to the directory where pfps are stored
                 try {
@@ -59,6 +65,7 @@ class RegistrationController extends AbstractController
             $user->setPseudo($form->get("pseudo")->getData());
             $user->setEmail($form->get("email")->getData());
             $user->setCreatedAt(new DateTimeImmutable('now'));
+            $user->setToken(bin2hex(random_bytes(48)));
 
             // encode the plain password
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
