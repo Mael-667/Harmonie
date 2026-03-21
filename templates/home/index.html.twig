@@ -6,9 +6,18 @@
 
 <div id="title">
     <h1>Harmonie</h1>
+    {% if is_granted("ROLE_USER") %}
+        <p class="soustitre">Re-bienvenue {{ app.user.pseudo }} !</p>
+    {% endif %}
+
     <div class="titleButtons">
-        <a href="{{ path('login') }}" class="button">Se connecter</a>
-        <a href="{{ path('register') }}" class="button crimsonButton">S'inscrire</a>
+        {% if is_granted("ROLE_USER") %}
+            <a href="{{ path('app') }}" class="button crimsonButton">Accéder au chat</a>       
+            <a href="{{ path('logout') }}" class="button">Se déconnecter</a>
+        {% else %}
+            <a href="{{ path('login') }}" class="button">Se connecter</a>
+            <a href="{{ path('register') }}" class="button crimsonButton">S'inscrire</a>        
+        {% endif %}
     </div>
 </div>
 

@@ -1,8 +1,8 @@
 <?php
 
 
-require __DIR__."\WebSocketServer.php";
-require __DIR__."\SymfonyIPC.php";
+require __DIR__."/WebSocketServer.php";
+require __DIR__."/SymfonyIPC.php";
 
 
 // Démarrer la loop après avoir fini de tout initialiser sinon php ne prend plus rien en compte
@@ -16,10 +16,12 @@ $ws->onMessage(function($msg) use (&$ws, &$si){
     switch ($details->type) {
         case "authentification":
             $userDetails = $si->checkCredentials($details->token);
+            echo $userDetails.PHP_EOL;
             if($userDetails){
                 // associer les infos de l'utilisateur a la connexion
             } else {
                 // message d'erreur si le token est erroné
+                // rediriger l'utilisateur vers la page de connexion
             }
             break;
         

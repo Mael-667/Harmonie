@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endblock %}
+
+{% block title %}Harmonie{% endblock %}
+
+{% block body %}
+
+<div id="side_panel">
+
+</div>
+<div id="main">
+    <div id="header">
+        <h3 id="server-name"></h3>
+    </div>
+    
+    <div id="messages">
+
+    </div>
+
+    <div id="input">
+        <form action="" method="post">
+            <label for="attachement">
+                <i class="fa-solid fa-file-arrow-up"></i>
+                <input type="file" name="attachement" id="attachement">
+            </label>
+            <label for="message">
+                <input type="text" name="attachement" id="attachement">
+            </label>
+            <button id="emoji-btn">
+                <i class="fa-regular fa-face-laugh-beam"></i>
+            </button>
+            <button type="submit">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </form>
+
+    </div>
+</div>
+<div id="social">
+    <div id="search">
+        <form action="" method="get">
+            <input type="text" name="query" id="query">
+            <button type="submit">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+        </form>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('scripts/app.js') }}"></script>
+{% endblock %}

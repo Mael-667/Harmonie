@@ -28,8 +28,8 @@ final class WebsocketController extends AbstractController
         
         if($user == null){
             return new JsonResponse([
-                "error" => "Accès refusé"
-            ], 403);
+                "error" => "Bad request"
+            ], 400);
         } else {
             return new JsonResponse([
                 "pseudo" => $user->getPseudo()

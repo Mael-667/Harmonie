@@ -27,7 +27,7 @@ class SymfonyIPC
     public function checkCredentials($token)
     {
         try {
-            $response = await($this->browser->post("http://127.0.0.1:8000/websocket/login", ["X-IPC-Secret" => $this->secret, 'Content-Type' => 'application/json'], json_encode(["token" => $token])));
+            $response = await($this->browser->post("http://web:80/websocket/login", ["X-IPC-Secret" => $this->secret, 'Content-Type' => 'application/json'], json_encode(["token" => $token])));
             return (string) $response->getBody();
         } catch (\React\Http\Message\ResponseException $e) {
             // Log l'erreur sans crasher le serveur

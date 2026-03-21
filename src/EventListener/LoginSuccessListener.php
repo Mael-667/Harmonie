@@ -18,6 +18,10 @@ final class LoginSuccessListener
     {
         $response = $event->getResponse();
 
+        if ($response === null) {
+            return;
+        }
+
         $token = $event->getUser()->getToken();
 
         $cookie = Cookie::create('token')
