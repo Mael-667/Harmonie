@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -52,6 +54,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $token = null;
+
+    #[ORM\ManyToOne(inversedBy: 'users')]
+    private ?Server $server = null;
+
+    /**
+     * @var Collection<int, Message>
+     */
+    #[ORM\OneToMany(targetEntity: Message::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $messages;
+
+    /**
+     * @var Collection<int, Theme>
+     */
+    #[ORM\OneToMany(targetEntity: Theme::class, mappedBy: 'user')]
+    private Collection $themes;
+
+    public function __construct()
+    {
+        $this->messages = new ArrayCollection();
+        $this->themes = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -196,6 +219,78 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setToken(string $token): static
     {
         $this->token = $token;
+
+        return $this;
+    }
+
+    public function getServer(): ?Server
+    {
+        return $this->server;
+    }
+
+    public function setServer(?Server $server): static
+    {
+        $this->server = $server;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Message>
+     */
+    public function getMessages(): Collection
+    {
+        return $this->messages;
+    }
+
+    public function addMessage(Message $message): static
+    {
+        if (!$this->messages->contains($message)) {
+            $this->messages->add($message);
+            $message->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMessage(Message $message): static
+    {
+        if ($this->messages->removeElement($message)) {
+            // set the owning side to null (unless already changed)
+            if ($message->getUser() === $this) {
+                $message->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Theme>
+     */
+    public function getThemes(): Collection
+    {
+        return $this->themes;
+    }
+
+    public function addTheme(Theme $theme): static
+    {
+        if (!$this->themes->contains($theme)) {
+            $this->themes->add($theme);
+            $theme->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTheme(Theme $theme): static
+    {
+        if ($this->themes->removeElement($theme)) {
+            // set the owning side to null (unless already changed)
+            if ($theme->getUser() === $this) {
+                $theme->setUser(null);
+            }
+        }
 
         return $this;
     }
