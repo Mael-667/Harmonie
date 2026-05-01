@@ -5,7 +5,9 @@ require __DIR__ . '/../vendor/autoload.php';
 use React\EventLoop\Loop;
 use React\Socket\ConnectionInterface;
 use React\Socket\SocketServer;
-use Symfony\Component\Uid\Uuid; 
+
+require __DIR__."/User.php";
+
 
 class WebSocketServer
 {
@@ -15,9 +17,11 @@ class WebSocketServer
     private $callbacks = [];
     private $users = [];
 
+    private $port = 8080;
+
     public function __construct()
     {
-        $this->socket = new SocketServer('0.0.0.0:8080');
+        $this->socket = new SocketServer('0.0.0.0:'.$this->port);
         // Implémentation du protocole websocket tel que décrit sur cette documentation
         // https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_servers
 
@@ -27,10 +31,10 @@ class WebSocketServer
             $buffer = '';
             $message = '';
 
-            $userUUID = Uuid::V4()->toString();
-            $this->users[$userUUID] = $conn;
+            $user = new User($conn);
+            $this->users[] = $user;
 
-            $conn->on("data", function (string $data) use ($conn, &$handshake, &$buffer, &$message) {
+            $conn->on("data", function (string $data) use (&$conn, &$handshake, &$buffer, &$message, &$user) {
                 $buffer .= $data;
 
                 if (!$handshake) {
@@ -44,24 +48,21 @@ class WebSocketServer
                     if ($result["FIN"] != 0) {
                         // Message entier
 
-                        $this->callback("onMessage", $message);
-                        
-                        // $conn->write($this->encodeFrame($message));
-
+                        $this->callback("onMessage", $message, $user);
                         $message = '';
                     }
                     $buffer = '';
                 }
             });
 
-            $conn->on("close", function() use ($userUUID) {
-                unset($this->users[$userUUID]);
+            $conn->on("close", function() use ($user) {
+                unset($this->users[array_search($user, $this->users)]);
             });
         });
     }
 
     public function run(){
-        echo "Serveur WebSocket sur ws://localhost:8080\n";
+        echo "Serveur WebSocket sur ws://localhost:".$this->port.PHP_EOL;
 
         Loop::run();
     }
@@ -189,10 +190,10 @@ class WebSocketServer
         return $payload;
     }
 
-    public function callback($event, $data){
+    public function callback($event, $data, $user){
         switch ($event) {
             case 'onMessage':
-                if(isset($this->callbacks["onMessage"])) ($this->callbacks["onMessage"])($data);
+                if(isset($this->callbacks["onMessage"])) ($this->callbacks["onMessage"])($data, $user);
                 break;
             
             default:
@@ -206,8 +207,18 @@ class WebSocketServer
     }
 
     public function broadcastMessage($message){
-        foreach ($this->users as $k => $v) {
-            $v->write($this->encodeFrame($message));
+        foreach ($this->users as $key => $user) {
+            if($user->authenticated){
+                $user->conn->write($this->encodeFrame($message));
+            }
+        }
+    }
+
+    public function broadcastMessageTo($message, callable $fun){
+        foreach ($this->users as $key => $user) {
+            if($user->authenticated && $fun($user)){
+                $user->conn->write($this->encodeFrame($message));
+            }
         }
     }
 }
