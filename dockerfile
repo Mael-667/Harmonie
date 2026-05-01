@@ -13,4 +13,5 @@ COPY conf/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 
 RUN a2enconf z-app
 RUN docker-php-ext-install pdo pdo_mysql
+RUN apt-get update && apt-get install -y git unzip && rm -rf /var/lib/apt/lists/*
 
