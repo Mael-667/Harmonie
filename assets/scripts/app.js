@@ -1,5 +1,5 @@
-
-const ws = new WebSocket("ws://localhost:443");
+const url = (window.location.origin).replace(window.location.protocol, "");
+let ws = new WebSocket(`ws:${url}:443`);
 
 ws.onopen = (e) => {
   const token = getCookie("token");
@@ -11,14 +11,21 @@ ws.onopen = (e) => {
 };
 
 ws.onclose = (e) => {
-  console.log("deconnecté");
-  
+  console.log("Connexion perdue, reconnexion...");
+
+  let recoInterval = setInterval(() => {
+    if(ws.readyState == 1){
+      console.log("Connecté.");
+      clearInterval(recoInterval);
+    } else {
+        ws = new WebSocket(`ws:${url}:443`);
+    }
+  }, 2000)
 };
 
 ws.onmessage = (e) => {
   console.log(e.data);
 };
-
 
 function getCookie(cname) {
   let name = cname + "=";
@@ -35,3 +42,26 @@ function getCookie(cname) {
   }
   return "";
 }
+
+
+const form = document.getElementById("msgForm");
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const messageElmt = document.getElementById("message");
+
+  const textContent = messageElmt.value;
+
+  const message = {
+    "type" : "message",
+    "channel": "",
+    "content":  {
+      "text": textContent,
+      "attachment": ""
+    }
+  }
+
+  ws.send(JSON.stringify(message));
+  // TODO: Vérifier que la data a bien été reçue
+  messageElmt.value = "";
+})
+

@@ -18,18 +18,23 @@ final class AppController extends AbstractController
 
         $user = $this->getUser();
         if($user instanceof User){
-            $pseudo = $user->getPseudo();
-            $avatar = $user->getAvatarUrl();
-            // dd($user);
+
+            $userProfile = [
+                "pseudo" => $user->getPseudo(),
+                "avatar" => $user->getAvatarUrl()
+            ];
     
             return $this->render('app/index.html.twig', [
-                "pseudo" => $pseudo,
-                "avatar" => $avatar
+                "user" => $userProfile
             ]);
 
         } else {
             throw new HttpException(400, 'Bad request');
         }
+    }
 
+    #[Route('/newServer', name: 'app_newServer', methods: ["POST"])]
+    public function newServer(){
+        
     }
 }

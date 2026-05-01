@@ -1,0 +1,128 @@
+body {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: 1fr;
+    margin: 0;
+}
+
+#side_panel {
+    grid-column: 1 / 3;
+    display: flex;
+    flex-direction: column;
+}
+
+#serversDetails {
+    display: flex;
+    flex-direction: row;
+    height: stretch;
+}
+
+#servers {
+    width: 5rem;
+}
+
+
+#userInfo {
+    height: 5rem;
+    display: flex;
+    align-items: center;
+    padding: 0.2rem 0.5rem;
+}
+
+#userPfp {
+    height: 4.2rem;
+}
+
+#userPfp>img {
+    height: 100%;
+    border-radius: 50%;
+}
+
+
+
+#main {
+    grid-column: 3 / 11;
+    display: flex;
+    flex-direction: column;
+}
+
+#header {
+    height: 3rem;
+}
+
+#messages {
+    height: stretch;
+}
+
+#input {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 4rem;
+}
+
+#input button{
+    background-color: #ffffff00;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+#input>form {
+    width: 90%;
+    height: 2.5rem;
+    border: 1px solid var(--main-outline);
+    border-radius: 1rem;
+    display: flex;
+    padding: 0.3rem;
+    padding-right: 0.6rem;
+    & i {
+        font-size: 2rem;
+        color: var(--secondary-color);
+
+        &:hover{
+            color: var(--secondary-color-hover);
+        }
+    }
+}
+
+#messageLabel {
+    width: stretch;
+}
+
+#message {
+    width: 100%;
+    box-sizing: border-box;
+    height: 100%;
+    background-color: #ffffff00;
+    border: none;
+    font-size: 1.15rem;
+    color: var(--text-color);
+
+    &::placeholder{
+        color: var(--field-placeholder);
+    }
+    &:focus{
+        outline: none;
+    }
+}
+
+#submitButton>i{
+    font-size: 1.8rem !important;
+    position: relative;
+    top: 0.1rem;
+}
+
+#attachement {
+    display: none;
+}
+
+#attachementButton {
+    cursor: pointer;
+    align-self: center;
+}
+
+
+#social {
+    grid-column: 11 / 13;
+}

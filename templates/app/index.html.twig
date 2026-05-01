@@ -10,8 +10,29 @@
 {% block body %}
 
 <div id="side_panel">
+    <div id="serversDetails">
+        <div id="servers">
+    
+        </div>
+        <div id="serverInfo">
+    
+        </div>
+    </div>
+    <div id="userInfo">
+        <div id="userPfp">
+            <img src={{asset('uploads/pdp/'~user.avatar)}} alt="User avatar">
+        </div>
+        <div id="userHandles">
+            <p id="userPseudo">{{ user.pseudo }}</p>
+            <p id="userHandle"></p>
+        </div>
+        <div id="settings">
+
+        </div>
+    </div>
 
 </div>
+
 <div id="main">
     <div id="header">
         <h3 id="server-name"></h3>
@@ -22,18 +43,20 @@
     </div>
 
     <div id="input">
-        <form action="" method="post">
-            <label for="attachement">
+        <form action="" method="post" id="msgForm">
+            <label for="attachement" id="attachementButton">
                 <i class="fa-solid fa-file-arrow-up"></i>
                 <input type="file" name="attachement" id="attachement">
             </label>
-            <label for="message">
-                <input type="text" name="attachement" id="attachement">
+            <div class="horizontalLine"></div>
+            <label for="message" id="messageLabel">
+                <input type="text" name="message" id="message" placeholder="Écrivez ici" autocomplete="off">
             </label>
             <button id="emoji-btn">
                 <i class="fa-regular fa-face-laugh-beam"></i>
             </button>
-            <button type="submit">
+            <div class="horizontalLine"></div>
+            <button type="submit" id="submitButton">
                 <i class="fa-solid fa-paper-plane"></i>
             </button>
         </form>
@@ -48,6 +71,9 @@
                 <i class="fa-solid fa-magnifying-glass"></i>
             </button>
         </form>
+    </div>
+    <div id="users">
+
     </div>
 
 </div>
