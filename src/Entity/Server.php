@@ -31,9 +31,9 @@ class Server
     private Collection $users;
 
     /**
-     * @var Collection<int, channel>
+     * @var Collection<int, Channel>
      */
-    #[ORM\OneToMany(targetEntity: channel::class, mappedBy: 'server', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Channel::class, mappedBy: 'server', orphanRemoval: true)]
     private Collection $channels;
 
     public function __construct()
@@ -114,14 +114,14 @@ class Server
     }
 
     /**
-     * @return Collection<int, channel>
+     * @return Collection<int, Channel>
      */
     public function getChannels(): Collection
     {
         return $this->channels;
     }
 
-    public function addChannel(channel $channel): static
+    public function addChannel(Channel $channel): static
     {
         if (!$this->channels->contains($channel)) {
             $this->channels->add($channel);
@@ -131,7 +131,7 @@ class Server
         return $this;
     }
 
-    public function removeChannel(channel $channel): static
+    public function removeChannel(Channel $channel): static
     {
         if ($this->channels->removeElement($channel)) {
             // set the owning side to null (unless already changed)
