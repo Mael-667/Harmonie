@@ -6,13 +6,15 @@ html{
     --field-bg: #0A0909;
     --field-placeholder: #f0deb854;
     --text-color: white;
+    --background: #161616;
+    --background-secondary: #121212;
 
     font-family: Arial, Helvetica, sans-serif;
 }
 
 body{
     min-height: 100vh;
-    background: #161616;
+    background: var(--background);
     background: linear-gradient(135deg, rgba(22, 22, 22, 1) 0%, rgb(22 17 17) 16%, rgb(7 0 2) 90%, rgba(10, 9, 9, 1) 100%);
     color: var(--text-color);
 }
@@ -53,6 +55,10 @@ h2::after{
     width: 80%;
     background-color: var(--main-outline);
     margin: 0 10%;
+}
+
+button{
+    cursor: pointer;
 }
 
 .soustitre{
@@ -121,4 +127,11 @@ h2::after{
     background-color: var(--main-outline);
     align-self: center;
     margin: 0 0.4rem;
+}
+
+.transparentButton{
+    background: none;
+    border: none;
+    padding: 0;
+    outline: #12121200;
 }

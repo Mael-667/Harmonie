@@ -1,5 +1,7 @@
 {% extends 'base.html.twig' %}
 
+{% import "app/popups.html.twig" as popups %}
+
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -12,7 +14,11 @@
 <div id="side_panel">
     <div id="serversDetails">
         <div id="servers">
-    
+            <div id="newServer" class="serverButton">
+                <button class="transparentButton" aria-label="Create New Server">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
         </div>
         <div id="serverInfo">
     
@@ -27,7 +33,7 @@
             <p id="userHandle"></p>
         </div>
         <div id="settings">
-
+            <button aria-label="settings" class="transparentButton" id="profileSetting"><i class="fa-solid fa-gear"></i></button>
         </div>
     </div>
 
@@ -44,7 +50,7 @@
 
     <div id="input">
         <form action="" method="post" id="msgForm">
-            <label for="attachement" id="attachementButton">
+            <label for="attachement" id="attachementButton" aria-label="Select a file to upload">
                 <i class="fa-solid fa-file-arrow-up"></i>
                 <input type="file" name="attachement" id="attachement">
             </label>
@@ -52,7 +58,7 @@
             <label for="message" id="messageLabel">
                 <input type="text" name="message" id="message" placeholder="Écrivez ici" autocomplete="off">
             </label>
-            <button id="emoji-btn">
+            <button id="emoji-btn" aria-label="Open emoji selector">
                 <i class="fa-regular fa-face-laugh-beam"></i>
             </button>
             <div class="horizontalLine"></div>
@@ -77,6 +83,11 @@
     </div>
 
 </div>
+
+<div class="popupBackground">
+    {{ popups.popup("popupNewServer") }}
+</div>
+
 
 {% endblock %}
 

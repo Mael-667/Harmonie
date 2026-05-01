@@ -3,6 +3,7 @@ body {
     grid-template-columns: repeat(12, 1fr);
     grid-template-rows: 1fr;
     margin: 0;
+    background: var(--background);
 }
 
 #side_panel {
@@ -19,6 +20,31 @@ body {
 
 #servers {
     width: 5rem;
+    background-color: var(--background-secondary);
+}
+
+.serverButton{
+    width: 4rem;
+    height: 4rem;
+    border-radius: 1rem;
+    margin: auto;
+}
+
+#newServer{
+    background-color: var(--field-bg);
+    border: 1px solid var(--main-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    & i{
+        color: var(--secondary-color);
+        font-size: 3.5rem;
+        transition: 150ms;
+
+        &:hover{
+            color: var(--secondary-color-hover);
+        }
+    }
 }
 
 
@@ -27,6 +53,7 @@ body {
     display: flex;
     align-items: center;
     padding: 0.2rem 0.5rem;
+    background-color: var(--field-bg);
 }
 
 #userPfp {
@@ -38,7 +65,34 @@ body {
     border-radius: 50%;
 }
 
+#userHandles{
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-around;
+    color: var(--secondary-color);
+    margin-left: 0.5rem;
+    flex-direction: column;
 
+    font-family: "Roboto", sans-serif;
+    font-size: 1.15rem;
+    &>*{
+        margin: 0;
+    }
+}
+
+#settings{
+    margin-left: auto;
+}
+
+#profileSetting{
+    color: var(--secondary-color);
+    font-size: 1.8rem;
+    padding-top: 3px;
+    transition: 1000ms;
+    &:hover{
+        transform: rotate(180deg);
+    }
+}
 
 #main {
     grid-column: 3 / 11;
@@ -69,7 +123,7 @@ body {
 }
 
 #input>form {
-    width: 90%;
+    width: 95%;
     height: 2.5rem;
     border: 1px solid var(--main-outline);
     border-radius: 1rem;
@@ -79,7 +133,7 @@ body {
     & i {
         font-size: 2rem;
         color: var(--secondary-color);
-
+        transition: 150ms;
         &:hover{
             color: var(--secondary-color-hover);
         }
@@ -125,4 +179,51 @@ body {
 
 #social {
     grid-column: 11 / 13;
+}
+
+.popupBackground{
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    background-color: rgba(14, 13, 13, 0.479);
+    justify-content: center;
+    align-items: center;
+    display: none;
+}
+
+.popup{
+    background-color: var(--background);
+    border: 1px solid var(--main-outline);
+    box-shadow: 0 0 4px var(--main-color);
+    border-radius: 1.4rem;
+}
+
+#serverIconLabel{
+    display: flex;
+    height: 6.5rem;
+    width: 6.5rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--main-outline);
+    /* box-shadow: 0 0 5px 0px black; */
+    border-radius: 50%;
+    background: var(--field-bg);
+    transition-duration: 150ms;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    margin: auto;
+    color: var(--secondary-color);
+
+    &::after{
+        content: "Votre avatar ici";
+        text-align: center;
+    }
+}
+
+#serverIcon{
+    display: none;
 }

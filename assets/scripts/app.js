@@ -65,3 +65,9 @@ form.addEventListener("submit", (e) => {
   messageElmt.value = "";
 })
 
+
+const popupBg = document.querySelector(".popupBackground");
+document.getElementById("newServer").addEventListener("click", (e) =>{
+  popupBg.style.display = "flex";
+  document.getElementById("popupNewServer").style.display = "flex";
+})
