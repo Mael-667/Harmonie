@@ -1,0 +1,137 @@
+html{
+    --main-color: #A81848;
+    --main-outline: #a81848a0;
+    --secondary-color: #F0DEB8;
+    --secondary-color-hover: #e4ce9f;
+    --field-bg: #0A0909;
+    --field-placeholder: #f0deb854;
+    --text-color: white;
+    --background: #161616;
+    --background-secondary: #121212;
+
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body{
+    min-height: 100vh;
+    background: var(--background);
+    background: linear-gradient(135deg, rgba(22, 22, 22, 1) 0%, rgb(22 17 17) 16%, rgb(7 0 2) 90%, rgba(10, 9, 9, 1) 100%);
+    color: var(--text-color);
+}
+
+#title{
+    padding-top: 20vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+h1{
+  font-family: "Cabin Sketch", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+  color: var(--secondary-color);
+  font-size: 6.5rem;
+}
+
+h2{
+  font-family: "Cabin Sketch", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+  color: var(--secondary-color);
+  font-size: 3.3rem;
+  text-align: center;
+
+  margin: 0;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+h2::after{
+    content: " ";
+    display: block;
+    height: 1px;
+    width: 80%;
+    background-color: var(--main-outline);
+    margin: 0 10%;
+}
+
+button{
+    cursor: pointer;
+}
+
+.soustitre{
+    font-family: "Cabin Sketch", sans-serif;
+    font-weight: 700;
+    font-style: normal;
+    color: var(--secondary-color);
+    font-size: 2.5rem;
+    text-align: center;
+    margin: 0;
+    margin-top: 1.2rem;
+    margin-bottom: 1.8rem;
+}
+
+.titleButtons{
+    display: flex;
+    gap: 3rem;
+    &>a{
+        text-decoration: none;
+        color: var(--secondary-color);
+        font-size: 1.25rem;
+    }
+}
+
+.button{
+    border: 1px solid var(--main-color);
+    padding: 1rem;
+    border-radius: 0.9rem;
+    font-size: 1rem;
+    text-decoration: none;
+    color: var(--secondary-color);
+    transition: 250ms;
+    cursor: pointer;
+}
+
+.button:hover{
+    box-shadow: 0 0 4px var(--main-color);
+}
+
+.crimsonButton{
+    background-color: var(--main-color);
+}
+
+.popup{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 21rem;
+    padding: 1rem;
+    border: 1px solid var(--main-color);
+    border-radius: 1rem;
+    background-color: #161616b0;
+    box-shadow: 0px 0px 6px 0px var(--main-color);
+}
+
+.buttons{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    margin: 0.7rem 0;
+}
+
+.horizontalLine{
+    width: 1px;
+    height: 70%;
+    background-color: var(--main-outline);
+    align-self: center;
+    margin: 0 0.4rem;
+}
+
+.transparentButton{
+    background: none;
+    border: none;
+    padding: 0;
+    outline: #12121200;
+}

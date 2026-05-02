@@ -1,0 +1,33 @@
+{% macro popup(element) %}
+        {# permet d'importer un block et de l'afficher directement #}
+        {{ block(element) }}
+{% endmacro %}
+
+{% block popupNewServer %}
+    <div id="popupNewServer" class="popup" style="display: none;">
+        <h2>Ajouter un nouveau serveur</h2>
+        <form action="" method="post">
+            <label for="serverLink">Lien du serveur</label>
+            <input type="text" name="serverLink" id="serverLink" placeholder="harmonie.gg/1">
+            <button type="submit" class="button crimsonButton">Ajouter</button>
+        </form>
+
+        <h2>Ou créez en un !</h2>
+        <form action="" method="post">
+            <label for="serverIcon" id="serverIconLabel">
+                <input type="file" name="serverIcon" id="serverIcon">
+            </label>
+            <label for="serverName">Nom serveur</label>
+            <input type="text" name="serverName" id="serverName" placeholder="Serveur de toi">
+            <button type="submit" class="button crimsonButton">Créer</button>
+        </form>
+    </div>
+
+    <script>
+    let fileInput = document.getElementById("serverIcon");
+    fileInput.addEventListener("change", () => {
+        fileInput.previousSibling.style.background = `url(${URL.createObjectURL(fileInput.files[0])})`;
+        fileInput.previousSibling.style.color = `#ffffff00`;
+    })
+    </script>
+{% endblock %}

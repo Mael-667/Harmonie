@@ -1,0 +1,52 @@
+body{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+}
+
+form{
+    width: 90%;
+    color: var(--secondary-color);
+}
+
+form>div:nth-child(1)>label:first-of-type{
+    display: flex;
+    height: 6.5rem;
+    width: 6.5rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--main-outline);
+    /* box-shadow: 0 0 5px 0px black; */
+    border-radius: 50%;
+    background: var(--field-bg);
+    transition-duration: 150ms;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    margin: auto;
+    color: var(--secondary-color);
+
+    &::after{
+        content: "Votre avatar ici";
+        text-align: center;
+    }
+}
+
+form>div:nth-child(1)>input:first-of-type{
+ display: none;
+}
+
+form>div{
+    display: flex;
+    flex-direction: column;
+    padding: 0.3em 0;
+}
+
+form input{
+    background: var(--field-bg);
+    border: 1px solid var(--main-outline);
+    border-radius: 0.5rem;
+    height: 2.1rem;
+    color: white;
+    padding-left: 0.5rem;
+}

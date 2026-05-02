@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/register.css') }}">
+{% endblock %}
+
+{% block title %}Inscription{% endblock %}
+
+{% block body %}
+    <div class="popup">
+        <h2>Bienvenue sur Harmonie</h2>
+
+        {{ form_errors(registrationForm) }}
+
+        {{ form_start(registrationForm, {'attr': {'enctype': 'multipart/form-data'}}) }}
+            {{ form_row(registrationForm.pdp) }}
+            {{ form_row(registrationForm.pseudo) }}
+            {{ form_row(registrationForm.email) }}
+            {{ form_row(registrationForm.plainPassword, {
+                label: 'Mot de passe'
+            }) }}
+
+            <div class="buttons">
+                <a class="button" href="{{ path('home_index') }}">Annuler</a>
+                <button type="submit" class="button crimsonButton">S'inscrire</button>
+            </div>
+        {{ form_end(registrationForm) }}
+    </div>
+{% endblock %}
+
+ {% block javascripts %}
+    <script src="{{ asset('scripts/register.js') }}"></script>
+{% endblock %}

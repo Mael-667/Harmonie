@@ -1,0 +1,5 @@
+FROM php:8.5.3-alpine
+
+WORKDIR /harmonie
+
+CMD ["php", "websocket/ChatWebsocket.php"]
