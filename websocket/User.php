@@ -5,6 +5,7 @@ class User{
     public $conn;
     public $pseudo;
     public $id;
+    public $token;
 
     public function __construct($conn) {
         $this->conn = $conn;

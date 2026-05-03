@@ -15,7 +15,7 @@ PHP 8.4 / Symfony 8 on the server side, Twig for rendering, MySQL via Doctrine, 
 ## Run it
 
 ```bash
-git clone https://github.com/<user>/Harmonie.git
+git clone https://github.com/Mael-667/Harmonie.git
 cd Harmonie
 docker compose up --build
 ```
