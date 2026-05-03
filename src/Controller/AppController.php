@@ -33,7 +33,7 @@ final class AppController extends AbstractController
         }
     }
 
-    #[Route('/newServer', name: 'app_newServer', methods: ["POST"])]
+    #[Route('/app/newServer', name: 'app_newServer', methods: ["POST"])]
     public function newServer(){
         
     }

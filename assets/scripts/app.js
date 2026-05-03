@@ -67,7 +67,24 @@ form.addEventListener("submit", (e) => {
 
 
 const popupBg = document.querySelector(".popupBackground");
+let openedPopups = [];
 document.getElementById("newServer").addEventListener("click", (e) =>{
   popupBg.style.display = "flex";
-  document.getElementById("popupNewServer").style.display = "flex";
+  let popup = document.getElementById("popupNewServer");
+  popup.style.display = "flex";
+  openedPopups.push(popup);
+})
+
+popupBg.addEventListener("click", (e) =>{
+  e.stopPropagation();
+  let lastPopup = openedPopups.pop();
+  lastPopup.style.display = "none";
+  if(openedPopups.length == 0) popupBg.style.display = "none";
+})
+
+
+document.querySelectorAll(".popup").forEach((e) => {
+  e.addEventListener('click', (f) =>{
+    f.stopPropagation();
+  })
 })
