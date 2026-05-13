@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Form\ServerType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -23,9 +24,12 @@ final class AppController extends AbstractController
                 "pseudo" => $user->getPseudo(),
                 "avatar" => $user->getAvatarUrl()
             ];
+
+            $newServerForm = $this->createForm(ServerType::class);
     
             return $this->render('app/index.html.twig', [
-                "user" => $userProfile
+                "user" => $userProfile,
+                "newServerForm" => $newServerForm->createView()
             ]);
 
         } else {

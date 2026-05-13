@@ -17,24 +17,26 @@
         </div>
         <div id="createServer">
             <h2>Ou créez en un !</h2>
-            <form action="/app/newServer" method="post">
+            {{ form_start(newServerForm) }}
                 <label for="serverIcon" id="serverIconLabel">
-                    <input type="file" name="serverIcon" id="serverIcon" accept="image/*">
+                    {{ form_widget(newServerForm.server_icon) }}
                 </label>
                 <div class="singleLineForm">
                     <div class="field">
-                        <label for="serverName">Nom serveur</label>
-                        <input type="text" name="serverName" id="serverName" placeholder="Serveur de toi">
+                        {{ form_label(newServerForm.server_name) }}
+                        {{ form_widget(newServerForm.server_name) }}
+                        {# <label for="serverName">Nom serveur</label> #}
+                        {# <input type="text" name="serverName" id="serverName" placeholder="Serveur de toi"> #}
                     </div>
                     <button type="submit" class="button crimsonButton">Créer</button>
                 </div>
-            </form>
+            {{ form_end(newServerForm) }}
         </div>
     </div>
 
     <script>
-    let fileInput = document.getElementById("serverIcon");
-    let fileLabel = document.getElementById("serverIconLabel");
+        let fileLabel = document.getElementById("serverIconLabel");
+    let fileInput = document.getElementById("server_icon");
     fileInput.addEventListener("change", () => {
         fileLabel.style.background = `url(${URL.createObjectURL(fileInput.files[0])})`;
         fileLabel.style.color = `#ffffff00`;
@@ -44,7 +46,7 @@
     formNewServer.addEventListener("submit", (e) => {
         e.preventDefault();
 
-        console.log(formNewServer);
+        let form = new FormData(formNewServer);
         
     })
     </script>
