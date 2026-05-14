@@ -27,8 +27,9 @@ class Server
     /**
      * @var Collection<int, User>
      */
-    #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'server')]
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'servers')]
     private Collection $users;
+
 
     /**
      * @var Collection<int, Channel>
@@ -95,21 +96,16 @@ class Server
     {
         if (!$this->users->contains($user)) {
             $this->users->add($user);
-            $user->setServer($this);
+            $user->addServer($this); // synchro côté owning
         }
-
         return $this;
     }
 
     public function removeUser(User $user): static
     {
         if ($this->users->removeElement($user)) {
-            // set the owning side to null (unless already changed)
-            if ($user->getServer() === $this) {
-                $user->setServer(null);
-            }
+            $user->removeServer($this);
         }
-
         return $this;
     }
 

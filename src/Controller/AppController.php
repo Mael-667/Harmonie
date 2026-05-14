@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Channel;
 use App\Entity\Server;
 use App\Entity\User;
+use App\Enum\ChannelTypeEnum;
 use App\Form\ServerType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -78,17 +80,26 @@ final class AppController extends AbstractController
                 // instead of its contents
                 $server->setIcon($newFilename);
             }
+
             
-            // Todo: créer un chan
+            $admin = $this->getUser();
+            $server->addUser($admin);
+            
+            
+            $defaultChannel = new Channel();
+            $defaultChannel->setType(ChannelTypeEnum::Textual);
+            $defaultChannel->setName("Général");
+            // Todo: ajouter les roles qui ont acces au chan
 
             $entityManager->persist($server);
+            $entityManager->persist($defaultChannel);
             $entityManager->flush();
-
 
             return new Response(json_encode(["message" => "ALL IS GOOD"]));
         }
 
 
-        return new Response(json_encode(["message" => "ALL IS not GOOD"], 400));
+        // Renvoie un acces denied
+        throw $this->createAccessDeniedException();
     }
 }
