@@ -1,7 +1,5 @@
 {% extends 'base.html.twig' %}
 
-{% import "app/popups.html.twig" as popups %}
-
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -97,7 +95,6 @@
             </form>
         </div>
         <div id="createServer">
-            {# {{ dump(newServerForm   ) }} #}
             <h2>Ou créez en un !</h2>
             {{ form_start(newServerForm) }}
                 <label for="server_icon" id="serverIconLabel">

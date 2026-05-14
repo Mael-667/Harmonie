@@ -1,4 +1,5 @@
 const url = (window.location.origin).replace(window.location.protocol, "");
+const origin = window.location.origin;
 let ws = new WebSocket(`ws:${url}:443`);
 
 ws.onopen = (e) => {
@@ -87,4 +88,36 @@ document.querySelectorAll(".popup").forEach((e) => {
   e.addEventListener('click', (f) =>{
     f.stopPropagation();
   })
+})
+
+
+// new server popup logic
+let fileLabel = document.getElementById("serverIconLabel");
+let fileInput = document.getElementById("server_icon");
+fileInput.addEventListener("change", () => {
+    fileLabel.style.background = `url(${URL.createObjectURL(fileInput.files[0])})`;
+    fileLabel.style.color = `#ffffff00`;
+})
+
+let formNewServer = document.querySelector("#createServer>form")
+formNewServer.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    let form = new FormData(formNewServer);
+
+    try {
+     fetch(origin+"/app/newServer", {
+        method: "POST",
+        // Set the FormData instance as the request body
+        body: form,
+      })
+      .then((response) => response.json())
+      .then((e) =>{
+        console.log(e);
+        
+      })
+    } catch (e) {
+      console.error(e);
+    }
+    
 })
