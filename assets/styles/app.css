@@ -27,7 +27,16 @@ body {
     width: 4rem;
     height: 4rem;
     border-radius: 1rem;
-    margin: auto;
+    margin: 0.5rem auto;
+    background-color: var(--field-bg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: block;
+    transition: 150ms;
+    &:hover{
+        filter: brightness(0.8);
+    }
 }
 
 #newServer{
@@ -40,13 +49,8 @@ body {
         color: var(--secondary-color);
         font-size: 3.5rem;
         transition: 150ms;
-
-        &:hover{
-            color: var(--secondary-color-hover);
-        }
     }
 }
-
 
 #userInfo {
     height: 5rem;
@@ -132,10 +136,10 @@ body {
     padding-right: 0.6rem;
     & i {
         font-size: 2rem;
-        color: var(--secondary-color);
+        color: var(--secondary-color-hover);
         transition: 150ms;
         &:hover{
-            color: var(--secondary-color-hover);
+            color: var(--secondary-color);
         }
     }
 }

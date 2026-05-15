@@ -7,6 +7,7 @@ use App\Entity\Server;
 use App\Entity\User;
 use App\Enum\ChannelTypeEnum;
 use App\Form\ServerType;
+use App\Repository\MessageRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,6 +18,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Asset\Package;
+use Symfony\Component\Asset\VersionStrategy\EmptyVersionStrategy;
 
 
 
@@ -47,6 +50,72 @@ final class AppController extends AbstractController
         }
     }
 
+    // GET /articles/42 — détail, id entier uniquement
+    #[Route('/app/{id}', name: 'app_showServer', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function showServer(int $id, MessageRepository $messageRepository){
+        // TODO: si l'utilisateur ne nous dit pas qu'il a deja load l'index, envoyer l'index + les infos
+        
+        
+        // Pour vérifier si l'utilisateur a bien acces au serveur demandé,
+        // Je récupère tous les serveurs de l'utilisateur puis je filtre avec l'id du serveur demandé,
+        // Si l'utilisateur a bien acces au serveur il devrait y avoir un match, sinon acces denied 
+        
+        /** @var User $user */
+        $user = $this->getUser();
+
+        /** @var Server $server */
+        $server = $user->getServers()->filter(function ($e) use ($id) {
+            return $e->getId() == $id;
+        })->first();
+
+        if(!$server) throw $this->createAccessDeniedException();
+
+        $channels = $server->getChannels()->toArray();
+        $channelsJSON = [];
+        for ($i=0; $i < count($channels); $i++) { 
+            $channelsJSON[$i] = [
+                "id" => $channels[$i]->getId(),
+                "type" => $channels[$i]->getType()->value,
+                "name" => $channels[$i]->getName(),
+                "category" => $channels[$i]->getCategory()
+            ];
+        }
+
+        // Par défaut on affiche le 1er channel du serveur
+        $messages = $messageRepository->getLastMessages($channels[0]);
+        
+        return new Response(json_encode([
+            "channels" => $channelsJSON,
+            "currentChannel" => $channelsJSON[0]["id"],
+            "messages" => $messages
+        ]));
+    }
+
+    #[Route('/app/getServers', name: 'app_getServers', methods: ["GET"])]
+    public function getServers(){
+        $user = $this->getUser();
+        if($user instanceof User){
+            $package = new Package(new EmptyVersionStrategy());
+            $serversObject = $user->getServers()->toArray();
+            // dd($serversObject);
+
+            $servers = [];
+
+            for ($i=0; $i < count($serversObject); $i++) { 
+                $servers[$i] = [
+                    "id" => $serversObject[$i]->getId(),
+                    "name" => $serversObject[$i]->getName(),
+                    "icon" => $package->getUrl("uploads/serverIcon/".$serversObject[$i]->getIcon()),
+                ];
+            }
+
+            return new Response(json_encode($servers));
+        } else {
+            throw new HttpException(400, 'Bad request');
+        }
+    }
+
+
     #[Route('/app/newServer', name: 'app_newServer', methods: ["POST"])]
     public function newServer(
         Request $request,
@@ -69,7 +138,7 @@ final class AppController extends AbstractController
                 $safeFilename = $slugger->slug($originalFilename);
                 $newFilename = $safeFilename . '-' . uniqid() . '.' . $icon->guessExtension();
 
-                // Move the file to the directory where pfps are stored
+                // Move the file to the directory where img are stored
                 try {
                     $icon->move($serverIcon, $newFilename);
                 } catch (FileException $e) {
@@ -90,16 +159,16 @@ final class AppController extends AbstractController
             $defaultChannel->setType(ChannelTypeEnum::Textual);
             $defaultChannel->setName("Général");
             // Todo: ajouter les roles qui ont acces au chan
+            $server->addChannel($defaultChannel);
 
             $entityManager->persist($server);
             $entityManager->persist($defaultChannel);
             $entityManager->flush();
 
             return new Response(json_encode(["message" => "ALL IS GOOD"]));
+        } else {
+            // Renvoie un acces denied
+            throw $this->createAccessDeniedException();
         }
-
-
-        // Renvoie un acces denied
-        throw $this->createAccessDeniedException();
     }
 }

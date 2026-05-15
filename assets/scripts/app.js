@@ -106,12 +106,18 @@ formNewServer.addEventListener("submit", (e) => {
     let form = new FormData(formNewServer);
 
     try {
+      // console.log(origin+"/app/newServer");
+      
      fetch(origin+"/app/newServer", {
         method: "POST",
         // Set the FormData instance as the request body
         body: form,
       })
-      .then((response) => response.json())
+      .then((response) => 
+        {
+          console.log(response);
+          return response.json()
+        })
       .then((e) =>{
         console.log(e);
         
@@ -121,3 +127,46 @@ formNewServer.addEventListener("submit", (e) => {
     }
     
 })
+
+// Get user's servers
+function getServers(){
+  fetch(origin+"/app/getServers")
+  .then((response) => response.json())
+  .then((e) => {
+    const serverList = document.getElementById('servers');
+    let renderedServerButton = [];
+    e.forEach((element) => {
+      renderedServerButton.push(renderServerButton(element));
+    })
+
+    serverList.prepend(...renderedServerButton);
+  })
+  .catch((err) => console.log(err))
+}
+
+function renderServerButton(server){
+  let button = document.createElement("button");
+  button.classList.add("button", "serverButton");
+  button.setAttribute("aria-label", `Click to join the server : ${server.name}" serverId="${server.id}`);
+  button.setAttribute('serverId', server.id);
+  button.style.backgroundImage = `url(${server.icon})`
+  
+  button.addEventListener("click", (e) =>{
+    displayServer(server.id);
+  })
+
+  return button;
+}
+
+function displayServer(id){
+  window.history.pushState("", "", origin+"/app/"+id);
+  fetch(origin+"/app/"+id)
+    .then((body) => body.json())
+    .then((json) => {
+      console.log(json)
+    })
+    .catch((err) => console.log(err));
+}
+
+
+getServers();
