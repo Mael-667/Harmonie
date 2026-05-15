@@ -19,13 +19,14 @@ body {
 }
 
 #servers {
-    width: 5rem;
+    width: auto;
+    padding: 0 0.4rem;
     background-color: var(--background-secondary);
 }
 
 .serverButton{
-    width: 4rem;
-    height: 4rem;
+    width: 3.7rem;
+    height: 3.7rem;
     border-radius: 1rem;
     margin: 0.5rem auto;
     background-color: var(--field-bg);
@@ -34,6 +35,7 @@ body {
     background-repeat: no-repeat;
     display: block;
     transition: 150ms;
+    border: none;
     &:hover{
         filter: brightness(0.8);
     }
@@ -49,6 +51,26 @@ body {
         color: var(--secondary-color);
         font-size: 3.5rem;
         transition: 150ms;
+    }
+}
+
+#serverInfo{
+    width: 100%;
+    border: 1px solid var(--main-color);
+}
+
+.channelButton{
+    background: none;
+    border: none;
+    color: var(--main-color);
+    font-family: 'Roboto';
+    font-size: 1.3rem;
+    margin: 1rem;
+    cursor: pointer;
+    transition: 50ms;
+
+    &:hover{
+        filter: brightness(1.4);
     }
 }
 
@@ -110,6 +132,37 @@ body {
 
 #messages {
     height: stretch;
+    padding: 0 1.3rem;
+}
+
+.message{
+    display: flex;
+}
+
+.pfpBox{
+    &>img{
+        height: 3.5rem;
+        border-radius: 50%;
+    }
+}
+
+.messageContent{
+    margin-top: 0.5rem;
+    margin-left: 0.5rem;
+}
+
+.pseudo{
+    font-family: 'Roboto';
+    font-size: 1.2rem;
+    font-weight: 340;
+    color: var(--secondary-color);
+}
+
+.messageDate{
+    font-size: 0.7rem;
+    font-weight: 300;
+    font-family: 'Roboto';
+    color: var(--main-color);
 }
 
 #input {

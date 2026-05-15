@@ -149,7 +149,7 @@ function renderServerButton(server){
   button.classList.add("button", "serverButton");
   button.setAttribute("aria-label", `Click to join the server : ${server.name}" serverId="${server.id}`);
   button.setAttribute('serverId', server.id);
-  button.style.backgroundImage = `url(${server.icon})`
+  button.style.backgroundImage = `url(${origin}/${server.icon})`
   
   button.addEventListener("click", (e) =>{
     displayServer(server.id);
@@ -159,14 +159,104 @@ function renderServerButton(server){
 }
 
 function displayServer(id){
+  // TODO: pouvoir customiser l'ordre des serveurs
   window.history.pushState("", "", origin+"/app/"+id);
-  fetch(origin+"/app/"+id)
+  fetch(origin+"/app/"+id, {
+    headers: { "Accept": "application/json" }
+  })
     .then((body) => body.json())
     .then((json) => {
-      console.log(json)
+      displayChannels(json.channels);
+      displayMessages(json.messages);
+      console.log(json);
     })
     .catch((err) => console.log(err));
 }
 
+function displayChannels(channels){
+  let div = document.createElement("div");
+  let categories = {};
+  channels.forEach((channel) => {
+    let chanElement = document.createElement("button");
+    chanElement.classList.add('channelButton');
+    chanElement.textContent = "#"+channel.name;
+
+    chanElement.addEventListener("click", (e) => {
+      displayChannel(channel.id);
+    })
+
+    if(channel.category == null){
+      div.append(chanElement);
+    } else {
+      // TODO: pouvoir customiser l'ordre des channels
+      if(categories[channel.category] == undefined){
+        categories[channel.category] = document.createElement("div");
+      }
+      categories[channel.category].append(chanElement);
+    }
+  })
+
+  for(const key in categories){
+    div.append(categories[key]);
+  }
+
+  document.getElementById("serverInfo").replaceChildren(div);
+}
+
+function displayMessages(messages){
+  let messageConteneur = document.getElementById("messages");
+  messages.forEach((e) => {
+    messageConteneur.append(renderMessage(e));
+  })
+}
+
+function renderMessage(message){
+  // TODO: Process l'attachment
+  // TODO: si le message précédent est du meme utilisateur les fusionner
+  const messageBox = document.createElement("div");
+  messageBox.classList.add("message");
+
+  const pfpBox = document.createElement("div");
+  pfpBox.classList.add("pfpBox");
+  pfpBox.dataset.userId = message.authorId;
+
+  const avatar = document.createElement("img");
+  avatar.src = `${origin}/uploads/pdp/${message.authorAvatar}`;
+  avatar.alt = `Avatar de ${message.authorPseudo}`;
+  pfpBox.append(avatar);
+
+  const messageContent = document.createElement("div");
+  messageContent.classList.add("messageContent");
+
+  const pseudo = document.createElement("span");
+  pseudo.classList.add("pseudo");
+  pseudo.dataset.userId = message.authorId;
+  pseudo.textContent = message.authorPseudo;
+
+  let dateString = new Date(message.timestamp.date).toLocaleTimeString();
+  const date = document.createElement("span");
+  date.classList.add("messageDate");
+  date.textContent = dateString;
+
+  const content = document.createElement("div");
+  content.classList.add("content");
+  content.textContent = message.content;
+
+  messageContent.append(pseudo, " ", date, content);
+  messageBox.append(pfpBox, messageContent);
+
+  return messageBox;
+}
+
+// Charge automatiquement les info du serveur si l'utilisateur accède spécifiquement a un lien contenant id serveur et channel
+const segments = window.location.pathname.split("/").filter(Boolean);
+if(segments[0] == "app"){
+  let serverId = segments[1];
+  let channelId = segments[2];
+
+  if(serverId != null && !isNaN(serverId)){
+    displayServer(serverId);
+  }
+}
 
 getServers();

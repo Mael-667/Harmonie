@@ -51,10 +51,13 @@ final class AppController extends AbstractController
     }
 
     // GET /articles/42 — détail, id entier uniquement
-    #[Route('/app/{id}', name: 'app_showServer', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function showServer(int $id, MessageRepository $messageRepository){
-        // TODO: si l'utilisateur ne nous dit pas qu'il a deja load l'index, envoyer l'index + les infos
-        
+    #[Route('/app/{id}', name: 'app_showServer', requirements: ['id' => '\d+'])]
+    public function showServer(int $id, MessageRepository $messageRepository, Request $request){
+        // Descriminer une premiere connexion d'une requete ajax avec le format de requete
+        // La partie JS se chargera de request les données si elles sont demandées dans l'url
+        if ($request->getPreferredFormat() != 'json'){
+            return $this->index();
+        }
         
         // Pour vérifier si l'utilisateur a bien acces au serveur demandé,
         // Je récupère tous les serveurs de l'utilisateur puis je filtre avec l'id du serveur demandé,
@@ -85,6 +88,8 @@ final class AppController extends AbstractController
         $messages = $messageRepository->getLastMessages($channels[0]);
         
         return new Response(json_encode([
+            "serverName" => $server->getName(),
+            "serverId" => $server->getId(),
             "channels" => $channelsJSON,
             "currentChannel" => $channelsJSON[0]["id"],
             "messages" => $messages
