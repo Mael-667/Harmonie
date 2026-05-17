@@ -29,7 +29,6 @@ final class AppController extends AbstractController
     #[Route('/app', name: 'app')]
     public function index(): Response
     {
-
         $user = $this->getUser();
         if($user instanceof User){
 
@@ -51,8 +50,8 @@ final class AppController extends AbstractController
     }
 
     // GET /articles/42 — détail, id entier uniquement
-    #[Route('/app/{id}', name: 'app_showServer', requirements: ['id' => '\d+'])]
-    public function showServer(int $id, MessageRepository $messageRepository, Request $request){
+    #[Route('/app/{id}/{serverId}', name: 'app_showServer', requirements: ['id' => '\d+'])]
+    public function showServer(Request $request, MessageRepository $messageRepository, int $id, int $serverId = -1){
         // Descriminer une premiere connexion d'une requete ajax avec le format de requete
         // La partie JS se chargera de request les données si elles sont demandées dans l'url
         if ($request->getPreferredFormat() != 'json'){
@@ -74,6 +73,10 @@ final class AppController extends AbstractController
         if(!$server) throw $this->createAccessDeniedException();
 
         $channels = $server->getChannels()->toArray();
+
+        // Par défaut on affiche le 1er channel du serveur
+        $channelIndex = 0;
+
         $channelsJSON = [];
         for ($i=0; $i < count($channels); $i++) { 
             $channelsJSON[$i] = [
@@ -82,16 +85,17 @@ final class AppController extends AbstractController
                 "name" => $channels[$i]->getName(),
                 "category" => $channels[$i]->getCategory()
             ];
+
+            if ($channelsJSON[$i]["id"] == $serverId) $channelIndex = $i;
         }
 
-        // Par défaut on affiche le 1er channel du serveur
-        $messages = $messageRepository->getLastMessages($channels[0]);
+        $messages = $messageRepository->getLastMessages($channels[$channelIndex]);
         
         return new Response(json_encode([
             "serverName" => $server->getName(),
             "serverId" => $server->getId(),
             "channels" => $channelsJSON,
-            "currentChannel" => $channelsJSON[0]["id"],
+            "currentChannel" => $channelsJSON[$channelIndex]["id"],
             "messages" => $messages
         ]));
     }

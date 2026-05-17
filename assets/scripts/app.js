@@ -104,36 +104,28 @@ formNewServer.addEventListener("submit", (e) => {
     e.preventDefault();
 
     let form = new FormData(formNewServer);
-
-    try {
-      // console.log(origin+"/app/newServer");
-      
      fetch(origin+"/app/newServer", {
         method: "POST",
         // Set the FormData instance as the request body
         body: form,
       })
-      .then((response) => 
-        {
-          console.log(response);
-          return response.json()
-        })
+      .then((response) => response.json())
       .then((e) =>{
         console.log(e);
-        
+        // TODO: refresh les serveurs si tout est bon
       })
-    } catch (e) {
-      console.error(e);
-    }
+      .catch((err) => console.log(err))
     
 })
 
+let currentServerId = 0;
 // Get user's servers
 function getServers(){
   fetch(origin+"/app/getServers")
   .then((response) => response.json())
   .then((e) => {
-    const serverList = document.getElementById('servers');
+    const serverList = document.getElementById('serverList');
+    serverList.replaceChildren();  
     let renderedServerButton = [];
     e.forEach((element) => {
       renderedServerButton.push(renderServerButton(element));
@@ -158,22 +150,24 @@ function renderServerButton(server){
   return button;
 }
 
-function displayServer(id){
+function displayServer(id, serverId = -1){
   // TODO: pouvoir customiser l'ordre des serveurs
-  window.history.pushState("", "", origin+"/app/"+id);
-  fetch(origin+"/app/"+id, {
+  let serverUrl = serverId > 0 ? "/"+serverId : "" ;
+  currentServerId = id;
+  window.history.pushState("", "", origin+"/app/"+id+serverUrl);
+  fetch(origin+"/app/"+id+serverUrl, {
     headers: { "Accept": "application/json" }
   })
     .then((body) => body.json())
     .then((json) => {
-      displayChannels(json.channels);
+      renderChannelsButtons(json.channels);
       displayMessages(json.messages);
       console.log(json);
     })
     .catch((err) => console.log(err));
 }
 
-function displayChannels(channels){
+function renderChannelsButtons(channels){
   let div = document.createElement("div");
   let categories = {};
   channels.forEach((channel) => {
@@ -182,7 +176,7 @@ function displayChannels(channels){
     chanElement.textContent = "#"+channel.name;
 
     chanElement.addEventListener("click", (e) => {
-      displayChannel(channel.id);
+      displayServer(currentServerId, channel.id);
     })
 
     if(channel.category == null){
@@ -205,47 +199,58 @@ function displayChannels(channels){
 
 function displayMessages(messages){
   let messageConteneur = document.getElementById("messages");
+  messageConteneur.replaceChildren();
   messages.forEach((e) => {
-    messageConteneur.append(renderMessage(e));
+    let newMessage = renderMessage(e);
+    if(newMessage){
+      messageConteneur.append(newMessage);
+    }
   })
 }
 
 function renderMessage(message){
   // TODO: Process l'attachment
-  // TODO: si le message précédent est du meme utilisateur les fusionner
-  const messageBox = document.createElement("div");
-  messageBox.classList.add("message");
-
-  const pfpBox = document.createElement("div");
-  pfpBox.classList.add("pfpBox");
-  pfpBox.dataset.userId = message.authorId;
-
-  const avatar = document.createElement("img");
-  avatar.src = `${origin}/uploads/pdp/${message.authorAvatar}`;
-  avatar.alt = `Avatar de ${message.authorPseudo}`;
-  pfpBox.append(avatar);
-
-  const messageContent = document.createElement("div");
-  messageContent.classList.add("messageContent");
-
-  const pseudo = document.createElement("span");
-  pseudo.classList.add("pseudo");
-  pseudo.dataset.userId = message.authorId;
-  pseudo.textContent = message.authorPseudo;
-
-  let dateString = new Date(message.timestamp.date).toLocaleTimeString();
-  const date = document.createElement("span");
-  date.classList.add("messageDate");
-  date.textContent = dateString;
-
-  const content = document.createElement("div");
-  content.classList.add("content");
-  content.textContent = message.content;
-
-  messageContent.append(pseudo, " ", date, content);
-  messageBox.append(pfpBox, messageContent);
-
-  return messageBox;
+  let messageConteneur = document.getElementById("messages");
+  let lastMessage = messageConteneur.lastElementChild;
+  if(lastMessage == null || lastMessage.dataset.userId != message.authorId){
+    const messageBox = document.createElement("div");
+    messageBox.classList.add("message");
+    messageBox.dataset.userId = message.authorId;
+  
+    const pfpBox = document.createElement("div");
+    pfpBox.classList.add("pfpBox");
+    pfpBox.dataset.userId = message.authorId;
+  
+    const avatar = document.createElement("img");
+    avatar.src = `${origin}/uploads/pdp/${message.authorAvatar}`;
+    avatar.alt = `Avatar de ${message.authorPseudo}`;
+    pfpBox.append(avatar);
+  
+    const messageContent = document.createElement("div");
+    messageContent.classList.add("messageContent");
+  
+    const pseudo = document.createElement("span");
+    pseudo.classList.add("pseudo");
+    pseudo.dataset.userId = message.authorId;
+    pseudo.textContent = message.authorPseudo;
+  
+    let dateString = new Date(message.timestamp.date).toLocaleTimeString();
+    const date = document.createElement("span");
+    date.classList.add("messageDate");
+    date.textContent = dateString;
+  
+    const content = document.createElement("pre");
+    content.classList.add("content");
+    content.textContent = message.content;
+  
+    messageContent.append(pseudo, " ", date, content);
+    messageBox.append(pfpBox, messageContent);
+  
+    return messageBox;
+  } else {
+    lastMessage.querySelector(".content").textContent += "\n"+message.content
+    return false;
+  }
 }
 
 // Charge automatiquement les info du serveur si l'utilisateur accède spécifiquement a un lien contenant id serveur et channel
@@ -255,7 +260,11 @@ if(segments[0] == "app"){
   let channelId = segments[2];
 
   if(serverId != null && !isNaN(serverId)){
-    displayServer(serverId);
+    if(channelId != null && !isNaN(channelId)){
+      displayServer(serverId, channelId);
+    } else {
+      displayServer(serverId);
+    }
   }
 }
 
