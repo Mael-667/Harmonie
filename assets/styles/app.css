@@ -41,9 +41,13 @@ body {
     }
 }
 
+.serverButtonActive{
+    box-shadow: 0 0 3px 2px var(--main-color);
+}
+
 #newServer{
     background-color: var(--field-bg);
-    border: 1px solid var(--main-color);
+    border: 1px solid var(--main-outline);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -56,7 +60,7 @@ body {
 
 #serverInfo{
     width: 100%;
-    border: 1px solid var(--main-color);
+    border: 1px solid var(--main-outline);
 }
 
 .channelButton{
@@ -142,6 +146,7 @@ body {
 .pfpBox{
     &>img{
         height: 3.5rem;
+        min-width: 3.5rem;
         border-radius: 50%;
     }
 }

@@ -34,13 +34,13 @@ $ws->onMessage(function($msg, $user) use (&$ws, &$symfonyIPC){
                 break;
             case "message":
                 if(!$user->authenticated) return;
-                
+
                 $content = $message->content;
                 $channel = $message->channel;
                 $attachment = $message->attachment;
                 // on attend le retour de cette fonction pour savoir si l'utilisateur a l'acces ou non
                 if($symfonyIPC->saveNewMessage($user->id, $content, $attachment, $channel)){
-                    $ws->broadcastMessageTo(json_encode(newMessage($user, $content, $attachment)), function($user) use ($channel){
+                    $ws->broadcastMessageTo(json_encode(newMessage($user, $content, $attachment, $channel)), function($user) use ($channel){
                         return in_array($channel, $user->channels);
                     });
                 };
@@ -56,14 +56,15 @@ $ws->onMessage(function($msg, $user) use (&$ws, &$symfonyIPC){
 });
 
 
-function newMessage($user, $content, $attachment){
+function newMessage($user, $content, $attachment, $channelId){
     return [
         "attachment" => $attachment,
         "authorAvatar" => $user->avatar,
         "authorId" => $user->id,
         "authorPseudo" => $user->pseudo,
         "content" => $content,
-        "timestamp" => new DateTime('now')
+        "timestamp" => new DateTime('now'),
+        "channel" => $channelId
     ];
 }
 

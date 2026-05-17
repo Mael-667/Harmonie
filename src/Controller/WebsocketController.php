@@ -59,6 +59,7 @@ final class WebsocketController extends AbstractController
 
     #[Route('/websocket/saveMessage', name: 'websocket_saveMessage')]
     public function saveMessage(Request $request, UserRepository $userRep, EntityManagerInterface $emi){
+        // TODO: découpler la vérification de l'insertion des données, faire 2 request ptet
         $secret = $_ENV["IPC_SECRET"];
         if($secret != $request->headers->get("X-IPC-Secret")){
             throw new HttpException(403, 'Accès refusé');

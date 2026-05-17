@@ -30,7 +30,10 @@ ws.onclose = (e) => {
 ws.onmessage = (e) => {
   console.log(e.data);
   //TODO: vérifier que l'utilisateur est bien dans le chan en question avant d'update 
-  renderMessage(JSON.parse(e.data));
+  let message = JSON.parse(e.data);
+  if(message.channel == currentChannelId){
+    renderMessage();
+  }
 };
 
 function getCookie(cname) {
@@ -151,8 +154,8 @@ function getServers(){
 function renderServerButton(server){
   let button = document.createElement("button");
   button.classList.add("button", "serverButton");
+  button.dataset.serverId = server.id;
   button.setAttribute("aria-label", `Click to join the server : ${server.name}" serverId="${server.id}`);
-  button.setAttribute('serverId', server.id);
   button.style.backgroundImage = `url(${origin}/${server.icon})`
   
   button.addEventListener("click", (e) =>{
@@ -162,12 +165,12 @@ function renderServerButton(server){
   return button;
 }
 
-function displayServer(id, serverId = -1){
+function displayServer(id, channelId = -1){
   // TODO: pouvoir customiser l'ordre des serveurs
-  let serverUrl = serverId > 0 ? "/"+serverId : "" ;
+  let channelUrl = channelId > 0 ? "/"+channelId : "" ;
   currentServerId = id;
-  window.history.pushState("", "", origin+"/app/"+id+serverUrl);
-  fetch(origin+"/app/"+id+serverUrl, {
+  window.history.pushState("", "", origin+"/app/"+id+channelUrl);
+  fetch(origin+"/app/"+id+channelUrl, {
     headers: { "Accept": "application/json" }
   })
     .then((body) => body.json())
@@ -175,6 +178,13 @@ function displayServer(id, serverId = -1){
       renderChannelsButtons(json.channels);
       displayMessages(json.messages);
       currentChannelId = json.currentChannel;
+
+      let prevServFocus = document.querySelector('.serverButtonActive');
+      if(prevServFocus) prevServFocus.classList.remove('serverButtonActive');
+      let currentServerButton = document.querySelector(`[data-server-id="${currentServerId}"]`);
+      currentServerButton.classList.add('serverButtonActive');
+      let currentChannelButton = document.querySelector(`[data-channel-id="${currentChannelId}"]`);
+
       console.log(json);
     })
     .catch((err) => console.log(err));
@@ -185,6 +195,7 @@ function renderChannelsButtons(channels){
   let categories = {};
   channels.forEach((channel) => {
     let chanElement = document.createElement("button");
+    chanElement.dataset.channelId = channel.id;
     chanElement.classList.add('channelButton');
     chanElement.textContent = "#"+channel.name;
 
@@ -273,6 +284,9 @@ function renderMessage(message){
   }
 }
 
+
+getServers();
+
 // Charge automatiquement les info du serveur si l'utilisateur accède spécifiquement a un lien contenant id serveur et channel
 const segments = window.location.pathname.split("/").filter(Boolean);
 if(segments[0] == "app"){
@@ -288,4 +302,3 @@ if(segments[0] == "app"){
   }
 }
 
-getServers();
