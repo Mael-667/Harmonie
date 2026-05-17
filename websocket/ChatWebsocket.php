@@ -34,21 +34,16 @@ $ws->onMessage(function($msg, $user) use (&$ws, &$symfonyIPC){
                 break;
             case "message":
                 if(!$user->authenticated) return;
-
-                // TODO: fonction pour vérifier que l'utilisateur a bien acces au channel en question
-                if(in_array($message->channel, $user->channels)){
-                    $content = $message->content;
-                    $channel = $message->channel;
-                    $attachment = $message->attachment;
-                    $symfonyIPC->saveNewMessage($user->id, $content, $attachment, $channel);
-
+                
+                $content = $message->content;
+                $channel = $message->channel;
+                $attachment = $message->attachment;
+                // on attend le retour de cette fonction pour savoir si l'utilisateur a l'acces ou non
+                if($symfonyIPC->saveNewMessage($user->id, $content, $attachment, $channel)){
                     $ws->broadcastMessageTo(json_encode(newMessage($user, $content, $attachment)), function($user) use ($channel){
                         return in_array($channel, $user->channels);
                     });
-                } else {
-                    echo "Error 400".PHP_EOL;
-                }
-
+                };
                 break;
             default:
                 //todo: renvoyer un message d'erreur requete invalide

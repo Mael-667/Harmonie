@@ -58,13 +58,12 @@ final class WebsocketController extends AbstractController
     }
 
     #[Route('/websocket/saveMessage', name: 'websocket_saveMessage')]
-    public function saveMessage(Request $request, UserRepository $userRep, ChannelRepository $channelRepository, EntityManagerInterface $emi){
+    public function saveMessage(Request $request, UserRepository $userRep, EntityManagerInterface $emi){
         $secret = $_ENV["IPC_SECRET"];
         if($secret != $request->headers->get("X-IPC-Secret")){
             throw new HttpException(403, 'Accès refusé');
         };
 
-        // TODO: vérifier que l'utilisateur a bien acces au chan où il essaye d'envoyer le message
         $decodedRequest = json_decode($request->getContent());
 
         $userId = $decodedRequest->userId;
@@ -72,22 +71,21 @@ final class WebsocketController extends AbstractController
         $channelId = $decodedRequest->channelId;
         $attachment = $decodedRequest->attachment;
 
+        // On vérifie si l'utilisateur existe et si il a acces au channel susnommé
+        // todo: Test initial, a compléter avec une vérification des permissions
+        $userInfo = $userRep->findWithChannelAccess($userId, $channelId);
+        if(!$userInfo) throw $this->createAccessDeniedException();
+
+        //Pour l'insert, Doctrine a juste besoin d'une référence vers User et Channel, pas de l'entité hydratée :
+        $user = $emi->getReference(User::class, $userId);
+        $channel = $emi->getReference(Channel::class, $channelId);
+        
         $message = new Message();
-
-        $channelTarget = $channelRepository->findOneBy(["id" => trim($channelId)]);
-        $user = $userRep->findOneBy(["id" => trim($userId)]);
-
-        if($channelTarget == null){
-            return new JsonResponse([
-                "error" => "Channel inexistant"
-            ], 400);
-        }
-
         $message->setUser($user);
         $message->setContent($content);
         $message->setTimestamp(new DateTime('now'));
         $message->setAttachment($attachment);
-        $message->setChannel($channelTarget);
+        $message->setChannel($channel);
 
         $emi->persist($message);
         $emi->flush();

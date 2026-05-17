@@ -252,16 +252,23 @@ function renderMessage(message){
     date.classList.add("messageDate");
     date.textContent = dateString;
   
-    const content = document.createElement("pre");
+    const content = document.createElement("div");
     content.classList.add("content");
-    content.textContent = message.content;
+
+    const msg = document.createElement('pre');
+    msg.classList.add("content");
+    msg.textContent = message.content;
+    content.append(msg);
   
     messageContent.append(pseudo, " ", date, content);
     messageBox.append(pfpBox, messageContent);
   
     return messageBox;
   } else {
-    lastMessage.querySelector(".content").textContent += "\n"+message.content
+    const msg = document.createElement('pre');
+    msg.classList.add("content");
+    msg.textContent = message.content;
+    lastMessage.querySelector(".content").append(msg);
     return false;
   }
 }
