@@ -27,7 +27,7 @@ class MessageRepository extends ServiceEntityRepository
             ->addSelect("user.pseudo AS authorPseudo, user.avatar_url AS authorAvatar, user.id as authorId")
             ->where("message.channel = :channel")
             ->setParameter("channel", $channel)
-            ->orderBy("message.id", 'DESC')
+            ->orderBy("message.id", 'ASC')
             ->setMaxResults(50)
             ->getQuery()
             ->getArrayResult();

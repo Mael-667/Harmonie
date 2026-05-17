@@ -1,5 +1,8 @@
 const url = (window.location.origin).replace(window.location.protocol, "");
 const origin = window.location.origin;
+
+
+// WEBSOCKET SECTION
 let ws = new WebSocket(`ws:${url}:443`);
 
 ws.onopen = (e) => {
@@ -26,6 +29,8 @@ ws.onclose = (e) => {
 
 ws.onmessage = (e) => {
   console.log(e.data);
+  //TODO: vérifier que l'utilisateur est bien dans le chan en question avant d'update 
+  renderMessage(JSON.parse(e.data));
 };
 
 function getCookie(cname) {
@@ -54,11 +59,9 @@ form.addEventListener("submit", (e) => {
 
   const message = {
     "type" : "message",
-    "channel": "",
-    "content":  {
-      "text": textContent,
-      "attachment": ""
-    }
+    "channel": currentChannelId,
+    "content": textContent,
+    "attachment": ""
   }
 
   ws.send(JSON.stringify(message));
@@ -67,6 +70,9 @@ form.addEventListener("submit", (e) => {
 })
 
 
+
+
+// POPUP SECTION
 const popupBg = document.querySelector(".popupBackground");
 let openedPopups = [];
 document.getElementById("newServer").addEventListener("click", (e) =>{
@@ -118,7 +124,13 @@ formNewServer.addEventListener("submit", (e) => {
     
 })
 
+
+
+
+
+// SERVER DATA LOADING SECTION
 let currentServerId = 0;
+let currentChannelId = 0;
 // Get user's servers
 function getServers(){
   fetch(origin+"/app/getServers")
@@ -162,6 +174,7 @@ function displayServer(id, serverId = -1){
     .then((json) => {
       renderChannelsButtons(json.channels);
       displayMessages(json.messages);
+      currentChannelId = json.currentChannel;
       console.log(json);
     })
     .catch((err) => console.log(err));

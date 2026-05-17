@@ -23,6 +23,9 @@ $ws->onMessage(function($msg, $user) use (&$ws, &$symfonyIPC){
                     // TODO: générer un token de session
                     $user->token = $message->token;
                     $user->id = $userDetails->userId;
+                    $user->channels = $userDetails->userChannels;
+                    $user->avatar = $userDetails->userAvatar;
+                    $user->pseudo = $userDetails->pseudo;
                     // associer les infos de l'utilisateur a la connexion
                 } else {
                     //todo: message d'erreur si le token est erroné
@@ -32,10 +35,19 @@ $ws->onMessage(function($msg, $user) use (&$ws, &$symfonyIPC){
             case "message":
                 if(!$user->authenticated) return;
 
-                $content = $message->content;
-                $channel = $message->channel;
-                $attachment = $message->attachment;
-                $symfonyIPC->saveNewMessage($user->id, $content, $attachment, $channel);
+                // TODO: fonction pour vérifier que l'utilisateur a bien acces au channel en question
+                if(in_array($message->channel, $user->channels)){
+                    $content = $message->content;
+                    $channel = $message->channel;
+                    $attachment = $message->attachment;
+                    $symfonyIPC->saveNewMessage($user->id, $content, $attachment, $channel);
+
+                    $ws->broadcastMessageTo(json_encode(newMessage($user, $content, $attachment)), function($user) use ($channel){
+                        return in_array($channel, $user->channels);
+                    });
+                } else {
+                    echo "Error 400".PHP_EOL;
+                }
 
                 break;
             default:
@@ -48,6 +60,17 @@ $ws->onMessage(function($msg, $user) use (&$ws, &$symfonyIPC){
         
 });
 
+
+function newMessage($user, $content, $attachment){
+    return [
+        "attachment" => $attachment,
+        "authorAvatar" => $user->avatar,
+        "authorId" => $user->id,
+        "authorPseudo" => $user->pseudo,
+        "content" => $content,
+        "timestamp" => new DateTime('now')
+    ];
+}
 
 
 

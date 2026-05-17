@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Channel;
 use App\Entity\Message;
+use App\Entity\User;
 use App\Repository\ChannelRepository;
 use App\Repository\MessageRepository;
 use App\Repository\UserRepository;
@@ -37,9 +38,20 @@ final class WebsocketController extends AbstractController
                 "error" => "Bad request"
             ], 400);
         } else {
+            // TODO: Manière naïve de récupérer les chans auxquels l'utilisateur à acces, a changer avec
+            // Une véritable gestion des permissions
+            /** @var User $user */
+            $channelsId = [];
+            $user->getServers()->map(function($server) use (&$channelsId){
+                $server->getChannels()->map(function($channel) use (&$channelsId){
+                    $channelsId[] = $channel->getId();
+                });
+            });
             return new JsonResponse([
                 "pseudo" => $user->getPseudo(),
-                "userId" => $user->getId()
+                "userId" => $user->getId(),
+                "userChannels" => $channelsId,
+                "userAvatar" => $user->getAvatarUrl()
             ], 200);
         }
 
@@ -79,5 +91,7 @@ final class WebsocketController extends AbstractController
 
         $emi->persist($message);
         $emi->flush();
+
+        return new JsonResponse(["status" => "ok"], 200);
     }
 }

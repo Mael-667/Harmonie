@@ -47,7 +47,11 @@ class WebSocketServer
 
                     if ($result["FIN"] != 0) {
                         // Message entier
-
+                        // On ignore le message de fermeture de connexion
+                        if($result["opcode"] == 8) {
+                            $message = '';
+                            return;
+                        }
                         $this->callback("onMessage", $message, $user);
                         $message = '';
                     }
