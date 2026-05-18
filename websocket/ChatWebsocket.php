@@ -23,7 +23,6 @@ $ws->onMessage(function($msg, $user) use (&$ws, &$symfonyIPC){
                     // TODO: générer un token de session
                     $user->token = $message->token;
                     $user->id = $userDetails->userId;
-                    $user->channels = $userDetails->userChannels;
                     $user->avatar = $userDetails->userAvatar;
                     $user->pseudo = $userDetails->pseudo;
                     // associer les infos de l'utilisateur a la connexion
@@ -35,7 +34,9 @@ $ws->onMessage(function($msg, $user) use (&$ws, &$symfonyIPC){
             case "message":
                 if(!$user->authenticated) return;
 
-                $content = $message->content;
+                $content = trim($message->content);
+                // TODO: renvoyer une véritable erreur si le msg est empty
+                if($content == "") return;
                 $channel = $message->channel;
                 $attachment = $message->attachment;
                 // on attend le retour de cette fonction pour savoir si l'utilisateur a l'acces ou non, elle retournera les utilisateurs qui pourront voir le msssage

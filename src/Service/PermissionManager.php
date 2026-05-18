@@ -2,14 +2,15 @@
 namespace App\Service;
 
 use App\Entity\Server;
+use App\Enum\PermissionEnum;
 
 class PermissionManager
 {
-    public function canAccessChannel($channelId, $userId, array $roles, $permission = "read"): bool
+    public function canAccessChannel($channelId, $userId, array $roles, PermissionEnum $permission = PermissionEnum::Read): bool
     {
         for($i = 0; $i < count($roles); ++$i){
             if(in_array($userId, $roles[$i]["members"]) || in_array("*", $roles[$i]["members"])){
-                if(in_array("*", $roles[$i]["permissions"]) || in_array($permission, $roles[$i]["permissions"][$channelId])){
+                if(in_array("*", $roles[$i]["permissions"]) || (isset($roles[$i]["permissions"][$channelId]) && in_array($permission->value, $roles[$i]["permissions"][$channelId]))){
                     return true;
                 };
             }
@@ -24,6 +25,9 @@ class PermissionManager
                 "name" => "Admin",
                 "color" => "#aa0000",
                 "permissions" => [
+                    "*"
+                ],
+                "serverPermission" => [
                     "*"
                 ],
                 "members" => [
@@ -43,6 +47,8 @@ class PermissionManager
                         "read",
                         "write"
                     ]
+                ],
+                "serverPermission" => [
                 ],
                 "members" => [
                     "*"
@@ -65,6 +71,9 @@ class PermissionManager
     //              "write",
     //              "edit"
     //          ],
+    //     ],
+    //     "serverPermission" => [
+    //         "*"
     //     ],
     //     "members" => [
     //         "*",

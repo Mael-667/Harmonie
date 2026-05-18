@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Channel;
 use App\Entity\Message;
 use App\Entity\User;
+use App\Enum\PermissionEnum;
 use App\Repository\ChannelRepository;
 use App\Repository\MessageRepository;
 use App\Repository\UserRepository;
@@ -39,19 +40,9 @@ final class WebsocketController extends AbstractController
                 "error" => "Bad request"
             ], 400);
         } else {
-            // TODO: Manière naïve de récupérer les chans auxquels l'utilisateur à acces, a changer avec
-            // Une véritable gestion des permissions
-            /** @var User $user */
-            $channelsId = [];
-            $user->getServers()->map(function($server) use (&$channelsId){
-                $server->getChannels()->map(function($channel) use (&$channelsId){
-                    $channelsId[] = $channel->getId();
-                });
-            });
             return new JsonResponse([
                 "pseudo" => $user->getPseudo(),
                 "userId" => $user->getId(),
-                "userChannels" => $channelsId,
                 "userAvatar" => $user->getAvatarUrl()
             ], 200);
         }
@@ -78,7 +69,7 @@ final class WebsocketController extends AbstractController
         $userInfo = $userRep->findWithChannelAccess($userId, $channelId);
         if(!$userInfo) throw $this->createAccessDeniedException();
         // var_dump($userInfo["roles"]);
-        if(!$permissionManager->canAccessChannel($channelId, $userId, $userInfo["roles"], "write")){
+        if(!$permissionManager->canAccessChannel($channelId, $userId, $userInfo["roles"], PermissionEnum::Write)){
             throw $this->createAccessDeniedException();
         };
 
@@ -101,7 +92,7 @@ final class WebsocketController extends AbstractController
         $recipientIds = [];
         foreach ($server->getUsers() as $member) {
             $userId = $member->getId();
-            if ($permissionManager->canAccessChannel($channelId, $userId, $roles, "read")) {
+            if ($permissionManager->canAccessChannel($channelId, $userId, $roles, PermissionEnum::Read)) {
                 $recipientIds[] = $userId;
             }
         }

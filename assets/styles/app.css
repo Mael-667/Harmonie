@@ -197,6 +197,7 @@ body {
     display: flex;
     padding: 0.3rem;
     padding-right: 0.6rem;
+    background-color: var(--background-secondary);
     & i {
         font-size: 2rem;
         color: var(--secondary-color-hover);

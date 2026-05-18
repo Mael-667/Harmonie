@@ -76,7 +76,7 @@ final class AppController extends AbstractController
         $channels = $server->getChannels()->toArray();
 
         // Par défaut on affiche le 1er channel du serveur
-        $channelId = 0;
+        $channelIndex = 0;
 
         $channelsJSON = [];
         for ($i=0; $i < count($channels); $i++) { 
@@ -87,13 +87,13 @@ final class AppController extends AbstractController
                 "category" => $channels[$i]->getCategory()
             ];
 
-            if ($channelsJSON[$i]["id"] == $serverId) $channelId = $serverId;
+            if ($channelsJSON[$i]["id"] == $serverId) $channelIndex = $i;
         }
 
-        if($permissionManager->canAccessChannel($channelsJSON[$channelId]["id"], $user->getId(), $server->getRoles())){
-            $messages = $messageRepository->getLastMessages($channels[$channelId]);
+        if($permissionManager->canAccessChannel($channelsJSON[$channelIndex]["id"], $user->getId(), $server->getRoles())){
+            $messages = $messageRepository->getLastMessages($channels[$channelIndex]);
         } else {
-            $messages = ["error" => "access denied"];
+            $message = ["error" => "access denied"];
         };
 
         
@@ -101,7 +101,7 @@ final class AppController extends AbstractController
             "serverName" => $server->getName(),
             "serverId" => $server->getId(),
             "channels" => $channelsJSON,
-            "currentChannel" => $channelsJSON[$channelId]["id"],
+            "currentChannel" => $channelsJSON[$channelIndex]["id"],
             "messages" => $messages
         ]));
     }
