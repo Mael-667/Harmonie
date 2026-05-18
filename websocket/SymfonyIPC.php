@@ -41,7 +41,8 @@ class SymfonyIPC
 
     public function saveNewMessage($userId, $content, $attachment, $channelId){
         try {
-            $this->browser->post("http://web:80/websocket/saveMessage", ["X-IPC-Secret" => $this->secret, 'Content-Type' => 'application/json'], json_encode(["userId" => $userId, "message" => $content, "channelId" => $channelId, "attachment" => $attachment]));
+            $response = await($this->browser->post("http://web:80/websocket/saveMessage", ["X-IPC-Secret" => $this->secret, 'Content-Type' => 'application/json'], json_encode(["userId" => $userId, "message" => $content, "channelId" => $channelId, "attachment" => $attachment])));
+            return json_decode($response->getBody());
         } catch (\React\Http\Message\ResponseException $e) {
             echo "[SymfonyIPC] Erreur HTTP {$e->getResponse()->getStatusCode()} dans saveNewMessage\n";
             return false;

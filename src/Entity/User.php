@@ -55,8 +55,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $token = null;
 
-    #[ORM\ManyToOne(inversedBy: 'users')]
-    private ?Server $server = null;
+    /**
+     * @var Collection<int, Server>
+     */
+    #[ORM\ManyToMany(targetEntity: Server::class, inversedBy: 'users')]
+    #[ORM\JoinTable(name: 'user_server')] // optionnel, Doctrine génère un nom sinon
+    private Collection $servers;
 
     /**
      * @var Collection<int, Message>
@@ -74,6 +78,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->messages = new ArrayCollection();
         $this->themes = new ArrayCollection();
+        $this->servers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -223,15 +228,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getServer(): ?Server
+    public function getServers(): Collection
     {
-        return $this->server;
+        return $this->servers;
     }
 
-    public function setServer(?Server $server): static
+    public function addServer(Server $server): static
     {
-        $this->server = $server;
+        if (!$this->servers->contains($server)) {
+            $this->servers->add($server);
+        }
+        return $this;
+    }
 
+    public function removeServer(Server $server): static
+    {
+        $this->servers->removeElement($server);
         return $this;
     }
 

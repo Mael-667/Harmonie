@@ -1,7 +1,5 @@
 {% extends 'base.html.twig' %}
 
-{% import "app/popups.html.twig" as popups %}
-
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -10,10 +8,12 @@
 {% block title %}Harmonie{% endblock %}
 
 {% block body %}
-
+{# TODO: ajouter des call to action dans la page de base  #}
 <div id="side_panel">
     <div id="serversDetails">
         <div id="servers">
+            <div id="serverList">
+            </div>
             <div id="newServer" class="serverButton">
                 <button class="transparentButton" aria-label="Create New Server">
                     <i class="fa-solid fa-plus"></i>
@@ -58,7 +58,7 @@
             <label for="message" id="messageLabel">
                 <input type="text" name="message" id="message" placeholder="Écrivez ici" autocomplete="off">
             </label>
-            <button id="emoji-btn" aria-label="Open emoji selector">
+            <button type="button" id="emoji-btn" aria-label="Open emoji selector">
                 <i class="fa-regular fa-face-laugh-beam"></i>
             </button>
             <div class="horizontalLine"></div>
@@ -85,7 +85,33 @@
 </div>
 
 <div class="popupBackground">
-    {{ popups.popup("popupNewServer") }}
+     <div id="popupNewServer" class="popup" style="display: none;">
+        <div id="addServer">
+            <h2>Ajouter un nouveau serveur</h2>
+            <form action="" method="post" class="singleLineForm">
+                <div class="field">
+                    <label for="serverLink">Lien du serveur</label>
+                    <input type="text" name="serverLink" id="serverLink" placeholder="harmonie.gg/1">
+                </div>
+                <button type="submit" class="button crimsonButton">Ajouter</button>
+            </form>
+        </div>
+        <div id="createServer">
+            <h2>Ou créez en un !</h2>
+            {{ form_start(newServerForm) }}
+                <label for="server_icon" id="serverIconLabel">
+                    {{ form_widget(newServerForm.icon) }}
+                </label>
+                <div class="singleLineForm">
+                    <div class="field">
+                        {{ form_label(newServerForm.name) }}
+                        {{ form_widget(newServerForm.name) }}
+                    </div>
+                    <button type="submit" class="button crimsonButton">Créer</button>
+                </div>
+            {{ form_end(newServerForm) }}
+        </div>
+    </div>
 </div>
 
 

@@ -19,20 +19,35 @@ body {
 }
 
 #servers {
-    width: 5rem;
+    width: auto;
+    padding: 0 0.4rem;
     background-color: var(--background-secondary);
 }
 
 .serverButton{
-    width: 4rem;
-    height: 4rem;
+    width: 3.7rem;
+    height: 3.7rem;
     border-radius: 1rem;
-    margin: auto;
+    margin: 0.5rem auto;
+    background-color: var(--field-bg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: block;
+    transition: 150ms;
+    border: none;
+    &:hover{
+        filter: brightness(0.8);
+    }
+}
+
+.serverButtonActive{
+    box-shadow: 0 0 3px 2px var(--main-color);
 }
 
 #newServer{
     background-color: var(--field-bg);
-    border: 1px solid var(--main-color);
+    border: 1px solid var(--main-outline);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -40,13 +55,28 @@ body {
         color: var(--secondary-color);
         font-size: 3.5rem;
         transition: 150ms;
-
-        &:hover{
-            color: var(--secondary-color-hover);
-        }
     }
 }
 
+#serverInfo{
+    width: 100%;
+    border: 1px solid var(--main-outline);
+}
+
+.channelButton{
+    background: none;
+    border: none;
+    color: var(--main-color);
+    font-family: 'Roboto';
+    font-size: 1.3rem;
+    margin: 1rem;
+    cursor: pointer;
+    transition: 50ms;
+
+    &:hover{
+        filter: brightness(1.4);
+    }
+}
 
 #userInfo {
     height: 5rem;
@@ -106,6 +136,43 @@ body {
 
 #messages {
     height: stretch;
+    padding: 0 1.3rem;
+}
+
+.message{
+    display: flex;
+}
+
+.pfpBox{
+    &>img{
+        height: 3.5rem;
+        min-width: 3.5rem;
+        border-radius: 50%;
+    }
+}
+
+.messageContent{
+    margin-top: 0.5rem;
+    margin-left: 0.5rem;
+}
+
+.pseudo{
+    font-family: 'Roboto';
+    font-size: 1.2rem;
+    font-weight: 340;
+    color: var(--secondary-color);
+}
+
+.messageDate{
+    font-size: 0.7rem;
+    font-weight: 300;
+    font-family: 'Roboto';
+    color: var(--main-color);
+}
+
+.content{
+    margin: 0;
+    font-family: arial;
 }
 
 #input {
@@ -130,12 +197,13 @@ body {
     display: flex;
     padding: 0.3rem;
     padding-right: 0.6rem;
+    background-color: var(--background-secondary);
     & i {
         font-size: 2rem;
-        color: var(--secondary-color);
+        color: var(--secondary-color-hover);
         transition: 150ms;
         &:hover{
-            color: var(--secondary-color-hover);
+            color: var(--secondary-color);
         }
     }
 }
@@ -237,7 +305,7 @@ body {
     }
 }
 
-#serverIcon{
+#server_icon{
     display: none;
 }
 
