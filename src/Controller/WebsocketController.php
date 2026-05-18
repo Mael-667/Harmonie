@@ -96,6 +96,15 @@ final class WebsocketController extends AbstractController
         $emi->persist($message);
         $emi->flush();
 
-        return new JsonResponse(["status" => "ok"], 200);
+        $server = $channel->getServer();
+        $roles = $server->getRoles();
+        $recipientIds = [];
+        foreach ($server->getUsers() as $member) {
+            $userId = $member->getId();
+            if ($permissionManager->canAccessChannel($channelId, $userId, $roles, "read")) {
+                $recipientIds[] = $userId;
+            }
+        }
+        return new JsonResponse(["status" => "ok", "recipients" => $recipientIds]);
     }
 }

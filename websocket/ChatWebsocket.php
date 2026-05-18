@@ -38,10 +38,12 @@ $ws->onMessage(function($msg, $user) use (&$ws, &$symfonyIPC){
                 $content = $message->content;
                 $channel = $message->channel;
                 $attachment = $message->attachment;
-                // on attend le retour de cette fonction pour savoir si l'utilisateur a l'acces ou non
-                if($symfonyIPC->saveNewMessage($user->id, $content, $attachment, $channel)){
-                    $ws->broadcastMessageTo(json_encode(newMessage($user, $content, $attachment, $channel)), function($user) use ($channel){
-                        return in_array($channel, $user->channels);
+                // on attend le retour de cette fonction pour savoir si l'utilisateur a l'acces ou non, elle retournera les utilisateurs qui pourront voir le msssage
+                $ans = $symfonyIPC->saveNewMessage($user->id, $content, $attachment, $channel);
+                if($ans){
+                    $recipientIds = $ans->recipients;
+                    $ws->broadcastMessageTo(json_encode(newMessage($user, $content, $attachment, $channel)), function($user) use (&$recipientIds){
+                        return in_array($user->id, $recipientIds, true);
                     });
                 };
                 break;

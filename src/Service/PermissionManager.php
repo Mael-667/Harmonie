@@ -36,8 +36,8 @@ class PermissionManager
     public function addDefaultPermission(Server $server, int $channelId){
         $currentRoles = $server->getRoles();
         $currentRoles[] =  [
-                "name" => "Admin",
-                "color" => "#aa0000",
+                "name" => "User",
+                "color" => "#ffffff",
                 "permissions" => [
                     $channelId => [
                         "read",
