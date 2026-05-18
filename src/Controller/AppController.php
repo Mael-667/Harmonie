@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Enum\ChannelTypeEnum;
 use App\Form\ServerType;
 use App\Repository\MessageRepository;
+use App\Service\PermissionManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
@@ -51,7 +52,7 @@ final class AppController extends AbstractController
 
     // GET /articles/42 — détail, id entier uniquement
     #[Route('/app/{id}/{serverId}', name: 'app_showServer', requirements: ['id' => '\d+'])]
-    public function showServer(Request $request, MessageRepository $messageRepository, int $id, int $serverId = -1){
+    public function showServer(Request $request, PermissionManager $permissionManager, MessageRepository $messageRepository, int $id, int $serverId = -1){
         // Descriminer une premiere connexion d'une requete ajax avec le format de requete
         // La partie JS se chargera de request les données si elles sont demandées dans l'url
         if ($request->getPreferredFormat() != 'json'){
@@ -75,7 +76,7 @@ final class AppController extends AbstractController
         $channels = $server->getChannels()->toArray();
 
         // Par défaut on affiche le 1er channel du serveur
-        $channelIndex = 0;
+        $channelId = 0;
 
         $channelsJSON = [];
         for ($i=0; $i < count($channels); $i++) { 
@@ -86,16 +87,21 @@ final class AppController extends AbstractController
                 "category" => $channels[$i]->getCategory()
             ];
 
-            if ($channelsJSON[$i]["id"] == $serverId) $channelIndex = $i;
+            if ($channelsJSON[$i]["id"] == $serverId) $channelId = $serverId;
         }
 
-        $messages = $messageRepository->getLastMessages($channels[$channelIndex]);
+        if($permissionManager->canAccessChannel($channelsJSON[$channelId]["id"], $user->getId(), $server->getRoles())){
+            $messages = $messageRepository->getLastMessages($channels[$channelId]);
+        } else {
+            $messages = ["error" => "access denied"];
+        };
+
         
         return new Response(json_encode([
             "serverName" => $server->getName(),
             "serverId" => $server->getId(),
             "channels" => $channelsJSON,
-            "currentChannel" => $channelsJSON[$channelIndex]["id"],
+            "currentChannel" => $channelsJSON[$channelId]["id"],
             "messages" => $messages
         ]));
     }
@@ -130,6 +136,7 @@ final class AppController extends AbstractController
         Request $request,
         SluggerInterface $slugger,
         EntityManagerInterface $entityManager,
+        PermissionManager $permissionManager,
         #[Autowire('%kernel.project_dir%/public/uploads/serverIcon')] string $serverIcon
     ){
 
@@ -159,7 +166,7 @@ final class AppController extends AbstractController
                 $server->setIcon($newFilename);
             }
 
-            
+            /** @var User $admin */
             $admin = $this->getUser();
             $server->addUser($admin);
             
@@ -167,7 +174,8 @@ final class AppController extends AbstractController
             $defaultChannel = new Channel();
             $defaultChannel->setType(ChannelTypeEnum::Textual);
             $defaultChannel->setName("Général");
-            // Todo: ajouter les roles qui ont acces au chan
+            $permissionManager->addAdminPermission($server, $admin->getId());
+            $permissionManager->addDefaultPermission($server, $defaultChannel->getId());
             $server->addChannel($defaultChannel);
 
             $entityManager->persist($server);

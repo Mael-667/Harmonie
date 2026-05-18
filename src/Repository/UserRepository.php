@@ -33,9 +33,10 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->flush();
     }
 
-    public function findWithChannelAccess(int $userId, int $channelId): ?User
+    public function findWithChannelAccess(int $userId, int $channelId)
     {
         return $this->createQueryBuilder("user")
+                  ->select("server.roles AS roles")
                   ->innerJoin("user.servers", "server")
                   ->innerJoin("server.channels", "channel")
                   ->where("user.id = :userId AND channel.id = :channelId")

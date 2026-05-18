@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Repository\ChannelRepository;
 use App\Repository\MessageRepository;
 use App\Repository\UserRepository;
+use App\Service\PermissionManager;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -58,7 +59,7 @@ final class WebsocketController extends AbstractController
     }
 
     #[Route('/websocket/saveMessage', name: 'websocket_saveMessage')]
-    public function saveMessage(Request $request, UserRepository $userRep, EntityManagerInterface $emi){
+    public function saveMessage(Request $request, PermissionManager $permissionManager, UserRepository $userRep, EntityManagerInterface $emi){
         // TODO: découpler la vérification de l'insertion des données, faire 2 request ptet
         $secret = $_ENV["IPC_SECRET"];
         if($secret != $request->headers->get("X-IPC-Secret")){
@@ -73,9 +74,13 @@ final class WebsocketController extends AbstractController
         $attachment = $decodedRequest->attachment;
 
         // On vérifie si l'utilisateur existe et si il a acces au channel susnommé
-        // todo: Test initial, a compléter avec une vérification des permissions
+        // Test initial, complétée avec une vérification des permissions
         $userInfo = $userRep->findWithChannelAccess($userId, $channelId);
         if(!$userInfo) throw $this->createAccessDeniedException();
+        // var_dump($userInfo["roles"]);
+        if(!$permissionManager->canAccessChannel($channelId, $userId, $userInfo["roles"], "write")){
+            throw $this->createAccessDeniedException();
+        };
 
         //Pour l'insert, Doctrine a juste besoin d'une référence vers User et Channel, pas de l'entité hydratée :
         $user = $emi->getReference(User::class, $userId);

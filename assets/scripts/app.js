@@ -32,7 +32,7 @@ ws.onmessage = (e) => {
   //TODO: vérifier que l'utilisateur est bien dans le chan en question avant d'update 
   let message = JSON.parse(e.data);
   if(message.channel == currentChannelId){
-    renderMessage();
+    renderMessage(message);
   }
 };
 
@@ -223,6 +223,11 @@ function renderChannelsButtons(channels){
 
 function displayMessages(messages){
   let messageConteneur = document.getElementById("messages");
+  if(messages.error != undefined) {
+    // TODO: handle l'erreur en qst probablement acces denied
+    console.log(messages);
+    return;
+  }
   messageConteneur.replaceChildren();
   messages.forEach((e) => {
     let newMessage = renderMessage(e);
