@@ -58,7 +58,12 @@ form.addEventListener("submit", (e) => {
   e.preventDefault();
   const messageElmt = document.getElementById("message");
 
-  const textContent = messageElmt.value;
+  const textContent = messageElmt.value.trim();
+
+  if(textContent == ""){
+    // TODO: retour d'empechage d'envoi message vide
+    return;
+  }
 
   const message = {
     "type" : "message",
