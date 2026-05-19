@@ -34,6 +34,23 @@ class MessageRepository extends ServiceEntityRepository
             // getArrayResult() au lieu de getResult() → renvoie un tableau associatif plat, directement json_encode-able
     }
 
+    // renvoie un array qui contiendra tout message "select(message)" + les roles "addSelect) séparément
+    public function findWithMessage(int $userId, int $messageId): ?array
+    {
+        return $this->createQueryBuilder("message")
+            ->select("message")
+            ->addSelect("server.roles AS roles")
+            ->addSelect("channel.id as channelId")
+            ->innerJoin("message.channel", "channel")
+            ->innerJoin("channel.server", "server")
+            ->where("message.id = :messageId")
+            ->andWhere("message.user = :userId")
+            ->setParameter("messageId", $messageId)
+            ->setParameter("userId", $userId)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     //    /**
     //     * @return Message[] Returns an array of Message objects
     //     */

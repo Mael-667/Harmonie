@@ -96,6 +96,62 @@ final class WebsocketController extends AbstractController
                 $recipientIds[] = $userId;
             }
         }
-        return new JsonResponse(["status" => "ok", "recipients" => $recipientIds]);
+        return new JsonResponse([
+            "status" => "ok",
+            "recipients" => $recipientIds,
+            "messageId" => $message->getId()
+        ]);
+    }
+
+
+    #[Route('/websocket/editMessage', name: 'websocket_editMessage')]
+    public function editMessage(Request $request, PermissionManager $permissionManager, MessageRepository $msgRep, EntityManagerInterface $emi){
+        $secret = $_ENV["IPC_SECRET"];
+        if($secret != $request->headers->get("X-IPC-Secret")){
+            throw new HttpException(403, 'Accès refusé');
+        };
+
+        $decodedRequest = json_decode($request->getContent());
+
+        $userId = $decodedRequest->userId;
+        $messageId = $decodedRequest->messageId;
+        $content = $decodedRequest->message;
+        $attachment = $decodedRequest->attachment;
+        
+        // On vérifie si l'utilisateur existe et si c'est bien son message
+        $ans = $msgRep->findWithMessage($userId, $messageId);
+        if(!$ans) throw $this->createAccessDeniedException();
+        // var_dump($userInfo["roles"]);
+        $roles = $ans["roles"];
+        $msg = $ans[0];
+        $channelId = $ans["channelId"];
+        if(!$permissionManager->canAccessChannel($channelId, $userId, $roles, PermissionEnum::Write)){
+            throw $this->createAccessDeniedException();
+        };
+
+        //Pour l'insert, Doctrine a juste besoin d'une référence vers User et Channel, pas de l'entité hydratée :
+        $channel = $emi->getReference(Channel::class, $channelId);
+
+        $msg->setContent($content);
+        // flush suffit pour l'edit
+        $emi->flush();
+
+        $server = $channel->getServer();
+        $recipientIds = [];
+        foreach ($server->getUsers() as $member) {
+            $userId = $member->getId();
+            if ($permissionManager->canAccessChannel($channelId, $userId, $roles, PermissionEnum::Read)) {
+                $recipientIds[] = $userId;
+            }
+        }
+        // on ne trust pas le channel de l'utilisateur car 
+        // Conséquence : si un client envoie un channel falsifié, le serveur fait l'update correctement (autorisation OK) mais le payload editMessage broadcasté contient le faux channelId. Côté récepteurs, le test if(message.channel == currentChannelId) (app.js ligne 43) échoue → l'UI ne se met pas à jour pour les
+        // destinataires légitimes. Pas une faille de sécurité, mais un bug d'affichage exploitable.
+        return new JsonResponse([
+            "status" => "ok",
+            "recipients" => $recipientIds,
+            "messageId" => $messageId,
+            "channelId" => $channelId
+        ]);
     }
 }
