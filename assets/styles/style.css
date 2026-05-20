@@ -8,6 +8,8 @@ html{
     --text-color: white;
     --background: #161616;
     --background-secondary: #121212;
+    --background-hover: #2d2a2a;
+    --link: rgb(22, 22, 148);
 
     font-family: Arial, Helvetica, sans-serif;
 }

@@ -1,12 +1,12 @@
 # Harmonie
 
-A self-hosted, open-source chat platform with text channels, voice channels and customizable themes — without a freemium model getting in the way.
+A self-hosted, open-source chat platform with text channels, voice channels and customizable themes. Without a freemium model getting in the way.
 
 > *"De la discorde naît l'Harmonie"*
 
 ## Why
 
-Most online chat apps lock basic features behind paywalls. Harmonie is the opposite take: spin it up on your own server, invite your friends, and that's it. Servers, channels, voice rooms, custom themes — all included, none gated.
+Most online chat apps lock basic features behind paywalls. Harmonie is the opposite take: spin it up on your own server, invite your friends, and that's it. Servers, channels, voice rooms, custom themes... All included, none gated.
 
 ## Stack
 
@@ -20,7 +20,7 @@ cd Harmonie
 docker compose up --build
 ```
 
-That's the whole setup — Composer install, database creation and migrations all run on first boot.
+That's the whole setup. Composer install, database creation and migrations all run on first boot.
 
 | Service | URL |
 |---|---|
@@ -41,9 +41,13 @@ Standard Symfony layout. The interesting bits:
 
 Themes are stored as JSON CSS rules tied to a user. Anyone can publish their own to the gallery, others pick from it, and a usage counter tracks the popular ones. The default look is carbon black (`#161616`), crimson highlights (`#A81848`) and off-white text (`#F0DEB8`).
 
+## AI Usage Disclosure
+
+I used AI only for commits and quick debugging/questions. As it is a school project, I wrote every line of code myself, for better or worse ☝️ 
+
 ## Status
 
-Active work-in-progress. Built as the capstone project for the French *Développeur Web et Web Mobile* qualification — so it's also a public record of how I went about the design, the data model and the real-time bits.
+Active work-in-progress. Built as the capstone project for the French *Développeur Web et Web Mobile* qualification, so it's also a public record of how I went about the design, the data model and the real-time bits.
 
 Specs and design files live in `extra/` if you want the longer story.
 

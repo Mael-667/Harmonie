@@ -31,8 +31,25 @@ ws.onmessage = (e) => {
   console.log(e.data);
   //TODO: vérifier que l'utilisateur est bien dans le chan en question avant d'update 
   let message = JSON.parse(e.data);
-  if(message.channel == currentChannelId){
-    renderMessage(message);
+  switch (message.type) {
+    case "newMessage":
+      message = message.payload;
+      if(message.channel == currentChannelId){
+        renderMessage(message);
+      }
+      break;
+    case "editMessage":
+      message = message.payload;
+      if(message.channel == currentChannelId){
+        rewriteMessage(message);
+      }
+      break;
+    case "deleteMessage":
+      message = message.payload;
+      removeMessage(message.id);
+      break;
+    default:
+      break;
   }
 };
 
@@ -77,6 +94,97 @@ form.addEventListener("submit", (e) => {
   messageElmt.value = "";
 })
 
+let oldContent;
+function editMessage(id, button){
+  closeEdit();
+  const contentDiv = document.querySelector(`[data-message-id="${id}"]`);
+  oldContent = contentDiv.textContent;
+  contentDiv.textContent = "";
+
+  const editForm = document.createElement("form");
+  editForm.classList.add('editForm');
+  editForm.setAttribute("aria-label", "Modifier le message");
+  // const editLabel = document.createElement("label");
+  // editLabel.setAttribute("for", "editedMessage");
+
+  const editInput = document.createElement("input");
+  editInput.setAttribute("name", "editedMessage");
+  editInput.setAttribute("id", "editedMessage");
+  editInput.value = oldContent;
+  editInput.setAttribute("placeholder", "Votre nouveau message ici.");
+  editInput.setAttribute("aria-label", "Nouveau contenu du message");
+
+  const verticalBar = document.createElement("div");
+  verticalBar.classList.add("horizontalLine");
+
+  const editButton = document.createElement("button");
+  editButton.classList.add("transparentButton", "editButton");
+  editButton.setAttribute("aria-label", "Envoyer la modification");
+  editButton.innerHTML = `<i class="fa-solid fa-paper-plane" aria-hidden="true"></i>`;
+
+  editForm.append(editInput);
+  editForm.append(verticalBar);
+  editForm.append(editButton);
+
+  contentDiv.append(editForm);
+
+  const cancelDiv = document.createElement("div");
+  cancelDiv.classList.add("cancelDiv");
+
+  const cancelButton = document.createElement('button');
+  cancelButton.classList.add("textButton");
+  cancelButton.textContent = "Annuler";
+
+  cancelButton.addEventListener("click", () =>{
+    closeEdit();
+  })
+
+  cancelDiv.append(cancelButton);
+
+  contentDiv.append(cancelDiv);
+
+  const messageId = contentDiv.getAttribute("data-message-id");
+  editForm.addEventListener('submit', (e) =>{
+    const newMessage = editInput.value.trim();
+    e.preventDefault();
+    if(newMessage != ""){
+      // TODO: remove comm
+      // oldContent = newMessage;
+      const message = {
+        "type" : "messageEdit",
+        "channel": currentChannelId,
+        "messageId": messageId,
+        "content": newMessage,
+        "attachment": ""
+      }
+      ws.send(JSON.stringify(message));
+
+    }
+    closeEdit();
+  })
+}
+
+function deleteMessage(messageId){
+  const message = {
+    "type" : "messageDelete",
+    "messageId": messageId
+  }
+  ws.send(JSON.stringify(message));
+}
+
+
+function closeEdit(){
+  const editForm = document.querySelector(".editForm");
+  if(editForm){
+    let message = editForm.parentElement;
+    // Apparemment ça enleve les eventlistener des elements enfants aussi donc ça laisse un état propre
+    message.replaceChildren();
+    message.textContent = oldContent;
+    let messageId = message.getAttribute("data-message-id");
+    addActionButtons(message, messageId);
+    editForm.remove();
+  }
+}
 
 
 
@@ -180,9 +288,9 @@ function displayServer(id, channelId = -1){
   })
     .then((body) => body.json())
     .then((json) => {
+      currentChannelId = json.currentChannel;
       renderChannelsButtons(json.channels);
       displayMessages(json.messages);
-      currentChannelId = json.currentChannel;
 
       let prevServFocus = document.querySelector('.serverButtonActive');
       if(prevServFocus) prevServFocus.classList.remove('serverButtonActive');
@@ -203,7 +311,7 @@ function renderChannelsButtons(channels){
     chanElement.dataset.channelId = channel.id;
     chanElement.classList.add('channelButton');
     chanElement.textContent = "#"+channel.name;
-
+    if(channel.id == currentChannelId) chanElement.classList.add("channelButtonActive")
     chanElement.addEventListener("click", (e) => {
       displayServer(currentServerId, channel.id);
     })
@@ -274,13 +382,17 @@ function renderMessage(message){
     date.textContent = dateString;
   
     const content = document.createElement("div");
-    content.classList.add("content");
+    content.classList.add("contentBox");
 
     const msg = document.createElement('pre');
     msg.classList.add("content");
     msg.textContent = message.content;
+    msg.dataset.messageId = message.id;
     content.append(msg);
-  
+
+    // action on message buttons
+    addActionButtons(msg, message.id);
+
     messageContent.append(pseudo, " ", date, content);
     messageBox.append(pfpBox, messageContent);
   
@@ -289,9 +401,58 @@ function renderMessage(message){
     const msg = document.createElement('pre');
     msg.classList.add("content");
     msg.textContent = message.content;
-    lastMessage.querySelector(".content").append(msg);
+    msg.dataset.messageId = message.id;
+
+    addActionButtons(msg, message.id);
+
+    lastMessage.querySelector(".contentBox").append(msg);
     return false;
   }
+}
+
+function rewriteMessage(msg){
+  let messageId = msg.id;
+  const contentDiv = document.querySelector(`[data-message-id="${messageId}"]`);
+  contentDiv.textContent = msg.content;
+  addActionButtons(contentDiv, messageId);
+}
+
+function removeMessage(id){
+  const contentDiv = document.querySelector(`[data-message-id="${id}"]`);
+  if(contentDiv == undefined) return;
+  const contentBox = contentDiv.parentElement;
+  contentDiv.remove();
+
+  if(contentBox.childElementCount == 0){
+    contentBox.parentElement.parentElement.remove();
+  }
+}
+
+function addActionButtons(msg, id){
+  const actionButtons = document.createElement("div");
+  actionButtons.classList.add("actionButtons");
+  
+  // TODO: ajouter le bouton edit que si c'est le message de l'utilisateur
+  const editButton = document.createElement('button');
+  editButton.classList.add("actionButton");
+  editButton.setAttribute("aria-label", "Modifier le message");
+  editButton.innerHTML = `<i class="fa-solid fa-pen" aria-hidden="true"></i>`;
+  editButton.addEventListener("click", () =>{
+    editMessage(id, editButton);
+  })
+  actionButtons.append(editButton);
+
+  // TODO: ajouter le bouton delete que si c'est le message de l'utilisateur ou si il a la permission
+  const deleteButton = document.createElement('button');
+  deleteButton.classList.add("actionButton");
+  deleteButton.setAttribute("aria-label", "Supprimer le message");
+  deleteButton.innerHTML = `<i class="fa-solid fa-trash-can" aria-hidden="true"></i>`;
+  deleteButton.addEventListener("click", () =>{
+    deleteMessage(id);
+  })
+  actionButtons.append(deleteButton);
+
+  msg.append(actionButtons);
 }
 
 

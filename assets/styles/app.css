@@ -42,7 +42,7 @@ body {
 }
 
 .serverButtonActive{
-    box-shadow: 0 0 3px 2px var(--main-color);
+    border: 2px solid var(--main-color);
 }
 
 #newServer{
@@ -76,6 +76,10 @@ body {
     &:hover{
         filter: brightness(1.4);
     }
+}
+
+.channelButtonActive{
+    border-bottom: 2px solid var(--main-color);
 }
 
 #userInfo {
@@ -143,6 +147,10 @@ body {
     display: flex;
 }
 
+.message:hover:has(.contentBox > *:only-child){
+    background-color: var(--background-hover);
+}
+
 .pfpBox{
     &>img{
         height: 3.5rem;
@@ -153,14 +161,14 @@ body {
 
 .messageContent{
     margin-top: 0.5rem;
-    margin-left: 0.5rem;
+    flex-grow: 1;
 }
 
 .pseudo{
     font-family: 'Roboto';
     font-size: 1.2rem;
-    font-weight: 340;
     color: var(--secondary-color);
+    margin-left: 0.6rem;
 }
 
 .messageDate{
@@ -170,10 +178,99 @@ body {
     color: var(--main-color);
 }
 
+.contentBox{
+    padding-top: 0.22rem;
+    &>*{
+        padding-left: 0.6rem;
+    }
+}
+
 .content{
     margin: 0;
     font-family: arial;
+    padding: 0.07rem 0;
+    padding-left: 0.6rem;
+    position: relative;
+    &:hover{
+        background-color: var(--background-hover);
+    }
 }
+
+.content:has(.editForm){
+    padding-left: 0;
+    &:hover{
+        background: none !important;
+    }
+}
+
+.actionButtons{
+    position: absolute;
+    top: -0.6rem;
+    right: 1rem;
+    display: none;
+    background-color: var(--background-secondary);
+    border: 1px solid var(--main-outline);
+    border-radius: 0.5rem;
+    padding: 0.2rem 0.15rem;
+}
+
+.content:hover .actionButtons {
+    display: block;
+}
+
+.actionButton{
+    background: none;
+    border: none;
+    position: relative;
+    color: var(--secondary-color-hover);
+    font-size: 1.07rem;
+
+    &:hover{
+        color: var(--secondary-color);
+    }
+}
+
+.editForm{
+    display: flex;
+    flex-direction: row;
+    height: 1.7rem;
+    border: 1px solid var(--main-outline);
+    border-radius: 0.6rem;
+    padding: 0.3rem 0.6rem;
+    padding-right: 0.6rem;
+    margin-top: 0.3rem;
+    background-color: var(--background-secondary);
+}
+
+#editedMessage{
+    padding: 0;
+    margin: 0;
+    background: none;
+    border: none;
+    font-family: arial;
+    color: var(--text-color);
+    font-size: 1rem;
+    flex-grow: 1;
+    outline: #ffffff00;
+}
+
+.cancelDiv{
+    margin-bottom: 0.3rem;
+}
+
+.editButton{
+    color: var(--secondary-color);
+    font-size: 1.3rem;
+    position: relative;
+    top: 2px;
+}
+
+.textButton{
+    background: none;
+    border: none;
+    color: var(--main-color);
+}
+
 
 #input {
     display: flex;
