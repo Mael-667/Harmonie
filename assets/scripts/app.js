@@ -291,6 +291,8 @@ function displayServer(id, channelId = -1){
       currentChannelId = json.currentChannel;
       renderChannelsButtons(json.channels);
       displayMessages(json.messages);
+      updateServerDetails(json.serverId, json.serverName);
+
 
       let prevServFocus = document.querySelector('.serverButtonActive');
       if(prevServFocus) prevServFocus.classList.remove('serverButtonActive');
@@ -301,6 +303,21 @@ function displayServer(id, channelId = -1){
       console.log(json);
     })
     .catch((err) => console.log(err));
+}
+
+function updateServerDetails(serverId, serverNom){
+  const conteneur = document.getElementById("serverDetails");
+
+  const serverName = document.createElement("span");
+  serverName.classList.add("serverName");
+  serverName.textContent = serverNom;
+  conteneur.append(serverName);
+
+  const serverSettings = document.createElement("button");
+  serverSettings.classList.add("actionButton", "editServer");
+  serverSettings.innerHTML = `<i class="fa-solid fa-gears" aria-hidden="true"></i>`
+
+  conteneur.append(serverSettings);
 }
 
 function renderChannelsButtons(channels){
@@ -331,7 +348,7 @@ function renderChannelsButtons(channels){
     div.append(categories[key]);
   }
 
-  document.getElementById("serverInfo").replaceChildren(div);
+  document.getElementById("channels").replaceChildren(div);
 }
 
 function displayMessages(messages){

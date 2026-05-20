@@ -63,12 +63,30 @@ body {
     border: 1px solid var(--main-outline);
 }
 
+#serverDetails{
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--main-outline);
+    padding: 0 1rem;
+}
+
+.serverName{
+    color: var(--main-color);
+    font-size: 1.5rem;
+    margin: 1.25rem 0;
+}
+
+.editServer{
+    font-size: 1.2rem !important;
+    padding: 0;
+}
+
 .channelButton{
     background: none;
     border: none;
     color: var(--main-color);
     font-family: 'Roboto';
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     margin: 1rem;
     cursor: pointer;
     transition: 50ms;
