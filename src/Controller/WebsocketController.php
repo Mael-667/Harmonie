@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Enum\PermissionEnum;
 use App\Repository\ChannelRepository;
 use App\Repository\MessageRepository;
+use App\Repository\ServerRepository;
 use App\Repository\UserRepository;
 use App\Service\PermissionManager;
 use DateTime;
@@ -152,6 +153,43 @@ final class WebsocketController extends AbstractController
             "recipients" => $recipientIds,
             "messageId" => $messageId,
             "channelId" => $channelId
+        ]);
+    }
+
+    #[Route('/websocket/deleteMessage', name: 'websocket_deleteMessage')]
+    public function deleteMessage(Request $request, PermissionManager $permissionManager, MessageRepository $msgRep, ServerRepository $servRep, EntityManagerInterface $emi){
+        $secret = $_ENV["IPC_SECRET"];
+        if($secret != $request->headers->get("X-IPC-Secret")){
+            throw new HttpException(403, 'Accès refusé');
+        };
+
+        $decodedRequest = json_decode($request->getContent());
+
+        $userId = $decodedRequest->userId;
+        $messageId = $decodedRequest->messageId;
+
+        $msgInfo = $msgRep->getMessageInfo($messageId);
+        $roles = $msgInfo["roles"];
+        $msgUserId = $msgInfo["userId"];
+        $msg = $msgInfo[0];
+        $hasRight = $permissionManager->hasServerRight($userId, $roles, PermissionEnum::Delete);
+
+        // On vérifie si l'utilisateur a les droits de suppression ou si c'est son message
+        if(!$hasRight && $userId != $msgUserId) throw $this->createAccessDeniedException();
+
+        $emi->remove($msg);
+        $emi->flush();
+
+        $recipientIds = [];
+        $serverUsers = $servRep->findOneBy(["id" => $msgInfo["serverId"]])->getUsers();
+        foreach ($serverUsers as $member) {
+            $recipientIds[] = $member->getId();
+        }
+        
+        return new JsonResponse([
+            "status" => "ok",
+            "recipients" => $recipientIds,
+            "messageId" => $messageId,
         ]);
     }
 }

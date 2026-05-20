@@ -57,6 +57,11 @@ class SymfonyIPC
         return $this->symfonyIPC($url, $body);
     }
 
+    public function deleteMessage($userId, $messageId){
+        $body = json_encode(["userId" => $userId, "messageId" => $messageId]);
+        $url = "http://web:80/websocket/deleteMessage";
+        return $this->symfonyIPC($url, $body);
+    }
 
 }
 

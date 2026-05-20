@@ -32,6 +32,7 @@ class WebSocketServer
             $message = '';
 
             $user = new User($conn);
+            // remplacer par une hashtable
             $this->users[] = $user;
 
             $conn->on("data", function (string $data) use (&$conn, &$handshake, &$buffer, &$message, &$user) {

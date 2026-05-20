@@ -51,6 +51,21 @@ class MessageRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
+    public function getMessageInfo(int $messageId){
+        return $this->createQueryBuilder("message")
+            ->select("message")
+            ->addSelect("server.roles AS roles")
+            ->addSelect("server.id as serverId")
+            ->addSelect("user.id as userId")
+            ->innerJoin("message.channel", "channel")
+            ->innerJoin("message.user", "user")
+            ->innerJoin("channel.server", "server")
+            ->where("message.id = :messageId")
+            ->setParameter("messageId", $messageId)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     //    /**
     //     * @return Message[] Returns an array of Message objects
     //     */

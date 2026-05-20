@@ -60,6 +60,19 @@ $ws->onMessage(function($msg, $user) use (&$ws, &$symfonyIPC){
                     });
                 };
                 break;
+            case "messageDelete":
+                if(!$user->authenticated) return false;
+                if(!is_numeric($msg->messageId)) return false;
+
+                $ans = $symfonyIPC->deleteMessage($user->id, $msg->messageId);
+                if($ans){
+                    $recipientIds = $ans->recipients;
+                    $preparedMessage = json_encode(deletedMessage($msg->messageId));
+                    $ws->broadcastMessageTo($preparedMessage, function($user) use (&$recipientIds){
+                        return in_array($user->id, $recipientIds, true);
+                    });
+                };
+                break;
             default:
                 //todo: renvoyer un message d'erreur requete invalide
                 break;
@@ -112,6 +125,14 @@ function editedMessage($content, $attachment, $channelId, $messageId){
     ];
 }
 
+function deletedMessage($messageId){
+    return [
+        "type" => "deleteMessage",
+        "payload" => [
+            "id" => $messageId
+        ]    
+    ];
+}
 
 $ws->run();
 

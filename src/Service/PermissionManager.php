@@ -19,6 +19,19 @@ class PermissionManager
         return false;
     }
 
+    public function hasServerRight($userId, array $roles, PermissionEnum $permission = PermissionEnum::Read): bool
+    {
+        for($i = 0; $i < count($roles); ++$i){
+            if(in_array($userId, $roles[$i]["members"]) || in_array("*", $roles[$i]["members"])){
+                if(in_array("*", $roles[$i]["serverPermission"]) || in_array($permission->value, $roles[$i]["serverPermission"])){
+                    return true;
+                };
+            }
+        }
+
+        return false;
+    }
+
     public function addAdminPermission(Server $server, int $adminId){
         $currentRoles = $server->getRoles();
         $currentRoles[] = [

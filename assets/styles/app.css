@@ -207,7 +207,7 @@ body {
     background-color: var(--background-secondary);
     border: 1px solid var(--main-outline);
     border-radius: 0.5rem;
-    padding: 0.15rem;
+    padding: 0.2rem 0.15rem;
 }
 
 .content:hover .actionButtons {
@@ -219,6 +219,8 @@ body {
     border: none;
     position: relative;
     color: var(--secondary-color-hover);
+    font-size: 1.07rem;
+
     &:hover{
         color: var(--secondary-color);
     }
@@ -232,7 +234,7 @@ body {
     border-radius: 0.6rem;
     padding: 0.3rem 0.6rem;
     padding-right: 0.6rem;
-    margin: 0.3rem 0;
+    margin-top: 0.3rem;
     background-color: var(--background-secondary);
 }
 
@@ -248,11 +250,21 @@ body {
     outline: #ffffff00;
 }
 
+.cancelDiv{
+    margin-bottom: 0.3rem;
+}
+
 .editButton{
     color: var(--secondary-color);
     font-size: 1.3rem;
     position: relative;
     top: 2px;
+}
+
+.textButton{
+    background: none;
+    border: none;
+    color: var(--main-color);
 }
 
 

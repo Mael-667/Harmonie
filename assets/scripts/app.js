@@ -44,6 +44,10 @@ ws.onmessage = (e) => {
         rewriteMessage(message);
       }
       break;
+    case "deleteMessage":
+      message = message.payload;
+      removeMessage(message.id);
+      break;
     default:
       break;
   }
@@ -110,14 +114,34 @@ function editMessage(id, button){
   editInput.setAttribute("placeholder", "Votre nouveau message ici.");
   editInput.setAttribute("aria-label", "Nouveau contenu du message");
 
+  const verticalBar = document.createElement("div");
+  verticalBar.classList.add("horizontalLine");
+
   const editButton = document.createElement("button");
   editButton.classList.add("transparentButton", "editButton");
   editButton.setAttribute("aria-label", "Envoyer la modification");
   editButton.innerHTML = `<i class="fa-solid fa-paper-plane" aria-hidden="true"></i>`;
 
   editForm.append(editInput);
+  editForm.append(verticalBar);
   editForm.append(editButton);
+
   contentDiv.append(editForm);
+
+  const cancelDiv = document.createElement("div");
+  cancelDiv.classList.add("cancelDiv");
+
+  const cancelButton = document.createElement('button');
+  cancelButton.classList.add("textButton");
+  cancelButton.textContent = "Annuler";
+
+  cancelButton.addEventListener("click", () =>{
+    closeEdit();
+  })
+
+  cancelDiv.append(cancelButton);
+
+  contentDiv.append(cancelDiv);
 
   const messageId = contentDiv.getAttribute("data-message-id");
   editForm.addEventListener('submit', (e) =>{
@@ -127,18 +151,27 @@ function editMessage(id, button){
       // TODO: remove comm
       // oldContent = newMessage;
       const message = {
-          "type" : "messageEdit",
-          "channel": currentChannelId,
-          "messageId": messageId,
-          "content": newMessage,
-          "attachment": ""
-        }
-        ws.send(JSON.stringify(message));
+        "type" : "messageEdit",
+        "channel": currentChannelId,
+        "messageId": messageId,
+        "content": newMessage,
+        "attachment": ""
+      }
+      ws.send(JSON.stringify(message));
 
     }
     closeEdit();
   })
 }
+
+function deleteMessage(messageId){
+  const message = {
+    "type" : "messageDelete",
+    "messageId": messageId
+  }
+  ws.send(JSON.stringify(message));
+}
+
 
 function closeEdit(){
   const editForm = document.querySelector(".editForm");
@@ -340,7 +373,7 @@ function renderMessage(message){
   
     const pseudo = document.createElement("span");
     pseudo.classList.add("pseudo");
-    pseudo.dataset.userId = message.id;
+    pseudo.dataset.userId = message.authorId;
     pseudo.textContent = message.authorPseudo;
   
     let dateString = new Date(message.timestamp.date).toLocaleTimeString();
@@ -384,10 +417,22 @@ function rewriteMessage(msg){
   addActionButtons(contentDiv, messageId);
 }
 
+function removeMessage(id){
+  const contentDiv = document.querySelector(`[data-message-id="${id}"]`);
+  if(contentDiv == undefined) return;
+  const contentBox = contentDiv.parentElement;
+  contentDiv.remove();
+
+  if(contentBox.childElementCount == 0){
+    contentBox.parentElement.parentElement.remove();
+  }
+}
+
 function addActionButtons(msg, id){
   const actionButtons = document.createElement("div");
   actionButtons.classList.add("actionButtons");
   
+  // TODO: ajouter le bouton edit que si c'est le message de l'utilisateur
   const editButton = document.createElement('button');
   editButton.classList.add("actionButton");
   editButton.setAttribute("aria-label", "Modifier le message");
@@ -396,6 +441,16 @@ function addActionButtons(msg, id){
     editMessage(id, editButton);
   })
   actionButtons.append(editButton);
+
+  // TODO: ajouter le bouton delete que si c'est le message de l'utilisateur ou si il a la permission
+  const deleteButton = document.createElement('button');
+  deleteButton.classList.add("actionButton");
+  deleteButton.setAttribute("aria-label", "Supprimer le message");
+  deleteButton.innerHTML = `<i class="fa-solid fa-trash-can" aria-hidden="true"></i>`;
+  deleteButton.addEventListener("click", () =>{
+    deleteMessage(id);
+  })
+  actionButtons.append(deleteButton);
 
   msg.append(actionButtons);
 }
