@@ -147,6 +147,10 @@ body {
     display: flex;
 }
 
+.message:hover:has(.contentBox > *:only-child){
+    background-color: var(--background-hover);
+}
+
 .pfpBox{
     &>img{
         height: 3.5rem;
