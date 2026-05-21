@@ -87,7 +87,9 @@ function validateWsMessage($user, $msg): bool{
     if(!$user->authenticated) return false;
 
     $content = trim($msg->content);
-    if($content == "") return false;
+    $attachment = trim($msg->attachment);
+
+    if($content == "" && $attachment == "") return false;
     // TODO: renvoyer une véritable erreur si le msg est empty
 
     $channel = $msg->channel;

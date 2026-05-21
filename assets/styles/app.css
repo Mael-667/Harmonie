@@ -150,15 +150,20 @@ body {
     grid-column: 3 / 11;
     display: flex;
     flex-direction: column;
+    height: 100vh;
 }
 
 #header {
-    height: 3rem;
+    min-height: 3rem;
+    max-height: 3rem;
 }
 
 #messages {
     height: stretch;
     padding: 0 1.3rem;
+    overflow-y: scroll;
+    padding-bottom: 1rem;
+    scrollbar-color: var(--scrollbar) var(--background);
 }
 
 .message{
@@ -219,6 +224,13 @@ body {
     &:hover{
         background: none !important;
     }
+}
+
+.attachment{
+    display: block;
+    max-height: 15rem;
+    margin: 0.7rem 0;
+    border-radius: 7px;
 }
 
 .actionButtons{
@@ -350,7 +362,7 @@ body {
     top: 0.1rem;
 }
 
-#attachement {
+#attachment {
     display: none;
 }
 

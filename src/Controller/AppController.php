@@ -3,12 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\Channel;
+use App\Entity\Message;
 use App\Entity\Server;
 use App\Entity\User;
 use App\Enum\ChannelTypeEnum;
 use App\Form\ServerType;
 use App\Repository\MessageRepository;
 use App\Service\PermissionManager;
+use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
@@ -186,6 +188,34 @@ final class AppController extends AbstractController
         } else {
             // Renvoie un acces denied
             throw $this->createAccessDeniedException();
+        }
+    }
+
+    #[Route('/app/fileUpload', name: 'app_fileUpload', methods: ["POST"])]
+    public function fileUpload(
+        Request $request,
+        SluggerInterface $slugger,
+        EntityManagerInterface $entityManager,
+        PermissionManager $permissionManager,
+        #[Autowire('%kernel.project_dir%/public/uploads/attachments')] string $attachmentDir
+    ){
+        // retrieves an instance of UploadedFile identified by "attachment"
+        $file = $request->files->get('attachment');
+
+        if ($file) {
+            $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+
+            $safeFilename = $slugger->slug($originalFilename);
+            $newFilename = $safeFilename . '-' . uniqid() . '.' . $file->guessExtension();
+            try {
+                $file->move($attachmentDir, $newFilename);
+            } catch (FileException $e) {
+                // ... handle exception if something happens during file upload
+            }
+
+            return new Response(json_encode(["fileName" => $newFilename]), 200);
+        } else {
+            return new Response(json_encode(["error" => "Aucun fichier"]), 400);
         }
     }
 }

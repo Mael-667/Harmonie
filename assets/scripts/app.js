@@ -36,6 +36,7 @@ ws.onmessage = (e) => {
       message = message.payload;
       if(message.channel == currentChannelId){
         renderMessage(message);
+        scrollMessageConteneurToBottom();
       }
       break;
     case "editMessage":
@@ -71,13 +72,28 @@ function getCookie(cname) {
 
 
 const form = document.getElementById("msgForm");
-form.addEventListener("submit", (e) => {
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
   const messageElmt = document.getElementById("message");
 
   const textContent = messageElmt.value.trim();
 
-  if(textContent == ""){
+  // les formulaires fonctionnent par clé valeur où leur clé est le nom du champ
+  let formData = new FormData(form);
+  let file = formData.get("attachment");
+  let attachment = "";
+
+  if(file.size != 0){
+    formData.append("channel", currentChannelId);
+    let response = await fetch(origin+"/app/fileUpload", {
+        method: "POST",
+        body: formData,
+      })
+    response = await response.json();
+    attachment = response.fileName;
+  }
+
+   if(textContent == "" && file.size == 0){
     // TODO: retour d'empechage d'envoi message vide
     return;
   }
@@ -86,12 +102,17 @@ form.addEventListener("submit", (e) => {
     "type" : "message",
     "channel": currentChannelId,
     "content": textContent,
-    "attachment": ""
+    "attachment": attachment
   }
+
+  // TODO: quand fichier, envoyer une premiere requete avec seulement le fichier a symfony
+  // symfony crée le message puis envoie un signal de retour 
+  // ensuite requete websocket qui va mettre a jour avec le contenu textuel
+  // récuperer le lien et broadcast le message
 
   ws.send(JSON.stringify(message));
   // TODO: Vérifier que la data a bien été reçue
-  messageElmt.value = "";
+  form.reset();
 })
 
 let oldContent;
@@ -226,17 +247,17 @@ formNewServer.addEventListener("submit", (e) => {
     e.preventDefault();
 
     let form = new FormData(formNewServer);
-     fetch(origin+"/app/newServer", {
-        method: "POST",
-        // Set the FormData instance as the request body
-        body: form,
-      })
-      .then((response) => response.json())
-      .then((e) =>{
-        console.log(e);
-        // TODO: refresh les serveurs si tout est bon
-      })
-      .catch((err) => console.log(err))
+    fetch(origin+"/app/newServer", {
+      method: "POST",
+      // Set the FormData instance as the request body
+      body: form,
+    })
+    .then((response) => response.json())
+    .then((e) =>{
+      console.log(e);
+      // TODO: refresh les serveurs si tout est bon
+    })
+    .catch((err) => console.log(err))
     
 })
 
@@ -307,6 +328,7 @@ function displayServer(id, channelId = -1){
 
 function updateServerDetails(serverId, serverNom){
   const conteneur = document.getElementById("serverDetails");
+  conteneur.replaceChildren();
 
   const serverName = document.createElement("span");
   serverName.classList.add("serverName");
@@ -315,7 +337,7 @@ function updateServerDetails(serverId, serverNom){
 
   const serverSettings = document.createElement("button");
   serverSettings.classList.add("actionButton", "editServer");
-  serverSettings.innerHTML = `<i class="fa-solid fa-gears" aria-hidden="true"></i>`
+  serverSettings.innerHTML = `<i class="fa-solid fa-ellipsis"></i>`
 
   conteneur.append(serverSettings);
 }
@@ -365,6 +387,20 @@ function displayMessages(messages){
       messageConteneur.append(newMessage);
     }
   })
+  scrollMessageConteneurToBottom();
+}
+
+function scrollMessageConteneurToBottom(){
+  let messageConteneur = document.getElementById("messages");
+  // les images (avatars, pièces jointes) se chargent après coup et agrandissent
+  // le conteneur : on re-scrolle quand chacune a fini de charger
+  messageConteneur.querySelectorAll("img").forEach((img) => {
+    if(!img.complete){
+      img.addEventListener("load", () => {
+        messageConteneur.scrollTop = messageConteneur.scrollHeight;
+      }, { once: true });
+    }
+  });
 }
 
 function renderMessage(message){
@@ -401,11 +437,21 @@ function renderMessage(message){
     const content = document.createElement("div");
     content.classList.add("contentBox");
 
+    
     const msg = document.createElement('pre');
+
     msg.classList.add("content");
     msg.textContent = message.content;
     msg.dataset.messageId = message.id;
     content.append(msg);
+    
+    if(message.attachment != "" && message.attachment != null){
+      const attachment = document.createElement("img");
+      attachment.classList.add("attachment");
+      attachment.src = `${origin}/uploads/attachments/${message.attachment}`;
+      // Todo: pouvoir mettre un alt a l'image lors de l'upload
+      msg.prepend(attachment);
+    }
 
     // action on message buttons
     addActionButtons(msg, message.id);
@@ -419,6 +465,14 @@ function renderMessage(message){
     msg.classList.add("content");
     msg.textContent = message.content;
     msg.dataset.messageId = message.id;
+
+    if(message.attachment != "" && message.attachment != null){
+      const attachment = document.createElement("img");
+      attachment.classList.add("attachment");
+      attachment.src = `${origin}/uploads/attachments/${message.attachment}`;
+      // Todo: pouvoir mettre un alt a l'image lors de l'upload
+      msg.prepend(attachment);
+    }
 
     addActionButtons(msg, message.id);
 
