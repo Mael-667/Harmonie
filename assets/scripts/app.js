@@ -29,7 +29,6 @@ ws.onclose = (e) => {
 
 ws.onmessage = (e) => {
   console.log(e.data);
-  //TODO: vérifier que l'utilisateur est bien dans le chan en question avant d'update 
   let message = JSON.parse(e.data);
   switch (message.type) {
     case "newMessage":
@@ -71,6 +70,36 @@ function getCookie(cname) {
 }
 
 
+// Todo afficher l'image en preview
+let attachmentInput = document.getElementById("attachment");
+attachmentInput.addEventListener("change", () => {
+  let attachment = attachmentInput.files[0];
+  let previousPreview = document.querySelector('.attachmentPreviewDiv');
+  
+  if(previousPreview != undefined){
+    previousPreview.remove();
+  }
+
+  if(attachment != undefined){
+    let attachmentUrl = URL.createObjectURL(attachment);
+    let attachmentPreviewDiv = document.createElement("div");
+    let form = document.getElementById("msgForm");
+    attachmentPreviewDiv.classList.add("attachmentPreviewDiv");
+
+    const attachmentPreview = document.createElement("img");
+    attachmentPreview.src = attachmentUrl;
+    attachmentPreview.classList.add("attachmentPreview");
+
+    attachmentPreviewDiv.prepend(attachmentPreview);                                                                                                         
+    document.getElementById('input').prepend(attachmentPreviewDiv);  
+  } else {
+    previousPreview.remove();
+  }
+
+})
+
+
+
 const form = document.getElementById("msgForm");
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -105,14 +134,14 @@ form.addEventListener("submit", async (e) => {
     "attachment": attachment
   }
 
-  // TODO: quand fichier, envoyer une premiere requete avec seulement le fichier a symfony
-  // symfony crée le message puis envoie un signal de retour 
-  // ensuite requete websocket qui va mettre a jour avec le contenu textuel
-  // récuperer le lien et broadcast le message
-
   ws.send(JSON.stringify(message));
   // TODO: Vérifier que la data a bien été reçue
   form.reset();
+  let previousPreview = document.querySelector('.attachmentPreviewDiv');
+  
+  if(previousPreview != undefined){
+    previousPreview.remove();
+  }
 })
 
 let oldContent;
@@ -169,7 +198,7 @@ function editMessage(id, button){
     const newMessage = editInput.value.trim();
     e.preventDefault();
     if(newMessage != ""){
-      // TODO: remove comm
+      // Pas de preshot optimiste
       // oldContent = newMessage;
       const message = {
         "type" : "messageEdit",
@@ -404,7 +433,6 @@ function scrollMessageConteneurToBottom(){
 }
 
 function renderMessage(message){
-  // TODO: Process l'attachment
   let messageConteneur = document.getElementById("messages");
   let lastMessage = messageConteneur.lastElementChild;
   if(lastMessage == null || lastMessage.dataset.userId != message.authorId){
@@ -449,7 +477,6 @@ function renderMessage(message){
       const attachment = document.createElement("img");
       attachment.classList.add("attachment");
       attachment.src = `${origin}/uploads/attachments/${message.attachment}`;
-      // Todo: pouvoir mettre un alt a l'image lors de l'upload
       msg.prepend(attachment);
     }
 
@@ -489,6 +516,7 @@ function rewriteMessage(msg){
 }
 
 function removeMessage(id){
+  // TODO: supprimer l'attachment aussi
   const contentDiv = document.querySelector(`[data-message-id="${id}"]`);
   if(contentDiv == undefined) return;
   const contentBox = contentDiv.parentElement;

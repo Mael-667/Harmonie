@@ -214,6 +214,8 @@ body {
     padding: 0.07rem 0;
     padding-left: 0.6rem;
     position: relative;
+    border-radius: 2px;
+
     &:hover{
         background-color: var(--background-hover);
     }
@@ -304,9 +306,15 @@ body {
 
 #input {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 4rem;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    border: 1px solid var(--main-outline);
+    background-color: var(--background-secondary);
+    width: 95%;
+    border-radius: 1rem;
+    margin: auto;
+    margin-bottom: 0.7rem;
 }
 
 #input button{
@@ -317,14 +325,13 @@ body {
 }
 
 #input>form {
-    width: 95%;
     height: 2.5rem;
-    border: 1px solid var(--main-outline);
-    border-radius: 1rem;
     display: flex;
     padding: 0.3rem;
     padding-right: 0.6rem;
-    background-color: var(--background-secondary);
+    align-items: center;
+    width: 100%;
+
     & i {
         font-size: 2rem;
         color: var(--secondary-color-hover);
@@ -366,11 +373,19 @@ body {
     display: none;
 }
 
-#attachementButton {
+#attachmentButton {
     cursor: pointer;
     align-self: center;
 }
 
+.attachmentPreview{
+    height: 10rem;
+    border-radius: 3px;
+}
+
+.attachmentPreviewDiv{
+    padding: 1rem;
+}
 
 #social {
     grid-column: 11 / 13;
