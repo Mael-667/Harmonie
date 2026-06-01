@@ -57,7 +57,7 @@ function getCookie(cname) {
   let name = cname + "=";
   let decodedCookie = decodeURIComponent(document.cookie);
   let ca = decodedCookie.split(';');
-  for(let i = 0; i <ca.length; i++) {
+  for(let i = 0; i < ca.length; i++) {
     let c = ca[i];
     while (c.charAt(0) == ' ') {
       c = c.substring(1);
@@ -70,7 +70,7 @@ function getCookie(cname) {
 }
 
 
-// Todo afficher l'image en preview
+// Todo bouton supprimer l'image en preview
 let attachmentInput = document.getElementById("attachment");
 attachmentInput.addEventListener("change", () => {
   let attachment = attachmentInput.files[0];
@@ -284,7 +284,11 @@ formNewServer.addEventListener("submit", (e) => {
     .then((response) => response.json())
     .then((e) =>{
       console.log(e);
-      // TODO: refresh les serveurs si tout est bon
+      // TODO: refresh le form apres
+      let lastPopup = openedPopups.pop();
+      lastPopup.style.display = "none";
+      if(openedPopups.length == 0) popupBg.style.display = "none";
+      getServers();
     })
     .catch((err) => console.log(err))
     
@@ -339,10 +343,10 @@ function displayServer(id, channelId = -1){
     .then((body) => body.json())
     .then((json) => {
       currentChannelId = json.currentChannel;
+      PermissionManager.updateRoles(json.roles);
       renderChannelsButtons(json.channels);
       displayMessages(json.messages);
       updateServerDetails(json.serverId, json.serverName);
-
 
       let prevServFocus = document.querySelector('.serverButtonActive');
       if(prevServFocus) prevServFocus.classList.remove('serverButtonActive');
@@ -471,6 +475,7 @@ function renderMessage(message){
     msg.classList.add("content");
     msg.textContent = message.content;
     msg.dataset.messageId = message.id;
+    msg.dataset.userId = message.authorId;
     content.append(msg);
     
     if(message.attachment != "" && message.attachment != null){
@@ -492,6 +497,7 @@ function renderMessage(message){
     msg.classList.add("content");
     msg.textContent = message.content;
     msg.dataset.messageId = message.id;
+    msg.dataset.userId = message.authorId;
 
     if(message.attachment != "" && message.attachment != null){
       const attachment = document.createElement("img");
@@ -516,7 +522,7 @@ function rewriteMessage(msg){
 }
 
 function removeMessage(id){
-  // TODO: supprimer l'attachment aussi
+  // supprime l'attachment aussi
   const contentDiv = document.querySelector(`[data-message-id="${id}"]`);
   if(contentDiv == undefined) return;
   const contentBox = contentDiv.parentElement;
@@ -531,27 +537,36 @@ function addActionButtons(msg, id){
   const actionButtons = document.createElement("div");
   actionButtons.classList.add("actionButtons");
   
-  // TODO: ajouter le bouton edit que si c'est le message de l'utilisateur
-  const editButton = document.createElement('button');
-  editButton.classList.add("actionButton");
-  editButton.setAttribute("aria-label", "Modifier le message");
-  editButton.innerHTML = `<i class="fa-solid fa-pen" aria-hidden="true"></i>`;
-  editButton.addEventListener("click", () =>{
-    editMessage(id, editButton);
-  })
-  actionButtons.append(editButton);
+  const authorId = msg.dataset.userId;
 
-  // TODO: ajouter le bouton delete que si c'est le message de l'utilisateur ou si il a la permission
-  const deleteButton = document.createElement('button');
-  deleteButton.classList.add("actionButton");
-  deleteButton.setAttribute("aria-label", "Supprimer le message");
-  deleteButton.innerHTML = `<i class="fa-solid fa-trash-can" aria-hidden="true"></i>`;
-  deleteButton.addEventListener("click", () =>{
-    deleteMessage(id);
-  })
-  actionButtons.append(deleteButton);
+  // ajoute le bouton edit que si c'est le message de l'utilisateur
+  if(authorId == userId){
+    const editButton = document.createElement('button');
+    editButton.classList.add("actionButton");
+    editButton.setAttribute("aria-label", "Modifier le message");
+    editButton.innerHTML = `<i class="fa-solid fa-pen" aria-hidden="true"></i>`;
+    editButton.addEventListener("click", () =>{
+      editMessage(id, editButton);
+    })
+    actionButtons.append(editButton);
+  }
 
-  msg.append(actionButtons);
+
+  // ajoute le bouton delete que si c'est le message de l'utilisateur ou si droits
+  if(authorId == userId || PermissionManager.hasServerRight(Permission.Delete)){
+    const deleteButton = document.createElement('button');
+    deleteButton.classList.add("actionButton");
+    deleteButton.setAttribute("aria-label", "Supprimer le message");
+    deleteButton.innerHTML = `<i class="fa-solid fa-trash-can" aria-hidden="true"></i>`;
+    deleteButton.addEventListener("click", () =>{
+      deleteMessage(id);
+    })
+    actionButtons.append(deleteButton);
+  }
+
+  if(actionButtons.childElementCount != 0){
+    msg.append(actionButtons);
+  }
 }
 
 
@@ -572,3 +587,27 @@ if(segments[0] == "app"){
   }
 }
 
+
+const Permission = {
+    Read: "read",
+    Write: "write",
+    Edit: "edit",
+    Delete: "delete",
+};
+
+class PermissionManager{
+  static updateRoles(roles){
+    this.roles = roles;
+  }
+
+  static hasServerRight(permission = Permission.Read){
+    for(let i = 0; i < this.roles.length; ++i){
+      if(this.roles[i].members.includes(userId) || this.roles[i].members.includes("*")){
+        if(this.roles[i].serverPermission.includes("*") || this.roles[i].serverPermission.includes(permission)){
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+}

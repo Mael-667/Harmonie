@@ -24,7 +24,7 @@ That's the whole setup. Composer install, database creation and migrations all r
 
 | Service | URL |
 |---|---|
-| App | http://localhost:8000 |
+| App | http://localhost:80 |
 | WebSocket | ws://localhost:443 |
 | phpMyAdmin | http://localhost:8080 |
 

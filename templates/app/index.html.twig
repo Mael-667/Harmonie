@@ -8,6 +8,12 @@
 {% block title %}Harmonie{% endblock %}
 
 {% block body %}
+
+<script type="text/javascript">
+    let userId = Number('{{ app.user.id }}');
+</script>
+
+
 {# TODO: ajouter des call to action dans la page de base  #}
 <div id="side_panel">
     <div id="serversDetails">

@@ -37,6 +37,7 @@ class RegistrationController extends AbstractController
             $plainPassword = $form->get('plainPassword')->getData();
 
             //génération de l'uuid
+            // Todo: remplacer par handle
             $uuid = Uuid::v4();
             $user->setUuid($uuid);
 

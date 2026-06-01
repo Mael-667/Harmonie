@@ -14,6 +14,7 @@ use App\Service\PermissionManager;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -157,7 +158,8 @@ final class WebsocketController extends AbstractController
     }
 
     #[Route('/websocket/deleteMessage', name: 'websocket_deleteMessage')]
-    public function deleteMessage(Request $request, PermissionManager $permissionManager, MessageRepository $msgRep, ServerRepository $servRep, EntityManagerInterface $emi){
+    public function deleteMessage(Request $request, PermissionManager $permissionManager, MessageRepository $msgRep, ServerRepository $servRep, EntityManagerInterface $emi,
+    #[Autowire('%kernel.project_dir%/public/uploads/attachments')] string $attachmentDir ){
         $secret = $_ENV["IPC_SECRET"];
         if($secret != $request->headers->get("X-IPC-Secret")){
             throw new HttpException(403, 'Accès refusé');
@@ -169,6 +171,11 @@ final class WebsocketController extends AbstractController
         $messageId = $decodedRequest->messageId;
 
         $msgInfo = $msgRep->getMessageInfo($messageId);
+
+        if ($msgInfo === null) {
+            return new JsonResponse(["status" => "not_found"], 404);
+        }
+
         $roles = $msgInfo["roles"];
         $msgUserId = $msgInfo["userId"];
         $msg = $msgInfo[0];
@@ -177,8 +184,19 @@ final class WebsocketController extends AbstractController
         // On vérifie si l'utilisateur a les droits de suppression ou si c'est son message
         if(!$hasRight && $userId != $msgUserId) throw $this->createAccessDeniedException();
 
+        $attachment = $msg->getAttachment();
+
         $emi->remove($msg);
         $emi->flush();
+
+        if($attachment){
+            $attachmentUrl = $attachmentDir."/".$attachment;
+            if(is_file($attachmentUrl)){
+                if (!unlink($attachmentUrl)) {
+                    // TODO: handle échec de la suppression (droits, fichier verrouillé…)
+                }
+            }
+        }
 
         $recipientIds = [];
         $serverUsers = $servRep->findOneBy(["id" => $msgInfo["serverId"]])->getUsers();

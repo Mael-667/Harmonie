@@ -95,13 +95,13 @@ final class AppController extends AbstractController
         if($permissionManager->canAccessChannel($channelsJSON[$channelIndex]["id"], $user->getId(), $server->getRoles())){
             $messages = $messageRepository->getLastMessages($channels[$channelIndex]);
         } else {
-            $message = ["error" => "access denied"];
+            $messages = ["error" => "access denied"];
         };
-
         
         return new Response(json_encode([
             "serverName" => $server->getName(),
             "serverId" => $server->getId(),
+            "roles" => $server->getRoles(),
             "channels" => $channelsJSON,
             "currentChannel" => $channelsJSON[$channelIndex]["id"],
             "messages" => $messages
@@ -176,12 +176,18 @@ final class AppController extends AbstractController
             $defaultChannel = new Channel();
             $defaultChannel->setType(ChannelTypeEnum::Textual);
             $defaultChannel->setName("Général");
-            $permissionManager->addAdminPermission($server, $admin->getId());
-            $permissionManager->addDefaultPermission($server, $defaultChannel->getId());
             $server->addChannel($defaultChannel);
 
+            // On persiste d'abord pour que le channel obtienne son id en base,
+            // sinon $defaultChannel->getId() vaut null.
             $entityManager->persist($server);
             $entityManager->persist($defaultChannel);
+            $entityManager->flush();
+
+            $permissionManager->addAdminPermission($server, $admin->getId());
+            $permissionManager->addDefaultPermission($server, $defaultChannel->getId());
+
+            // On sauvegarde les rôles mis à jour sur le serveur.
             $entityManager->flush();
 
             return new Response(json_encode(["message" => "ALL IS GOOD"]));
