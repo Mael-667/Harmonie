@@ -15,6 +15,7 @@
         {{ form_start(registrationForm, {'attr': {'enctype': 'multipart/form-data'}}) }}
             {{ form_row(registrationForm.pdp) }}
             {{ form_row(registrationForm.pseudo) }}
+            {{ form_row(registrationForm.handle) }}
             {{ form_row(registrationForm.email) }}
             {{ form_row(registrationForm.plainPassword, {
                 label: 'Mot de passe'

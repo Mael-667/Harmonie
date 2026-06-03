@@ -12,7 +12,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Uid\Uuid;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -35,11 +34,6 @@ class RegistrationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var string $plainPassword */
             $plainPassword = $form->get('plainPassword')->getData();
-
-            //génération de l'uuid
-            // Todo: remplacer par handle
-            $uuid = Uuid::v4();
-            $user->setUuid($uuid);
 
 
             $pdp = $form->get("pdp")->getData();
@@ -64,6 +58,7 @@ class RegistrationController extends AbstractController
 
             // définition des fields restants
             $user->setPseudo($form->get("pseudo")->getData());
+            $user->setHandle($form->get("handle")->getData());
             $user->setEmail($form->get("email")->getData());
             $user->setCreatedAt(new DateTimeImmutable('now'));
             $user->setToken(bin2hex(random_bytes(48)));
