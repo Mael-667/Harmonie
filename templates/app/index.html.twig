@@ -27,7 +27,12 @@
             </div>
         </div>
         <div id="serverInfo">
-            <div id="serverDetails"></div>
+            <div id="serverDetails">
+                <span class="serverName"></span>
+                <button class="actionButton editServer" id="editServer">
+                    <i class="fa-solid fa-ellipsis"></i>
+                </button>
+            </div>
             <div id="channels"></div>
         </div>
     </div>
@@ -117,6 +122,38 @@
                     <button type="submit" class="button crimsonButton">Créer</button>
                 </div>
             {{ form_end(newServerForm) }}
+        </div>
+    </div>
+
+    <div class="popup" id="popupServerSettings" style="display: none;">
+        <h2>Administration du serveur</h2>
+        <div id="settingsContent">
+            <nav id="serverSettingsNav">
+                <button class="navButton" id="properties">Propriétés du serveur</button>
+                <button class="navButton" id="users">Gestion d'utilisateurs</button>
+                <button class="navButton" id="roles">Gestion des rôles</button>
+            </nav>
+ 
+            <div id="settingsDetails">
+
+                <div id="propertiesContent">
+                    <form action="" class="singleLineForm" id="newInvitForm">
+                        <input type="hidden" name="token" value="{{ csrf_token('update-server') }}">
+                        <div class="field">
+                            <label for="newInvit">Identifiant de l'invitation pour votre serveur</label>
+                            <input type="text" name="newInvit" id="newInvit">
+                        </div>
+                        <button type="submit" class="button crimsonButton">Créer et copier le lien</button>
+                    </form>
+                </div>
+
+                <div id="usersContent" style="display: none;">
+
+                </div>
+                <div id="rolesContent" style="display: none;">
+
+                </div>
+            </div>
         </div>
     </div>
 </div>

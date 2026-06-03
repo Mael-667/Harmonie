@@ -5,10 +5,12 @@ namespace App\Controller;
 use App\Entity\Channel;
 use App\Entity\Message;
 use App\Entity\Server;
+use App\Entity\ServerInvitation;
 use App\Entity\User;
 use App\Enum\ChannelTypeEnum;
 use App\Form\ServerType;
 use App\Repository\MessageRepository;
+use App\Repository\ServerInvitationRepository;
 use App\Service\PermissionManager;
 use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -44,7 +46,9 @@ final class AppController extends AbstractController
     
             return $this->render('app/index.html.twig', [
                 "user" => $userProfile,
-                "newServerForm" => $newServerForm->createView()
+                "newServerForm" => $newServerForm->createView(),
+                // TODO: générer l'id aléatoirement
+                "newId" => "efi6hu"
             ]);
 
         } else {
@@ -223,5 +227,43 @@ final class AppController extends AbstractController
         } else {
             return new Response(json_encode(["error" => "Aucun fichier"]), 400);
         }
+    }
+
+
+    #[Route('/app/getInvitId', name: 'app_getInvitId', methods: ["GET"])]
+    public function getUniqueInvitId(ServerInvitationRepository $sir){
+        do{
+            $random = bin2hex(random_bytes(4));
+            $result = $sir->findOneBy(["identifiant" => $random]);
+        } while($result != null); 
+
+        return new Response(json_encode(["randomId" => $random]), 200);
+    }
+
+    #[Route('/app/newInvit', name: 'app_newInvit', methods: ["POST"])]
+    public function createNewInvit(ServerInvitationRepository $sir, Request $request, 
+        EntityManagerInterface $entityManager,
+    ){
+        $data = $request->getPayload();
+        if (!$this->isCsrfTokenValid('update-server', $data->get('token'))) return new Response('Token invalide', 403);
+
+
+        // TODO: bloquer ce chemin si l'utilisateur n'a pas le role créer invit
+        $identifiant = $data->get('newInvit');
+
+        if($sir->findOneBy(["identifiant" => $identifiant])) return new Response('Identifiant déjà utilisé', 400);
+
+        $invit = new ServerInvitation();
+        $invit->setIdentifiant($identifiant);
+        $invit->setServer($entityManager->getRepository(Server::class)->find($data->get('serverId')));
+
+        $ms = (int) $data->get('expirationDate');
+        $expirationDate = (new DateTime())->setTimestamp(intdiv($ms, 1000));
+        $invit->setExpirationDate($expirationDate);
+
+        $entityManager->persist($invit);
+        $entityManager->flush();
+
+        return new Response();
     }
 }

@@ -37,10 +37,17 @@ class Server
     #[ORM\OneToMany(targetEntity: Channel::class, mappedBy: 'server', orphanRemoval: true)]
     private Collection $channels;
 
+    /**
+     * @var Collection<int, ServerInvitation>
+     */
+    #[ORM\OneToMany(targetEntity: ServerInvitation::class, mappedBy: 'server', orphanRemoval: true)]
+    private Collection $invitations;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
         $this->channels = new ArrayCollection();
+        $this->invitations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -133,6 +140,36 @@ class Server
             // set the owning side to null (unless already changed)
             if ($channel->getServer() === $this) {
                 $channel->setServer(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ServerInvitation>
+     */
+    public function getInvitations(): Collection
+    {
+        return $this->invitations;
+    }
+
+    public function addInvitation(ServerInvitation $invitation): static
+    {
+        if (!$this->invitations->contains($invitation)) {
+            $this->invitations->add($invitation);
+            $invitation->setServer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInvitation(ServerInvitation $invitation): static
+    {
+        if ($this->invitations->removeElement($invitation)) {
+            // set the owning side to null (unless already changed)
+            if ($invitation->getServer() === $this) {
+                $invitation->setServer(null);
             }
         }
 

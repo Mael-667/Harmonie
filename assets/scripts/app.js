@@ -30,11 +30,16 @@ ws.onclose = (e) => {
 ws.onmessage = (e) => {
   console.log(e.data);
   let message = JSON.parse(e.data);
+  // TODO: CRSF TOKEN ICI AUSSI
   switch (message.type) {
     case "newMessage":
       message = message.payload;
       if(message.channel == currentChannelId){
-        renderMessage(message);
+        let newMessage = renderMessage(message);
+        if(newMessage){
+          let messageConteneur = document.getElementById("messages");
+          messageConteneur.append(newMessage);
+        }
         scrollMessageConteneurToBottom();
       }
       break;
@@ -239,28 +244,36 @@ function closeEdit(){
 
 
 // POPUP SECTION
-const popupBg = document.querySelector(".popupBackground");
-let openedPopups = [];
-document.getElementById("newServer").addEventListener("click", (e) =>{
-  popupBg.style.display = "flex";
-  let popup = document.getElementById("popupNewServer");
-  popup.style.display = "flex";
-  openedPopups.push(popup);
-})
+class PopupManager{
+  constructor(background){
+    this.popupBg = background;
+    this.openedPopups = [];
 
-popupBg.addEventListener("click", (e) =>{
-  e.stopPropagation();
-  let lastPopup = openedPopups.pop();
-  lastPopup.style.display = "none";
-  if(openedPopups.length == 0) popupBg.style.display = "none";
-})
+        
+    this.popupBg.addEventListener("click", (e) =>{
+      e.stopPropagation();
+      let lastPopup = this.openedPopups.pop();
+      lastPopup.style.display = "none";
+      if(this.openedPopups.length == 0) this.popupBg.style.display = "none";
+    })
+  }
 
+  add(buttonId, popupId){
+    document.getElementById(buttonId).addEventListener("click", (e) =>{
+      this.popupBg.style.display = "flex";
+      let popup = document.getElementById(popupId);
+      popup.addEventListener('click', (f) =>{
+        f.stopPropagation();
+      })
+      popup.style.display = "flex";
+      this.openedPopups.push(popup);
+    })
+  }
+}
 
-document.querySelectorAll(".popup").forEach((e) => {
-  e.addEventListener('click', (f) =>{
-    f.stopPropagation();
-  })
-})
+let popupManager = new PopupManager(document.querySelector(".popupBackground"))
+popupManager.add("newServer", "popupNewServer");
+popupManager.add("editServer", "popupServerSettings")
 
 
 // new server popup logic
@@ -294,6 +307,36 @@ formNewServer.addEventListener("submit", (e) => {
     
 })
 
+// edit server popup logic
+document.getElementById("editServer").addEventListener("click", (e) =>{
+  fetch(origin+"/app/getInvitId")
+    .then((response) => response.json())
+    .then((e) =>{
+      document.getElementById("newInvit").value = e.randomId;
+    });
+})
+
+let newInvitForm = document.getElementById("newInvitForm");
+newInvitForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  let form = new FormData(newInvitForm);
+  form.append("serverId", currentServerId);
+  form.append("expirationDate", (Date.now()) + 99999999999);
+
+  fetch(origin+"/app/newInvit", {
+    method: "POST",
+    body: form
+  })
+  .then((response) => response.json())
+  .then((e) => {
+
+  })
+  .catch({
+    // indiquer a l'utilisateur que l'id est deja pris
+  })
+
+})
 
 
 
@@ -360,19 +403,8 @@ function displayServer(id, channelId = -1){
 }
 
 function updateServerDetails(serverId, serverNom){
-  const conteneur = document.getElementById("serverDetails");
-  conteneur.replaceChildren();
-
-  const serverName = document.createElement("span");
-  serverName.classList.add("serverName");
+  const serverName = document.querySelector(".serverName");
   serverName.textContent = serverNom;
-  conteneur.append(serverName);
-
-  const serverSettings = document.createElement("button");
-  serverSettings.classList.add("actionButton", "editServer");
-  serverSettings.innerHTML = `<i class="fa-solid fa-ellipsis"></i>`
-
-  conteneur.append(serverSettings);
 }
 
 function renderChannelsButtons(channels){

@@ -483,3 +483,17 @@ form{
         margin: 0.3rem 0;
     }
 }
+
+#popupServerSettings{
+    min-width: 70%;
+}
+
+#settingsContent{
+    display: flex;
+}
+
+#serverSettingsNav{
+    display: flex;
+    flex-direction: column;
+    margin-right: 1rem;
+}
