@@ -8,4 +8,5 @@ enum PermissionEnum: string
     case Write = "write";
     case Edit  = "edit";
     case Delete = "delete";
+    case CreateInvit = "createInvit";
 }

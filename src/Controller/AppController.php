@@ -8,6 +8,7 @@ use App\Entity\Server;
 use App\Entity\ServerInvitation;
 use App\Entity\User;
 use App\Enum\ChannelTypeEnum;
+use App\Enum\PermissionEnum;
 use App\Form\ServerType;
 use App\Repository\MessageRepository;
 use App\Repository\ServerInvitationRepository;
@@ -243,12 +244,23 @@ final class AppController extends AbstractController
     #[Route('/app/newInvit', name: 'app_newInvit', methods: ["POST"])]
     public function createNewInvit(ServerInvitationRepository $sir, Request $request, 
         EntityManagerInterface $entityManager,
+        PermissionManager $permissionManager
     ){
         $data = $request->getPayload();
         if (!$this->isCsrfTokenValid('update-server', $data->get('token'))) return new Response('Token invalide', 403);
 
 
-        // TODO: bloquer ce chemin si l'utilisateur n'a pas le role créer invit
+        // bloque ce chemin si l'utilisateur n'a pas le role créer invit
+        $roles = $entityManager->getRepository(Server::class)->findOneBy(["id" => $data->get('serverId')])->getRoles();
+
+        // vérifie en meme temps si l'utilisateur a acces au serveur et si il a la permission de créer une invitation
+        /** @var User $user */
+        $user = $this->getUser();
+        if(!$permissionManager->hasServerRight($user->getId(), $roles, PermissionEnum::CreateInvit)){
+             throw $this->createAccessDeniedException();
+        };
+
+
         $identifiant = $data->get('newInvit');
 
         if($sir->findOneBy(["identifiant" => $identifiant])) return new Response('Identifiant déjà utilisé', 400);
@@ -264,6 +276,38 @@ final class AppController extends AbstractController
         $entityManager->persist($invit);
         $entityManager->flush();
 
-        return new Response();
+        return new Response(json_encode(["error" => "Aucun pas d'error"]));
+    }
+
+    #[Route('/app/getAllInvitations', name: 'app_getAllInvitations', methods: ["POST"])]
+    public function getAllInvitations(Request $request, EntityManagerInterface $entityManager, PermissionManager $permissionManager, ServerInvitationRepository $serverInvitationRepository){
+        $data = $request->getPayload();
+
+        // if (!$this->isCsrfTokenValid('get-all-invit', $data->get('token'))) return new Response('Token invalide', 403);
+
+        // bloque ce chemin si l'utilisateur n'a pas le role créer invit
+        $server = $entityManager->getRepository(Server::class)->findOneBy(["id" => $data->get('serverId')]);
+        $roles = $server->getRoles();
+
+        // vérifie en meme temps si l'utilisateur a acces au serveur et si il a la permission de créer une invitation
+        /** @var User $user */
+        $user = $this->getUser();
+        if(!$permissionManager->hasServerRight($user->getId(), $roles, PermissionEnum::CreateInvit)){
+             throw $this->createAccessDeniedException();
+        };
+
+        $invitations = $serverInvitationRepository->findBy(["server" => $server]);
+
+        $data = [];
+        foreach ($invitations as $invitation) {
+            $data[] = [
+                "id" => $invitation->getId(),
+                "identifiant" => $invitation->getIdentifiant(),
+                "expirationDate" => $invitation->getExpirationDate()?->getTimestamp() * 1000,
+            ];
+        }
+
+
+        return new Response(json_encode($data));
     }
 }
