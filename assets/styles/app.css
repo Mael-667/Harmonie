@@ -497,3 +497,27 @@ form{
     flex-direction: column;
     margin-right: 1rem;
 }
+
+#invitUrlConteneur{
+    background: var(--field-bg);
+    border: 1px solid var(--main-outline);
+    border-radius: 0.5rem;
+    height: 2.1rem;
+    padding-left: 0.5rem;
+    color: var(--secondary-color);
+}
+
+#newInvit{
+    padding: 0;
+    border: none;
+    background: #ffffff00;
+    outline: #ffffff00;
+    color: var(--text-color);
+    font-size: 1rem;
+}
+
+.settingsContent{
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}

@@ -60,6 +60,23 @@ h2::after{
     margin: 0 10%;
 }
 
+h3{
+    color: var(--secondary-color);
+    margin: 0.9rem 0;
+    font-size: 1.5rem;
+    width: fit-content;
+
+    &::after{
+        content: " ";
+        display: block;
+        height: 1px;
+        width: 96%;
+        background-color: var(--main-outline);
+        margin-top: 2px;
+        margin-left: 10%;
+    }
+}
+
 button{
     cursor: pointer;
 }

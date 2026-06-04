@@ -136,15 +136,21 @@
  
             <div id="settingsDetails">
 
-                <div id="propertiesContent">
-                    <form action="" class="singleLineForm" id="newInvitForm">
-                        <input type="hidden" name="token" value="{{ csrf_token('update-server') }}">
-                        <div class="field">
-                            <label for="newInvit">Identifiant de l'invitation pour votre serveur</label>
-                            <input type="text" name="newInvit" id="newInvit">
-                        </div>
-                        <button type="submit" class="button crimsonButton">Créer et copier le lien</button>
-                    </form>
+                <div id="propertiesContent" class="settingsContent">
+                    <div>
+                        <h3>Créer une invitation</h3>
+                        <form action="" class="singleLineForm" id="newInvitForm">
+                            <input type="hidden" name="token" value="{{ csrf_token('update-server') }}">
+                            <div class="field">
+                                <label for="newInvit">Modifiez l'url selon vos besoins</label>
+                                <span id="invitUrlConteneur"><span id="invitUrl"></span><input type="text" name="newInvit" id="newInvit"></span>
+                            </div>
+                            <button type="submit" class="button crimsonButton">Créer et copier le lien</button>
+                        </form>
+                    </div>
+                    <div>
+                        <h3>Liste des invitations</h3>
+                    </div>
                 </div>
 
                 <div id="usersContent" style="display: none;">

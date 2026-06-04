@@ -1,4 +1,4 @@
-const url = (window.location.origin).replace(window.location.protocol, "");
+const url = (window.location.origin).replace(window.location.protocol, "").replace("//", "");
 const origin = window.location.origin;
 
 
@@ -22,7 +22,7 @@ ws.onclose = (e) => {
       console.log("Connecté.");
       clearInterval(recoInterval);
     } else {
-        ws = new WebSocket(`ws:${url}:443`);
+        ws = new WebSocket(`ws://${url}:443`);
     }
   }, 2000)
 };
@@ -318,7 +318,9 @@ document.getElementById("editServer").addEventListener("click", (e) =>{
     })
     .then((response) => response.json())
     .then((e) =>{
+      document.getElementById("invitUrl").textContent = url+"/join/"
       document.getElementById("newInvit").value = e.randomId;
+      let invitations = e.invitations;
     });
 })
 
