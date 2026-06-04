@@ -231,14 +231,42 @@ final class AppController extends AbstractController
     }
 
 
-    #[Route('/app/getInvitId', name: 'app_getInvitId', methods: ["GET"])]
-    public function getUniqueInvitId(ServerInvitationRepository $sir){
+    #[Route('/app/setupInvit', name: 'app_setupInvit', methods: ["POST"])]
+    public function getUniqueInvitId(ServerInvitationRepository $sir,
+    Request $request, EntityManagerInterface $entityManager, PermissionManager $permissionManager, ServerInvitationRepository $serverInvitationRepository){
+        
+        $data = $request->getPayload();
+    
+        // bloque ce chemin si l'utilisateur n'a pas le role créer invit
+        $server = $entityManager->getRepository(Server::class)->findOneBy(["id" => $data->get('serverId')]);
+        $roles = $server->getRoles();
+
+        // vérifie en meme temps si l'utilisateur a acces au serveur et si il a la permission de créer une invitation
+        /** @var User $user */
+        $user = $this->getUser();
+        if(!$permissionManager->hasServerRight($user->getId(), $roles, PermissionEnum::CreateInvit)){
+             throw $this->createAccessDeniedException();
+        };
+
+        //génère un identifiant unique 
         do{
             $random = bin2hex(random_bytes(4));
             $result = $sir->findOneBy(["identifiant" => $random]);
         } while($result != null); 
 
-        return new Response(json_encode(["randomId" => $random]), 200);
+        //récupère les invitations existantes 
+        $invitations = $serverInvitationRepository->findBy(["server" => $server]);
+
+        $data = [];
+        foreach ($invitations as $invitation) {
+            $data[] = [
+                "id" => $invitation->getId(),
+                "identifiant" => $invitation->getIdentifiant(),
+                "expirationDate" => $invitation->getExpirationDate()?->getTimestamp() * 1000,
+            ];
+        }
+
+        return new Response(json_encode(["randomId" => $random, "invitations" => $data]), 200);
     }
 
     #[Route('/app/newInvit', name: 'app_newInvit', methods: ["POST"])]
@@ -277,37 +305,5 @@ final class AppController extends AbstractController
         $entityManager->flush();
 
         return new Response(json_encode(["error" => "Aucun pas d'error"]));
-    }
-
-    #[Route('/app/getAllInvitations', name: 'app_getAllInvitations', methods: ["POST"])]
-    public function getAllInvitations(Request $request, EntityManagerInterface $entityManager, PermissionManager $permissionManager, ServerInvitationRepository $serverInvitationRepository){
-        $data = $request->getPayload();
-
-        // if (!$this->isCsrfTokenValid('get-all-invit', $data->get('token'))) return new Response('Token invalide', 403);
-
-        // bloque ce chemin si l'utilisateur n'a pas le role créer invit
-        $server = $entityManager->getRepository(Server::class)->findOneBy(["id" => $data->get('serverId')]);
-        $roles = $server->getRoles();
-
-        // vérifie en meme temps si l'utilisateur a acces au serveur et si il a la permission de créer une invitation
-        /** @var User $user */
-        $user = $this->getUser();
-        if(!$permissionManager->hasServerRight($user->getId(), $roles, PermissionEnum::CreateInvit)){
-             throw $this->createAccessDeniedException();
-        };
-
-        $invitations = $serverInvitationRepository->findBy(["server" => $server]);
-
-        $data = [];
-        foreach ($invitations as $invitation) {
-            $data[] = [
-                "id" => $invitation->getId(),
-                "identifiant" => $invitation->getIdentifiant(),
-                "expirationDate" => $invitation->getExpirationDate()?->getTimestamp() * 1000,
-            ];
-        }
-
-
-        return new Response(json_encode($data));
     }
 }

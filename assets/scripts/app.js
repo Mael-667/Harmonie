@@ -309,7 +309,13 @@ formNewServer.addEventListener("submit", (e) => {
 
 // edit server popup logic
 document.getElementById("editServer").addEventListener("click", (e) =>{
-  fetch(origin+"/app/getInvitId")
+  let form = new FormData();
+  form.append("serverId", currentServerId);
+
+  fetch(origin+"/app/setupInvit", {
+      method: "POST",
+      body: form,
+    })
     .then((response) => response.json())
     .then((e) =>{
       document.getElementById("newInvit").value = e.randomId;
