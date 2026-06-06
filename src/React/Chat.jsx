@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import useWebsocket from "./hooks/useWebsocket";
 import MessageInput from "./MessageInput";
 import { UserContext } from "./modules/UserContext";
@@ -9,13 +9,14 @@ export default function Chat({ channelId, messages, setMessages }) {
   const url = (window.location.origin).replace(window.location.protocol, "").replace("//", "");
   const user = useContext(UserContext);
   const messageConteneurRef = useRef(null);
+  const [lastMessage, setLastMessage] = useState(null)
 
   const ws = useWebsocket({
     url: url,
     onReceiveMessage: (message) => {
       if (message.channel == channelId) {
         setMessages([...messages, message])
-        scrollMessageConteneurToBottom(messageConteneurRef.current);
+        setLastMessage(message);
       }
     },
     onEditMessage: (message) => {
@@ -28,17 +29,23 @@ export default function Chat({ channelId, messages, setMessages }) {
     }
   });
 
-  function scrollMessageConteneurToBottom(messageConteneur){
-    // les images (avatars, pièces jointes) se chargent après coup et agrandissent
-    // le conteneur : on re-scrolle quand chacune a fini de charger
-    messageConteneur.querySelectorAll("img").forEach((img) => {
-      if(!img.complete){
-        img.addEventListener("load", () => {
-          messageConteneur.scrollTop = messageConteneur.scrollHeight;
-        }, { once: true });
+  function scrollToBottom(conteneur) {
+    if (!conteneur) return;
+    conteneur.scrollTop = conteneur.scrollHeight;          // immédiat : texte + images en cache
+    conteneur.querySelectorAll("img").forEach((img) => {   // re-scroll quand une image agrandit le conteneur
+      if (!img.complete) {
+        img.addEventListener("load", () => { conteneur.scrollTop = conteneur.scrollHeight; }, { once: true });
       }
     });
   }
+  useEffect(() => {
+    scrollToBottom(messageConteneurRef.current);
+  }, [])
+
+  useEffect(() => {
+    scrollToBottom(messageConteneurRef.current);
+  }, [lastMessage, channelId])
+  
 
   function rewriteMessage(message) {
     const editedMessages = messages.map(msg => {

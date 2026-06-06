@@ -22,11 +22,12 @@ export default function App() {
   const [user, setUser] = useState(null);
 
 
-  // TODO: token crsf a refaire
+  // todo: update serverid et channelid quand on clique sur retour
+
   useEffect(() => {
     // TODO: pouvoir customiser l'ordre des serveurs
     if (!serverId) return;
-    // TODO: Mettre la version react
+    
     window.history.pushState("", "", origin + "/app/" + serverId + "/" + (channelId ?? ""));
     fetch(origin + "/app/" + serverId + "/" + (channelId ?? ""), {
       headers: { "Accept": "application/json" }
