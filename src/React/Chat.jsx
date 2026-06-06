@@ -3,7 +3,7 @@ import useWebsocket from "./hooks/useWebsocket";
 import MessageInput from "./MessageInput";
 import { UserContext } from "./modules/UserContext";
 import { usePermission } from "./hooks/usePermission";
-import FormPost from "./modules/FormPost";
+import { FormPost } from "./modules/FormComponents";
 
 export default function Chat({ channelId, initialMessages }) {
   const url = (window.location.origin).replace(window.location.protocol, "").replace("//", "");

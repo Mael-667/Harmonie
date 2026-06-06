@@ -32,7 +32,7 @@ class Channel
     /**
      * @var Collection<int, Message>
      */
-    #[ORM\OneToMany(targetEntity: Message::class, mappedBy: 'channel')]
+    #[ORM\OneToMany(targetEntity: Message::class, mappedBy: 'channel', orphanRemoval: true)]
     private Collection $messages;
 
     public function __construct()

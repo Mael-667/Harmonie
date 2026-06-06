@@ -1,5 +1,5 @@
 import { useState } from "react";
-import FormPost from "./modules/FormPost";
+import { FormPost } from "./modules/FormComponents";
 
 export default function MessageInput({ ws, channelId }) {
   async function sendMessage(formData) {

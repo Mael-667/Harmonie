@@ -259,7 +259,7 @@ body {
     padding: 0.2rem 0.15rem;
 }
 
-.contentBox:hover .actionButtons {
+.message:hover .actionButtons {
     display: block;
 }
 
@@ -435,7 +435,7 @@ body {
     }
 }
 
-#serverIconLabel{
+.dynamicImageInput{
     display: flex;
     height: 6.5rem;
     width: 6.5rem;
@@ -452,15 +452,24 @@ body {
     color: var(--secondary-color);
     cursor: pointer;
     background-position: center !important;
-
-    &::after{
-        content: "L'icone de votre serveur ici";
-        text-align: center;
-    }
+    position: relative;
 }
 
-#server_icon{
+.imgInputPlaceholder{
+    text-align: center;
+    padding: 0.4rem;
+}
+
+.imageInput{
     display: none;
+}
+
+.imgInputIcon{
+    position: absolute;
+    bottom: 0.1rem;
+    right: 0;
+    font-size: 2rem;
+    filter: drop-shadow(0 0 5px #000000);
 }
 
 form{
@@ -480,6 +489,7 @@ form{
         height: 2.1rem;
         color: white;
         padding-left: 0.5rem;
+        font-size: 1rem;
     }
 }
 
@@ -497,7 +507,7 @@ form{
 }
 
 #popupServerSettings{
-    min-width: 70%;
+    /* min-width: 70%; */
 }
 
 #settingsContent{
@@ -507,7 +517,7 @@ form{
 #serverSettingsNav{
     display: flex;
     flex-direction: column;
-    margin-right: 1rem;
+    margin-right: 2rem;
 }
 
 #invitUrlConteneur{
@@ -536,15 +546,16 @@ form{
 
 .listConteneur{
     background: var(--background-secondary);
-    border: 1px solid var(--main-color);
+    border: 1px solid var(--main-outline);
     border-radius: 0.6rem;
     display: flex;
+    justify-content: space-evenly;
 }
 
 .activeInvitation{
     margin: 0.5rem;
     padding: 0.4rem;
-    border: 1px solid var(--main-outline);
+    border: 1px solid var(--main-color);
     border-radius: 0.3rem;
     background-color: var(--field-bg);
     cursor: pointer;
@@ -559,9 +570,39 @@ form{
 }
 
 .smallText{
-    font-size: 0.7rem;
+    font-size: 0.8rem;
 }
 
 .secondaryColor{
     color: var(--secondary-color);
+}
+
+.servInfoForm{
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.servInfoEdit{
+    display: flex;
+    align-items: flex-end;
+    gap: 2rem;
+}
+
+.navButton{
+    background: none;
+    border: none;
+    color: var(--main-color);
+    font-size: 1.5rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--main-outline);
+    transition: 150ms;
+
+    &:hover{
+        background-color: var(--background-secondary)
+    }
+}
+
+.navButtonActive{
+    text-decoration: underline;
 }

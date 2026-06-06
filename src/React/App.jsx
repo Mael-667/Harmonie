@@ -49,7 +49,7 @@ export default function App() {
         }
         setRoles(json.roles);
         setChannels(json.channels);
-        setServer({ serverName: json.serverName, serverId: json.serverId })
+        setServer({ serverName: json.serverName, serverId: json.serverId, serverIcon: json.serverIcon })
         setInitialMessages(json.messages)
         console.log(json);
       })

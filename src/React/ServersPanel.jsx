@@ -2,8 +2,8 @@ import { useContext, useEffect, useState } from "react";
 import { UserContext } from "./modules/UserContext";
 import Modal from "./modules/Modal";
 import ServerSettings from './ServerSettings';
-import FormPost from "./modules/FormPost";
 import { copy } from "./modules/Utils";
+import { DynamicImageInput, FormPost } from "./modules/FormComponents";
 
 export default function ServersPanel({ channels, channelId, server, serverId, setServerId, setChannelId }) {
 
@@ -72,7 +72,7 @@ export default function ServersPanel({ channels, channelId, server, serverId, se
           <button className="actionButton editServer" id="editServer" onClick={() => setSettingsOpened(true)}>
             <i className="fa-solid fa-ellipsis"></i>
           </button>
-          {settingsOpened && <ServerSettings setSettingsOpened={setSettingsOpened} serverId={serverId}/>}
+          {settingsOpened && <ServerSettings setSettingsOpened={setSettingsOpened} server={server}/>}
         </div>
         <div id="channels">
           {channels?.map(channelsButtons)}
@@ -96,13 +96,7 @@ export default function ServersPanel({ channels, channelId, server, serverId, se
   </div>
 }
 
-function NewServerPopup({ setOpened, onCreated, setServerId, getServers }) {
-  const [preview, setPreview] = useState(null);
-
-  function updatePreview(e) {
-    setPreview(URL.createObjectURL(e.target.files[0]));
-  }
-
+function NewServerPopup({ setOpened, onCreated, setServerId, getServers}) {
   function createServer(form) {
     fetch(origin + "/app/newServer", {
       method: "POST",
@@ -155,9 +149,7 @@ function NewServerPopup({ setOpened, onCreated, setServerId, getServers }) {
       <h2>Ou créez en un !</h2>
       <FormPost name="server" method="post" encType="multipart/form-data"
         onSubmit={(e) => { e.preventDefault(); createServer(new FormData(e.currentTarget)); }}>
-        <label htmlFor="server_icon" id="serverIconLabel" style={preview ? { backgroundImage: `url(${preview})`, color: "#ffffff00" } : undefined}>
-          <input type="file" id="server_icon" name="server[icon]" onChange={updatePreview} />
-        </label>
+        <DynamicImageInput name={"server[icon]"} id={"server_icon"} placeholder={"L'image de votre serveur ici"}/>
         <div className="singleLineForm">
           <div className="field">
             <label htmlFor="server_name">Nom du serveur</label>

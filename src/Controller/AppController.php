@@ -108,6 +108,7 @@ final class AppController extends AbstractController
         return new Response(json_encode([
             "serverName" => $server->getName(),
             "serverId" => $server->getId(),
+            "serverIcon" => $server->getIcon(),
             "roles" => $server->getRoles(),
             "channels" => $channelsJSON,
             "currentChannel" => $channelsJSON[$channelIndex]["id"],
@@ -345,4 +346,105 @@ final class AppController extends AbstractController
 
         return new JsonResponse(["serverId" => $server->getId()], 200);
     }
+
+
+
+    #[Route('/app/editServer', name: 'app_editServer', methods: ["POST"])]
+    public function editServer(
+        Request $request,
+        SluggerInterface $slugger,
+        EntityManagerInterface $entityManager,
+        PermissionManager $permissionManager,
+        #[Autowire('%kernel.project_dir%/public/uploads/serverIcon')] string $serverIcon
+    ){
+        if (!$this->isCsrfTokenValid(self::CRSF_ID, $request->getPayload()->get('token'))) {
+            return new Response('Token invalide', 403);
+        }
+
+        $data = $request->getPayload();
+
+        $server = $entityManager->getRepository(Server::class)->findOneBy(["id" => $data->get('serverId')]);
+        $roles = $server->getRoles();
+
+        /** @var User $user */
+        $user = $this->getUser();
+        if(!$permissionManager->hasServerRight($user->getId(), $roles, PermissionEnum::EditServer)){
+             throw $this->createAccessDeniedException();
+        };
+
+        // retrieves an instance of UploadedFile identified by "attachment"
+        $file = $request->files->get('serverIcon');
+
+        if ($file) {
+
+            // si l'utilisateur envoie une nouvelle icone, on doit supprimer l'ancienne
+            $serverIconUrl = $serverIcon."/".$server->getIcon();
+            if(is_file($serverIconUrl)){
+                if (!unlink($serverIconUrl)) {
+                    // TODO: handle échec de la suppression (droits, fichier verrouillé…)
+                }
+            }
+
+            $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+
+            $safeFilename = $slugger->slug($originalFilename);
+            $newFilename = $safeFilename . '-' . uniqid() . '.' . $file->guessExtension();
+            try {
+                $file->move($serverIcon, $newFilename);
+            } catch (FileException $e) {
+                // ... handle exception if something happens during file upload
+            }
+
+            $server->setIcon($newFilename);
+        }
+
+        $newName = $data->get("editName");
+
+        if($newName){
+            $server->setName($newName);
+        }
+
+        $entityManager->flush();
+
+        return new JsonResponse(["error" => "prank"], 200);
+    }
+
+
+    #[Route('/app/deleteServer', name: 'app_deleteServer', methods: ["POST"])]
+    public function deleteServer(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        PermissionManager $permissionManager,
+        #[Autowire('%kernel.project_dir%/public/uploads/serverIcon')] string $serverIcon
+    ){
+        if (!$this->isCsrfTokenValid(self::CRSF_ID, $request->getPayload()->get('token'))) {
+            return new Response('Token invalide', 403);
+        }
+
+        $data = $request->getPayload();
+
+        $server = $entityManager->getRepository(Server::class)->findOneBy(["id" => $data->get('serverId')]);
+        $roles = $server->getRoles();
+
+        /** @var User $user */
+        $user = $this->getUser();
+        if(!$permissionManager->hasServerRight($user->getId(), $roles, PermissionEnum::EditServer)){
+             throw $this->createAccessDeniedException();
+        };
+
+        $serverIconUrl = $serverIcon."/".$server->getIcon();
+        if(is_file($serverIconUrl)){
+            if (!unlink($serverIconUrl)) {
+                // TODO: handle échec de la suppression (droits, fichier verrouillé…)
+            }
+        }
+
+        //  todo: Les fichiers de pièces jointes (uploads/attachments/…) des messages supprimés restent sur le disque — tu supprimes bien l'icône du serveur, mais pas les attachments. Fuite de fichiers à terme.
+
+        $entityManager->remove($server);
+        $entityManager->flush();
+
+        return new JsonResponse(["error" => "prank"], 200);
+    }
+
 }
