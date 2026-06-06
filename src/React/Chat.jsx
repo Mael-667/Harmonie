@@ -118,19 +118,20 @@ function Message({ user, message, firstOfAuthor, handleEdit, onDelete }) {
 
   return (
     <div className="message" data-user-id={message.authorId}>
-      {firstOfAuthor && <div className="pfpBox" data-user-id={message.authorId}>
-        <img
+      <div className="msgSideContent" data-user-id={message.authorId}>
+        {firstOfAuthor && <img
           src={`${origin}/uploads/pdp/${message.authorAvatar}`}
           alt={`Avatar de ${message.authorPseudo}`}
-        />
-      </div>}
+          className="pfpBox"
+        />}
+      </div>
 
       <div className="messageContent">
-        {firstOfAuthor && <> <span className="pseudo" data-user-id={message.authorId}>
+        {firstOfAuthor && <div className="messageInfo"> <span className="pseudo" data-user-id={message.authorId}>
           {message.authorPseudo}
         </span>{" "}
           <span className="messageDate">{dateString}</span>
-        </>}
+        </div>}
 
         <div className="contentBox">
           <pre className="content">
