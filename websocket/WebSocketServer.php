@@ -134,6 +134,7 @@ class WebSocketServer
             $payloadLen += ord($buffer[9]);
         }
 
+        $maskingKey = [];
         $maskingKeyLength = 4;
         for ($i = $index; $i < $index + $maskingKeyLength; $i++) {
             $maskingKey[] = $buffer[$i];
@@ -141,6 +142,10 @@ class WebSocketServer
 
         $index += 4;
 
+        // Initialisé ici pour gérer les frames à payload vide (ex: close frame 0x88 0x80,
+        // ping/pong sans données) : sinon la boucle ne tourne pas, $decodedPayload reste
+        // indéfini et implode() reçoit null → TypeError fatal.
+        $decodedPayload = [];
         for ($i = 0; $i < $payloadLen; $i++) {
             $decodedPayload[] = $buffer[$i + $index] ^ $maskingKey[($i) % 4];
         }
