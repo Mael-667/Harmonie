@@ -34,6 +34,8 @@ use Symfony\Component\Asset\VersionStrategy\EmptyVersionStrategy;
 #[IsGranted("ROLE_USER")]
 final class AppController extends AbstractController
 {
+    private const string CRSF_ID = "app";
+
     #[Route('/app', name: 'app')]
     public function index(): Response
     {
@@ -52,7 +54,7 @@ final class AppController extends AbstractController
                 "id" => $user->getId(),
                 // Token CSRF unique réutilisé par React sur toutes les requêtes mutantes.
                 // id 'app' = statefull (hors stateless_token_ids), validé via isCsrfTokenValid('app', ...).
-                "csrfToken" => $csrfTokenManager->getToken('app')->getValue()
+                "csrfToken" => $csrfTokenManager->getToken(self::CRSF_ID)->getValue()
             ];
         return new JsonResponse($userProfile);
     }
@@ -146,7 +148,7 @@ final class AppController extends AbstractController
         PermissionManager $permissionManager,
         #[Autowire('%kernel.project_dir%/public/uploads/serverIcon')] string $serverIcon
     ){
-        if (!$this->isCsrfTokenValid('app', $request->getPayload()->get('token'))) {
+        if (!$this->isCsrfTokenValid(self::CRSF_ID, $request->getPayload()->get('token'))) {
             return new Response('Token invalide', 403);
         }
 
@@ -213,6 +215,9 @@ final class AppController extends AbstractController
         PermissionManager $permissionManager,
         #[Autowire('%kernel.project_dir%/public/uploads/attachments')] string $attachmentDir
     ){
+        if (!$this->isCsrfTokenValid(self::CRSF_ID, $request->getPayload()->get('token'))) {
+            return new Response('Token invalide', 403);
+        }
         // retrieves an instance of UploadedFile identified by "attachment"
         $file = $request->files->get('attachment');
 
@@ -278,7 +283,7 @@ final class AppController extends AbstractController
         PermissionManager $permissionManager
     ){
         $data = $request->getPayload();
-        if (!$this->isCsrfTokenValid('app', $data->get('token'))) return new Response('Token invalide', 403);
+        if (!$this->isCsrfTokenValid(self::CRSF_ID, $data->get('token'))) return new Response('Token invalide', 403);
 
 
         // bloque ce chemin si l'utilisateur n'a pas le role créer invit
