@@ -62,7 +62,7 @@ export default function ServersPanel({ channels, channelId, server, serverId, se
           <button className="transparentButton" aria-label="Create New Server" onClick={() => setOpened(true)}>
             <i className="fa-solid fa-plus" aria-hidden="true"></i>
           </button>
-          {opened && <NewServerPopup setOpened={setOpened} onCreated={getServers} />}
+          {opened && <NewServerPopup setOpened={setOpened} onCreated={getServers} setServerId={setServerId} getServers={getServers} />}
         </div>
       </div>
       <div id="serverInfo">
@@ -95,7 +95,7 @@ export default function ServersPanel({ channels, channelId, server, serverId, se
   </div>
 }
 
-function NewServerPopup({ setOpened, onCreated }) {
+function NewServerPopup({ setOpened, onCreated, setServerId, getServers }) {
   const [preview, setPreview] = useState(null);
 
   function updatePreview(e) {
@@ -119,11 +119,30 @@ function NewServerPopup({ setOpened, onCreated }) {
 
   }
 
+  function joinServer(e){
+    e.preventDefault();
+    let formData = new FormData(e.currentTarget);
+
+    fetch(origin + "/app/joinServer", {
+      method: "POST",
+      // Set the FormData instance as the request body
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((e) => {
+        console.log(e);
+        setOpened(false);
+        setServerId(e.serverId)
+        getServers();
+      })
+      .catch((err) => console.log(err))
+  }
+
 
   return <Modal id="popupNewServer" onClose={() => setOpened(false)}>
     <div id="addServer">
       <h2>Ajouter un nouveau serveur</h2>
-      <FormPost method="post" className="singleLineForm">
+      <FormPost method="post" className="singleLineForm" onSubmit={(e) => joinServer(e)}>
         <div className="field">
           <label htmlFor="serverLink">Lien du serveur</label>
           <input type="text" name="serverLink" id="serverLink" placeholder="harmonie.gg/1" />

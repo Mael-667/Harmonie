@@ -265,6 +265,7 @@ final class AppController extends AbstractController
         //récupère les invitations existantes 
         $invitations = $serverInvitationRepository->findBy(["server" => $server]);
 
+        // Todo: supprimer les invit expirées
         $data = [];
         foreach ($invitations as $invitation) {
             $data[] = [
@@ -313,5 +314,35 @@ final class AppController extends AbstractController
         $entityManager->flush();
 
         return new Response(json_encode(["error" => "Aucun pas d'error"]));
+    }
+
+    #[Route('/app/joinServer', name: 'app_joinServer', methods: ["POST"])]
+    public function joinServer(ServerInvitationRepository $sir, Request $request, 
+        EntityManagerInterface $entityManager,
+        PermissionManager $permissionManager
+    ){
+        $data = $request->getPayload();
+        if (!$this->isCsrfTokenValid(self::CRSF_ID, $data->get('token'))) return new Response('Token invalide', 403);
+        
+        $link = trim($data->get("serverLink"));
+
+        // l'identifiant est la portion entre "/join/" et le "/" suivant (ou la fin de la chaîne)
+        if (!preg_match('#/join/([^/]+)#', $link, $matches)) {
+            return new Response(json_encode(["error" => "Lien d'invitation invalide"]), 400);
+        }
+        $identifiant = $matches[1];
+
+        $invitation = $sir->findOneBy(["identifiant" => $identifiant]);
+        if(!$invitation) return new Response('Invitation invalide', 403);
+
+        $server = $invitation->getServer();
+
+        /** @var User $user */
+        $user = $this->getUser();
+        $user->addServer($server);
+
+        $entityManager->flush();
+
+        return new JsonResponse(["serverId" => $server->getId()], 200);
     }
 }
