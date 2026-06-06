@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ServersPanel from "./ServersPanel";
 import Chat from "./Chat";
 import { UserContext } from "./modules/UserContext";
@@ -24,17 +24,29 @@ export default function App() {
 
   // todo: update serverid et channelid quand on clique sur retour
 
+  const skipRefetch = useRef(false);
+
   useEffect(() => {
     // TODO: pouvoir customiser l'ordre des serveurs
     if (!serverId) return;
     
     window.history.pushState("", "", origin + "/app/" + serverId + "/" + (channelId ?? ""));
+
+    // return apres le setchannelid de l'effet qui l'a fait rerun
+    if (skipRefetch.current) {
+      skipRefetch.current = false;
+      return;
+    }
+
     fetch(origin + "/app/" + serverId + "/" + (channelId ?? ""), {
       headers: { "Accept": "application/json" }
     })
       .then((body) => body.json())
       .then((json) => {
-        if (channelId != json.currentChannel) setChannelId(json.currentChannel);
+        if (channelId != json.currentChannel) {
+          skipRefetch.current = true;   // ce setChannelId ne doit PAS relancer un fetch, donc on met un flag qui va trigger un return apres le 2eme effet
+          setChannelId(json.currentChannel);
+        }
         setRoles(json.roles);
         setChannels(json.channels);
         setServer({ serverName: json.serverName, serverId: json.serverId })
