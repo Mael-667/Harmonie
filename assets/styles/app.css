@@ -204,7 +204,7 @@ body {
 
 .messageDate{
     font-size: 0.7rem;
-    font-weight: 300;
+    /* font-weight: 300; */
     font-family: 'Roboto';
     color: var(--main-color);
 }
@@ -527,4 +527,36 @@ form{
     display: flex;
     flex-direction: column;
     gap: 2rem;
+}
+
+.listConteneur{
+    background: var(--background-secondary);
+    border: 1px solid var(--main-color);
+    border-radius: 0.6rem;
+    display: flex;
+}
+
+.activeInvitation{
+    margin: 0.5rem;
+    padding: 0.4rem;
+    border: 1px solid var(--main-outline);
+    border-radius: 0.3rem;
+    background-color: var(--field-bg);
+    cursor: pointer;
+    transition: 150ms;
+    & p{
+        margin: 0.3rem 0;
+    }
+
+    &:hover{
+        background-color: var(--background-hover);
+    }
+}
+
+.smallText{
+    font-size: 0.7rem;
+}
+
+.secondaryColor{
+    color: var(--secondary-color);
 }
