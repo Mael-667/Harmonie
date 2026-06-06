@@ -25,3 +25,7 @@
 
 /.claude/
 /CLAUDE.md
+
+# node.js
+/node_modules/
+/public/build/

@@ -1,0 +1,196 @@
+import { useContext, useRef, useState } from "react";
+import useWebsocket from "./hooks/useWebsocket";
+import MessageInput from "./MessageInput";
+import { UserContext } from "./modules/UserContext";
+import { usePermission } from "./hooks/usePermission";
+import FormPost from "./modules/FormPost";
+
+export default function Chat({ channelId, messages, setMessages }) {
+  const url = (window.location.origin).replace(window.location.protocol, "").replace("//", "");
+  const user = useContext(UserContext);
+  const messageConteneurRef = useRef(null);
+
+  const ws = useWebsocket({
+    url: url,
+    onReceiveMessage: (message) => {
+      if (message.channel == channelId) {
+        setMessages([...messages, message])
+        scrollMessageConteneurToBottom(messageConteneurRef.current);
+      }
+    },
+    onEditMessage: (message) => {
+      if (message.channel == channelId) {
+        setMessages(() => rewriteMessage(message));
+      }
+    },
+    onDeleteMessage: (message) => {
+      setMessages(messages.filter(msg => msg.id != message.id))
+    }
+  });
+
+  function scrollMessageConteneurToBottom(messageConteneur){
+    // les images (avatars, pièces jointes) se chargent après coup et agrandissent
+    // le conteneur : on re-scrolle quand chacune a fini de charger
+    messageConteneur.querySelectorAll("img").forEach((img) => {
+      if(!img.complete){
+        img.addEventListener("load", () => {
+          messageConteneur.scrollTop = messageConteneur.scrollHeight;
+        }, { once: true });
+      }
+    });
+  }
+
+  function rewriteMessage(message) {
+    const editedMessages = messages.map(msg => {
+      if (msg.id == message.id) {
+        return {
+          ...msg,
+          ...message
+        }
+      } else {
+        return msg;
+      }
+    })
+
+    return editedMessages;
+  }
+
+
+  function handleEdit(formData, messageId) {
+    const newMessage = formData.get("editedMessage").trim();
+    if (newMessage != "") {
+      // Pas de preshot optimiste
+      // oldContent = newMessage;
+      const message = {
+        "type": "messageEdit",
+        "channel": channelId,
+        "messageId": messageId,
+        "content": newMessage,
+        "attachment": ""
+      }
+      ws.send(JSON.stringify(message));
+    }
+  }
+
+  function deleteMessage(messageId) {
+    const message = {
+      "type": "messageDelete",
+      "messageId": messageId
+    }
+    ws.send(JSON.stringify(message));
+  }
+
+
+  return <div id="main">
+    <div id="header">
+      <h3 id="channel-name"></h3>
+    </div>
+
+    <div id="messages" ref={messageConteneurRef}>
+      {/* TODO: utiliser useMemo pour sauvegarder les messages render*/}
+      {messages?.map((msg, i) => (
+        <Message
+          key={msg.id}
+          message={msg}
+          firstOfAuthor={i === 0 || messages[i - 1].authorId !== msg.authorId}
+          handleEdit={handleEdit}
+          onDelete={deleteMessage}
+          user={user}
+        />
+      ))}
+    </div>
+
+
+    <MessageInput ws={ws} channelId={channelId} />
+  </div>
+}
+
+function Message({ user, message, firstOfAuthor, handleEdit, onDelete }) {
+  const origin = window.location.origin;
+  const dateString = new Date(message.timestamp.date).toLocaleTimeString();
+  const hasAttachment = message.attachment !== "" && message.attachment != null;
+  const isOwn = message.authorId == user?.id;
+  const { Permission, hasServerRight } = usePermission();
+  const canDelete = isOwn || hasServerRight(Permission.Delete);
+
+
+  const [editing, setEditing] = useState(false);
+
+  return (
+    <div className="message" data-user-id={message.authorId}>
+      {firstOfAuthor && <div className="pfpBox" data-user-id={message.authorId}>
+        <img
+          src={`${origin}/uploads/pdp/${message.authorAvatar}`}
+          alt={`Avatar de ${message.authorPseudo}`}
+        />
+      </div>}
+
+      <div className="messageContent">
+        {firstOfAuthor && <> <span className="pseudo" data-user-id={message.authorId}>
+          {message.authorPseudo}
+        </span>{" "}
+          <span className="messageDate">{dateString}</span>
+        </>}
+
+        <div className="contentBox">
+          <pre className="content">
+            {!editing ? (
+              <MessageContent hasAttachment={hasAttachment} content={message.content} attachment={message.attachment} />
+            ) : (
+              <EditMessage handleEdit={handleEdit} content={message.content} messageId={message.id} cancelEdit={() => setEditing(false)} />
+            )
+            }
+          </pre>
+          {canDelete && <div className="actionButtons">
+            {isOwn && (
+              <button className="actionButton" aria-label="Modifier le message" onClick={() => setEditing(true)}>
+                <i className="fa-solid fa-pen" aria-hidden="true"></i>
+              </button>
+            )}
+            {canDelete && (
+              <button className="actionButton" aria-label="Supprimer le message" onClick={() => onDelete(message.id)}>
+                <i className="fa-solid fa-trash-can" aria-hidden="true"></i>
+              </button>
+            )}
+          </div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+function MessageContent({ hasAttachment, content, attachment }) {
+  return <>
+    {hasAttachment && (
+      <img
+        className="attachment"
+        src={`${origin}/uploads/attachments/${attachment}`}
+      />
+    )}
+    {content}
+  </>
+}
+
+function EditMessage({ handleEdit, content, cancelEdit, messageId }) {
+  return <>
+    <FormPost className="editForm" aria-label="Modifier le message"
+      onSubmit={(e) => { e.preventDefault(); handleEdit(new FormData(e.currentTarget), messageId); cancelEdit(); }}>
+      <input
+        name="editedMessage"
+        defaultValue={content}   /* ex-`editInput.value = oldContent` */
+        placeholder="Votre nouveau message ici."
+        aria-label="Nouveau contenu du message"
+        autoFocus
+        id="editedMessage"
+      />
+      <div className="horizontalLine"></div>
+      <button type="submit" className="transparentButton editButton" aria-label="Envoyer la modification">
+        <i className="fa-solid fa-paper-plane" aria-hidden="true"></i>
+      </button>
+    </FormPost>
+    <div className="cancelDiv">
+      <button type="button" className="textButton" onClick={cancelEdit}>
+        Annuler
+      </button>
+    </div>
+  </>
+}

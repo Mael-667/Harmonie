@@ -16,11 +16,13 @@ use App\Service\PermissionManager;
 use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -35,26 +37,24 @@ final class AppController extends AbstractController
     #[Route('/app', name: 'app')]
     public function index(): Response
     {
+        return $this->render('app/index.html.twig');
+    }
+
+    #[Route('/app/me', name: 'app_me')]
+    public function userInfo(CsrfTokenManagerInterface $csrfTokenManager): Response
+    {
+        /** @var User $user */
         $user = $this->getUser();
-        if($user instanceof User){
-
-            $userProfile = [
+        $userProfile = [
                 "pseudo" => $user->getPseudo(),
-                "avatar" => $user->getAvatarUrl()
+                "handle" => $user->getHandle(),
+                "avatar" => $user->getAvatarUrl(),
+                "id" => $user->getId(),
+                // Token CSRF unique réutilisé par React sur toutes les requêtes mutantes.
+                // id 'app' = statefull (hors stateless_token_ids), validé via isCsrfTokenValid('app', ...).
+                "csrfToken" => $csrfTokenManager->getToken('app')->getValue()
             ];
-
-            $newServerForm = $this->createForm(ServerType::class);
-    
-            return $this->render('app/index.html.twig', [
-                "user" => $userProfile,
-                "newServerForm" => $newServerForm->createView(),
-                // TODO: générer l'id aléatoirement
-                "newId" => "efi6hu"
-            ]);
-
-        } else {
-            throw new HttpException(400, 'Bad request');
-        }
+        return new JsonResponse($userProfile);
     }
 
     // GET /articles/42 — détail, id entier uniquement
@@ -146,6 +146,9 @@ final class AppController extends AbstractController
         PermissionManager $permissionManager,
         #[Autowire('%kernel.project_dir%/public/uploads/serverIcon')] string $serverIcon
     ){
+        if (!$this->isCsrfTokenValid('app', $request->getPayload()->get('token'))) {
+            return new Response('Token invalide', 403);
+        }
 
         $server = new Server();
         $newServerForm = $this->createForm(ServerType::class, $server);
@@ -275,7 +278,7 @@ final class AppController extends AbstractController
         PermissionManager $permissionManager
     ){
         $data = $request->getPayload();
-        if (!$this->isCsrfTokenValid('update-server', $data->get('token'))) return new Response('Token invalide', 403);
+        if (!$this->isCsrfTokenValid('app', $data->get('token'))) return new Response('Token invalide', 403);
 
 
         // bloque ce chemin si l'utilisateur n'a pas le role créer invit

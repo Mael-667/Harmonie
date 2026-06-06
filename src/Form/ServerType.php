@@ -33,6 +33,9 @@ class ServerType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Server::class,
+            // Le form est rendu par React (FormPost), pas par Twig : le CSRF est géré
+            // manuellement dans AppController::newServer via le token 'app'.
+            'csrf_protection' => false,
         ]);
     }
 }
