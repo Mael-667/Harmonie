@@ -135,6 +135,11 @@ body {
     }
 }
 
+#userHandle{
+    color: var(--main-color);
+    cursor: pointer;
+}
+
 #settings{
     margin-left: auto;
 }
@@ -188,7 +193,7 @@ body {
 }
 
 .messageInfo{
-    margin-top: 0.3rem;
+    margin-top: 0.4rem;
 }
 
 .messageContent{
@@ -239,7 +244,7 @@ body {
 .attachment{
     display: block;
     max-height: 15rem;
-    margin: 0.5rem 0;
+    margin-bottom: 0.5rem;
     border-radius: 7px;
 }
 

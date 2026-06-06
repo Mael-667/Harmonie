@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Modal from "./modules/Modal";
 import FormPost from "./modules/FormPost";
+import { copy } from "./modules/Utils";
 
 export default function ServerSettings({setSettingsOpened, serverId}) {
     // set la valeur par défaut
@@ -39,22 +40,6 @@ export default function ServerSettings({setSettingsOpened, serverId}) {
             console.log(err);
         })
     }
-
-    function copy(content) {
-      if (navigator.clipboard) {
-          navigator.clipboard.writeText(content);
-      } else {
-          // contexte non sécurisé (HTTP hors localhost) : fallback
-          const ta = document.createElement("textarea");
-          ta.value = content;
-          ta.style.position = "fixed";
-          ta.style.opacity = "0";
-          document.body.appendChild(ta);
-          ta.select();
-          document.execCommand("copy");
-          ta.remove();
-      }
-  }
 
     if (!invitDetails) return null;   // ou un <Modal>…Chargement…</Modal>
 

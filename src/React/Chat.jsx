@@ -5,11 +5,24 @@ import { UserContext } from "./modules/UserContext";
 import { usePermission } from "./hooks/usePermission";
 import FormPost from "./modules/FormPost";
 
-export default function Chat({ channelId, messages, setMessages }) {
+export default function Chat({ channelId, initialMessages }) {
   const url = (window.location.origin).replace(window.location.protocol, "").replace("//", "");
   const user = useContext(UserContext);
   const messageConteneurRef = useRef(null);
+
   const [lastMessage, setLastMessage] = useState(null)
+  
+  const [messages, setMessages] = useState(initialMessages);
+  const [loadedMessages, setLoadedMessages] = useState(initialMessages);
+  // l'état temps réel des messages vit ici (et non dans App) : les nouveaux
+  // messages WS ne re-rendent plus toute l'app. On resynchronise sur la prop
+  // quand App recharge les messages (navigation), via le pattern recommandé
+  // par React : ajustement pendant le render plutôt que dans un useEffect
+  // (évite les renders en cascade — cf. "You Might Not Need an Effect").
+  if (initialMessages !== loadedMessages) {
+    setLoadedMessages(initialMessages);
+    setMessages(initialMessages);
+  }
 
   const ws = useWebsocket({
     url: url,

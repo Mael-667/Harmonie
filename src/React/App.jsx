@@ -18,7 +18,7 @@ export default function App() {
   const [channels, setChannels] = useState(null);
   const [server, setServer] = useState(null);
   const [roles, setRoles] = useState(null);
-  const [messages, setMessages] = useState([]);
+  const [initialMessages, setInitialMessages] = useState([]);
   const [user, setUser] = useState(null);
 
 
@@ -50,7 +50,7 @@ export default function App() {
         setRoles(json.roles);
         setChannels(json.channels);
         setServer({ serverName: json.serverName, serverId: json.serverId })
-        setMessages(json.messages)
+        setInitialMessages(json.messages)
         console.log(json);
       })
       .catch((err) => console.log(err));
@@ -72,7 +72,7 @@ export default function App() {
     <PermissionProvider roles={roles} userId={user?.id}>
       <ServersPanel server={server} serverId={serverId} setServerId={setServerId} channels={channels} channelId={channelId} setChannelId={setChannelId} />
 
-      <Chat channelId={channelId} messages={messages} setMessages={setMessages} />
+      <Chat channelId={channelId} initialMessages={initialMessages} />
 
       <div id="social">
         <div id="search">

@@ -3,6 +3,7 @@ import { UserContext } from "./modules/UserContext";
 import Modal from "./modules/Modal";
 import ServerSettings from './ServerSettings';
 import FormPost from "./modules/FormPost";
+import { copy } from "./modules/Utils";
 
 export default function ServersPanel({ channels, channelId, server, serverId, setServerId, setChannelId }) {
 
@@ -85,7 +86,7 @@ export default function ServersPanel({ channels, channelId, server, serverId, se
         </div>
         <div id="userHandles">
           <p id="userPseudo">{user.pseudo}</p>
-          <p id="userHandle">{user.handle}</p>
+          <p id="userHandle" onClick={() => copy(user.handle)}>@{user.handle}</p>
         </div>
         <div id="settings">
           <button aria-label="settings" className="transparentButton" id="profileSetting"><i className="fa-solid fa-gear" aria-hidden="true"></i></button>
