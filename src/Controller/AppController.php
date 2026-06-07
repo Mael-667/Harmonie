@@ -284,20 +284,14 @@ final class AppController extends AbstractController
         EntityManagerInterface $entityManager,
         PermissionManager $permissionManager
     ){
-        $data = $request->getPayload();
-        if (!$this->isCsrfTokenValid(self::CRSF_ID, $data->get('token'))) return new Response('Token invalide', 403);
+        // $status, $data, $server, $user
+        extract(self::validateRequest($request, $entityManager, $permissionManager, PermissionEnum::CreateInvit));
 
+        if($status[0] != 200){
+            return new Response($status[1], $status[0]);
+        }
 
-        // bloque ce chemin si l'utilisateur n'a pas le role créer invit
-        $roles = $entityManager->getRepository(Server::class)->findOneBy(["id" => $data->get('serverId')])->getRoles();
-
-        // vérifie en meme temps si l'utilisateur a acces au serveur et si il a la permission de créer une invitation
-        /** @var User $user */
-        $user = $this->getUser();
-        if(!$permissionManager->hasServerRight($user->getId(), $roles, PermissionEnum::CreateInvit)){
-             throw $this->createAccessDeniedException();
-        };
-
+        // TODO: bloquer le nombre d'invit par serveur à 10
 
         $identifiant = $data->get('newInvit');
 
@@ -305,7 +299,7 @@ final class AppController extends AbstractController
 
         $invit = new ServerInvitation();
         $invit->setIdentifiant($identifiant);
-        $invit->setServer($entityManager->getRepository(Server::class)->find($data->get('serverId')));
+        $invit->setServer($server);
 
         $ms = (int) $data->get('expirationDate');
         $expirationDate = (new DateTime())->setTimestamp(intdiv($ms, 1000));
@@ -357,20 +351,12 @@ final class AppController extends AbstractController
         PermissionManager $permissionManager,
         #[Autowire('%kernel.project_dir%/public/uploads/serverIcon')] string $serverIcon
     ){
-        if (!$this->isCsrfTokenValid(self::CRSF_ID, $request->getPayload()->get('token'))) {
-            return new Response('Token invalide', 403);
+        // $status, $data, $server, $user
+        extract(self::validateRequest($request, $entityManager, $permissionManager, PermissionEnum::EditServer));
+
+        if($status[0] != 200){
+            return new Response($status[1], $status[0]);
         }
-
-        $data = $request->getPayload();
-
-        $server = $entityManager->getRepository(Server::class)->findOneBy(["id" => $data->get('serverId')]);
-        $roles = $server->getRoles();
-
-        /** @var User $user */
-        $user = $this->getUser();
-        if(!$permissionManager->hasServerRight($user->getId(), $roles, PermissionEnum::EditServer)){
-             throw $this->createAccessDeniedException();
-        };
 
         // retrieves an instance of UploadedFile identified by "attachment"
         $file = $request->files->get('serverIcon');
@@ -417,21 +403,13 @@ final class AppController extends AbstractController
         PermissionManager $permissionManager,
         #[Autowire('%kernel.project_dir%/public/uploads/serverIcon')] string $serverIcon
     ){
-        if (!$this->isCsrfTokenValid(self::CRSF_ID, $request->getPayload()->get('token'))) {
-            return new Response('Token invalide', 403);
+        // $status, $data, $server, $user
+        extract(self::validateRequest($request, $entityManager, $permissionManager, PermissionEnum::EditServer));
+
+        if($status[0] != 200){
+            return new Response($status[1], $status[0]);
         }
-
-        $data = $request->getPayload();
-
-        $server = $entityManager->getRepository(Server::class)->findOneBy(["id" => $data->get('serverId')]);
-        $roles = $server->getRoles();
-
-        /** @var User $user */
-        $user = $this->getUser();
-        if(!$permissionManager->hasServerRight($user->getId(), $roles, PermissionEnum::EditServer)){
-             throw $this->createAccessDeniedException();
-        };
-
+        
         $serverIconUrl = $serverIcon."/".$server->getIcon();
         if(is_file($serverIconUrl)){
             if (!unlink($serverIconUrl)) {
@@ -445,6 +423,70 @@ final class AppController extends AbstractController
         $entityManager->flush();
 
         return new JsonResponse(["error" => "prank"], 200);
+    }
+
+    #[Route('/app/createChannel', name: 'app_createChannel', methods: ["POST"])]
+    public function createChannel(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        PermissionManager $permissionManager,
+    ){
+        // $status, $data, $server, $user
+        extract(self::validateRequest($request, $entityManager, $permissionManager, PermissionEnum::EditServer));
+
+        if($status[0] != 200){
+            return new Response($status[1], $status[0]);
+        }
+        
+        $channel = new Channel();
+        $channel->setName($data->get("channelName"));
+        $channel->setServer($server);
+
+        // todo: remplacer les défauts
+        $channel->setType(ChannelTypeEnum::Textual);
+
+        $entityManager->persist($channel);
+        $entityManager->flush();
+
+        return new JsonResponse(["error" => "prank"], 200);
+    }
+
+
+
+
+
+    private function validateRequest(Request $request, EntityManagerInterface $entityManager, PermissionManager $permissionManager, PermissionEnum $permission){
+        $status = [200, "All Good"];
+        $data = null;
+        $server = null;
+        $user = null;
+
+        if (!$this->isCsrfTokenValid(self::CRSF_ID, $request->getPayload()->get('token'))) {
+            $status = [403, "Token invalide"];
+        } else {
+            $data = $request->getPayload();
+    
+            $server = $entityManager->getRepository(Server::class)->findOneBy(["id" => $data->get('serverId')]);
+    
+            if(!$server){
+                $status = [403, "Bad request"];
+            } else {
+                $roles = $server->getRoles();
+        
+                /** @var User $user */
+                $user = $this->getUser();
+                if(!$permissionManager->hasServerRight($user->getId(), $roles, $permission)){
+                    $status = [403, "Permission manquante"];
+                };
+            }
+        }
+
+        return [
+            "status" => $status,
+            "data" => $data,
+            "server" => $server,
+            "user" => $user
+        ];
     }
 
 }
