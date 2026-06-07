@@ -24,21 +24,22 @@ export default function Chat({ channelId, initialMessages }) {
     setMessages(initialMessages);
   }
 
+  // utilise les callback pour queue les modifs au cas où on reçoit 2 messages entre 2 render
   const ws = useWebsocket({
     url: url,
     onReceiveMessage: (message) => {
       if (message.channel == channelId) {
-        setMessages([...messages, message])
+        setMessages(m => [...m, message])
         setLastMessage(message);
       }
     },
     onEditMessage: (message) => {
       if (message.channel == channelId) {
-        setMessages(() => rewriteMessage(message));
+        setMessages((m) => rewriteMessage(m, message));
       }
     },
     onDeleteMessage: (message) => {
-      setMessages(messages.filter(msg => msg.id != message.id))
+      setMessages(m => m.filter(msg => msg.id != message.id))
     }
   });
 
@@ -60,8 +61,8 @@ export default function Chat({ channelId, initialMessages }) {
   }, [lastMessage, channelId])
   
 
-  function rewriteMessage(message) {
-    const editedMessages = messages.map(msg => {
+  function rewriteMessage(messageList, message) {
+    const editedMessages = messageList.map(msg => {
       if (msg.id == message.id) {
         return {
           ...msg,
