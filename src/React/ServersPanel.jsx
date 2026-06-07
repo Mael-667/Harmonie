@@ -72,7 +72,7 @@ export default function ServersPanel({ channels, channelId, server, serverId, se
           <button className="actionButton editServer" id="editServer" onClick={() => setSettingsOpened(true)}>
             <i className="fa-solid fa-ellipsis"></i>
           </button>
-          {settingsOpened && <ServerSettings setSettingsOpened={setSettingsOpened} server={server}/>}
+          {settingsOpened && <ServerSettings setSettingsOpened={setSettingsOpened} server={server} channels={channels}/>}
         </div>
         <div id="channels">
           {channels?.map(channelsButtons)}

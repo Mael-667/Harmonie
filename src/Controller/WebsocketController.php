@@ -22,6 +22,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 
+// TODO: sécuriser ces routes avec un token csrf
 final class WebsocketController extends AbstractController
 {
     #[Route('/websocket/login', name: 'websocket_login')]

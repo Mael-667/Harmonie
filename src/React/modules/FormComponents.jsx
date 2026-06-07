@@ -29,3 +29,12 @@ export function Field({id, label, placeholder, defaultValue}) {
                 <input type="text" name={id} id={id} placeholder={placeholder} defaultValue={defaultValue} />
             </div>
 }
+
+export function Select({id, label, options}){
+    return <div className="field">
+                <label htmlFor={id}>{label}</label>
+                <select id={id} name={id}>
+                    {options.map((e, i) => <option key={i} value={e}>{e}</option>)}
+                </select>
+            </div>
+}

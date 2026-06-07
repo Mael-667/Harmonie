@@ -442,6 +442,9 @@ final class AppController extends AbstractController
         $channel->setName($data->get("channelName"));
         $channel->setServer($server);
 
+        $category = $data->get("category");
+        if($category) $channel->setCategory($category);
+        
         // todo: remplacer les défauts
         $channel->setType(ChannelTypeEnum::Textual);
 

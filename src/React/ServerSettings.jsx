@@ -1,13 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Modal from "./modules/Modal";
 import { copy } from "./modules/Utils";
-import { DynamicImageInput, Field, FormPost } from "./modules/FormComponents";
+import { DynamicImageInput, Field, FormPost, Select } from "./modules/FormComponents";
 
-export default function ServerSettings({ setSettingsOpened, server }) {
+export default function ServerSettings({ setSettingsOpened, server, channels }) {
     // set la valeur par défaut
     const [tab, setTab] = useState("properties");
     const [invitDetails, setInvitDetails] = useState(null);
     const url = (window.location.origin).replace(window.location.protocol, "").replace("//", "");
+
+    const categories = useMemo(() => getCategories(channels) ,[channels])
 
     useEffect(() => {
         let form = new FormData();
@@ -22,6 +24,16 @@ export default function ServerSettings({ setSettingsOpened, server }) {
                 setInvitDetails({ randomId: e.randomId, invitations: e.invitations });
             });
     }, [server, url])
+
+    function getCategories(channels){
+        let categories = [];
+        channels.forEach(c => {
+            if (c.category && !categories.includes(c.category)) {
+                categories.push(c.category);
+            }
+        })
+        return categories;
+    }
 
     function submitNewInvit(form) {
         form.append("serverId", server.serverId);
@@ -75,6 +87,23 @@ export default function ServerSettings({ setSettingsOpened, server }) {
         .catch((err) => console.log(err))
     }
 
+    function createChannel(e) {
+        e.preventDefault();
+        let form = new FormData(e.currentTarget);
+        form.append("serverId", server.serverId)
+
+        fetch(origin + "/app/createChannel", {
+            method: "POST",
+            // Set the FormData instance as the request body
+            body: form,
+        })
+        .then((response) => response.json())
+        .then((e) => {
+            console.log(e);
+        })
+        .catch((err) => console.log(err))
+    }
+
 
     if (!invitDetails) return null;   // TODO: ou un <Modal>…Chargement…</Modal>
 
@@ -83,6 +112,7 @@ export default function ServerSettings({ setSettingsOpened, server }) {
         <div id="settingsContent">
             <nav id="serverSettingsNav">
                 <button className={`navButton ${tab === "properties" ? "navButtonActive" : ""}`} onClick={() => setTab('properties')}>Propriétés du serveur</button>
+                <button className={`navButton ${tab === "channels" ? "navButtonActive" : ""}`} onClick={() => setTab('channels')}>Canaux de discussion</button>
                 <button className={`navButton ${tab === "users" ? "navButtonActive" : ""}`} onClick={() => setTab('users')}>Gestion d'utilisateurs</button>
                 <button className={`navButton ${tab === "roles" ? "navButtonActive" : ""}`} onClick={() => setTab('roles')}>Gestion des rôles</button>
             </nav>
@@ -134,6 +164,26 @@ export default function ServerSettings({ setSettingsOpened, server }) {
                             <button type="submit" className="button crimsonButton">Supprimer le serveur</button>
                         </FormPost>
                     </div>
+                </div>)}
+
+                {tab === "channels" && (<div id="channelsContent" className="settingsContent">
+                    <div>
+                        <h3>Créer un canal</h3>
+                        <FormPost className="singleLineForm" onSubmit={createChannel}>
+                            <Field id={"channelName"} label={"Nom de votre canal"} />
+                            <Select id="category" label="Séléctionnez une catégorie" options={categories} />
+                            <button type="submit" className="button crimsonButton">Créer le canal</button>
+                        </FormPost>
+                    </div>
+                    <div>
+                        <h3>Gérez vos canaux</h3>
+                        <div>
+                            {channels.map((e, i) => 
+                                <div key={i}>{e.name}</div>
+                            )}
+                        </div>
+                    </div>
+
                 </div>)}
 
                 {tab === "users" && (<div id="usersContent">
