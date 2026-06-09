@@ -225,26 +225,7 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
                         <h3>Gérez vos canaux</h3>
                         <div className="listConteneur" style={{ flexDirection: "column", padding: "0.3rem" }}>
                             {channels.map((e, i) =>
-                                <FormPost key={i} className="channelDetails" onSubmit={(event) => updateChannel(event, e.id)}>
-                                    <div className="editChannelName">
-                                    #<input
-                                        name="editedChannelName"
-                                        defaultValue={e.name}   /* ex-`editInput.value = oldContent` */
-                                        placeholder="Nommez votre canal"
-                                        aria-label="Nom de votre canal"
-                                        className="editedMessage"
-                                    />
-                                    </div>
-                                    <div className="selectCategory">
-                                        {categories.length != 0 && !creatingCategory && <Select id="category" label="Séléctionnez une catégorie" options={categories} defaultValue={e.category} />}
-                                        {creatingCategory && <Field id="category" label="Nom de votre nouvelle catégorie" />}
-                                        <button type="button" className="actionButton formActionButton" onClick={!creatingCategory ? () => setCreatingCategory(true) : () => setCreatingCategory(false)}>{categories.length == 0 && !creatingCategory && "Ajouter une catégorie"} {!creatingCategory ? <i className="fa-solid fa-circle-plus"></i> : <i className="fa-solid fa-circle-xmark"></i>}</button>
-                                    </div>
-                                    <button className="actionButton formActionButton" type="button" aria-label="Supprimer le message" onClick={() => deleteChannel(e.id)}>
-                                        <i className="fa-solid fa-trash-can" aria-hidden="true"></i>
-                                    </button>
-                                    <button type="submit" className="button crimsonButton">Mettre à jour le canal</button>
-                                </FormPost>
+                                <ChannelRow key={i} channel={e} categories={categories} onUpdate={updateChannel} onDelete={deleteChannel} />
                             )}
                         </div>
                     </div>
@@ -261,4 +242,31 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
             </div>
         </div>
     </Modal>
+}
+
+// Une ligne d'édition de canal : état `creatingCategory` propre à chaque ligne
+// (sinon le toggle « ajouter une catégorie » serait partagé entre toutes les lignes).
+function ChannelRow({ channel, categories, onUpdate, onDelete }) {
+    const [creatingCategory, setCreatingCategory] = useState(false);
+
+    return <FormPost className="channelDetails" onSubmit={(event) => onUpdate(event, channel.id)}>
+        <div className="editChannelName">
+        #<input
+            name="editedChannelName"
+            defaultValue={channel.name}   /* ex-`editInput.value = oldContent` */
+            placeholder="Nommez votre canal"
+            aria-label="Nom de votre canal"
+            className="editedMessage"
+        />
+        </div>
+        <div className="selectCategory">
+            {categories.length != 0 && !creatingCategory && <Select id="category" label="Séléctionnez une catégorie" options={categories} defaultValue={channel.category} />}
+            {creatingCategory && <Field id="category" label="Nom de votre nouvelle catégorie" />}
+            <button type="button" className="actionButton formActionButton" onClick={() => setCreatingCategory(!creatingCategory)}>{categories.length == 0 && !creatingCategory && "Ajouter une catégorie"} {!creatingCategory ? <i className="fa-solid fa-circle-plus"></i> : <i className="fa-solid fa-circle-xmark"></i>}</button>
+        </div>
+        <button className="actionButton formActionButton" type="button" aria-label="Supprimer le canal" onClick={() => onDelete(channel.id)}>
+            <i className="fa-solid fa-trash-can" aria-hidden="true"></i>
+        </button>
+        <button type="submit" className="button crimsonButton">Mettre à jour le canal</button>
+    </FormPost>
 }
