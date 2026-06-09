@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-export default function useWebsocket({ url, onReceiveMessage, onEditMessage, onDeleteMessage }) {
+export default function useWebsocket({ url, onReceiveMessage, onEditMessage, onDeleteMessage, onSpecialMessage }) {
 
   const ws = useRef(null);
 
@@ -8,7 +8,7 @@ export default function useWebsocket({ url, onReceiveMessage, onEditMessage, onD
   // On les garde à jour dans un ref pour ne PAS recréer la socket à chaque fois.
   const handlersRef = useRef(null);
   useEffect(() => {
-    handlersRef.current = { onReceiveMessage, onEditMessage, onDeleteMessage };
+    handlersRef.current = { onReceiveMessage, onEditMessage, onDeleteMessage, onSpecialMessage };
   });
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function useWebsocket({ url, onReceiveMessage, onEditMessage, onD
         const data = JSON.parse(e.data);   // { type, payload } : le type est sur l'objet EXTÉRIEUR
         const h = handlersRef.current;
         // TODO: CRSF TOKEN ICI AUSSI
-        switch (data.type) {               // ← data.type, PAS data.payload.type (qui n'existe pas)
+        switch (data.type) {
           case "newMessage":
             h?.onReceiveMessage(data.payload);
             break;
@@ -50,6 +50,7 @@ export default function useWebsocket({ url, onReceiveMessage, onEditMessage, onD
             h?.onDeleteMessage(data.payload);
             break;
           default:
+            h?.onSpecialMessage(data);
             break;
         }
       };

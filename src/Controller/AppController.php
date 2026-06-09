@@ -28,6 +28,7 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Asset\Package;
 use Symfony\Component\Asset\VersionStrategy\EmptyVersionStrategy;
+use App\Service\WebsocketNotifier;
 
 
 
@@ -367,6 +368,7 @@ final class AppController extends AbstractController
         SluggerInterface $slugger,
         EntityManagerInterface $entityManager,
         PermissionManager $permissionManager,
+        WebsocketNotifier $websocketNotifier,
         #[Autowire('%kernel.project_dir%/public/uploads/serverIcon')] string $serverIcon
     ) {
         // $status, $data, $server, $user
@@ -410,6 +412,8 @@ final class AppController extends AbstractController
 
         $entityManager->flush();
 
+        self::updateUsers($websocketNotifier, $server);
+
         return new JsonResponse(["error" => "prank"], 200);
     }
 
@@ -419,7 +423,9 @@ final class AppController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         PermissionManager $permissionManager,
-        #[Autowire('%kernel.project_dir%/public/uploads/serverIcon')] string $serverIcon
+        WebsocketNotifier $websocketNotifier,
+        #[Autowire('%kernel.project_dir%/public/uploads/serverIcon')] string $serverIcon,
+        #[Autowire('%kernel.project_dir%/public/uploads/attachments')] string $attachmentDir
     ) {
         // $status, $data, $server, $user
         extract(self::validateRequest($request, $entityManager, $permissionManager, PermissionEnum::EditServer));
@@ -435,7 +441,13 @@ final class AppController extends AbstractController
             }
         }
 
-        //  todo: Les fichiers de pièces jointes (uploads/attachments/…) des messages supprimés restent sur le disque — tu supprimes bien l'icône du serveur, mais pas les attachments. Fuite de fichiers à terme.
+        $channels = $server->getChannels();
+        
+        foreach($channels as $channel){
+            self::deleteAllChannelAttachment($channel->getId(), $entityManager, $attachmentDir);
+        }
+
+        self::updateUsers($websocketNotifier, $server);
 
         $entityManager->remove($server);
         $entityManager->flush();
@@ -448,6 +460,7 @@ final class AppController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         PermissionManager $permissionManager,
+        WebsocketNotifier $websocketNotifier,
     ) {
         // $status, $data, $server, $user
         extract(self::validateRequest($request, $entityManager, $permissionManager, PermissionEnum::EditServer));
@@ -470,6 +483,8 @@ final class AppController extends AbstractController
         $entityManager->persist($channel);
         $entityManager->flush();
 
+        self::updateUsers($websocketNotifier, $server);
+
         return new JsonResponse(["error" => "prank"], 200);
     }
 
@@ -478,6 +493,7 @@ final class AppController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         PermissionManager $permissionManager,
+        WebsocketNotifier $websocketNotifier,
     ) {
         // champs reçus : token, serverId, channelId, editedChannelName, category
 
@@ -505,6 +521,7 @@ final class AppController extends AbstractController
 
         $entityManager->flush();
 
+        self::updateUsers($websocketNotifier, $server);
 
         return new JsonResponse(["error" => "prank"], 200);
     }
@@ -514,6 +531,7 @@ final class AppController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         PermissionManager $permissionManager,
+        WebsocketNotifier $websocketNotifier,
         #[Autowire('%kernel.project_dir%/public/uploads/attachments')] string $attachmentDir
     ) {
         // champs reçus : token, serverId, channelId
@@ -533,6 +551,8 @@ final class AppController extends AbstractController
         }
 
         self::deleteAllChannelAttachment($data->get("channelId"), $entityManager, $attachmentDir);
+
+        self::updateUsers($websocketNotifier, $server);
 
         $entityManager->remove($channel);
         $entityManager->flush();
@@ -555,7 +575,15 @@ final class AppController extends AbstractController
     }
 
 
+    private function updateUsers(WebsocketNotifier $websocketNotifier, Server $server, string $message = "updateServer"){
+        $recipientIds = [];
+        $serverUsers = $server->getUsers();
+        foreach ($serverUsers as $member) {
+            $recipientIds[] = $member->getId();
+        }
 
+        $websocketNotifier->broadcast($message, $recipientIds);
+    }
 
     private function validateRequest(Request $request, EntityManagerInterface $entityManager, PermissionManager $permissionManager, PermissionEnum $permission)
     {

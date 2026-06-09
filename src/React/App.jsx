@@ -20,6 +20,7 @@ export default function App() {
   const [roles, setRoles] = useState(null);
   const [initialMessages, setInitialMessages] = useState([]);
   const [user, setUser] = useState(null);
+  const [update, setUpdate] = useState(0);
 
 
   // todo: update serverid et channelid quand on clique sur retour
@@ -55,7 +56,7 @@ export default function App() {
       })
       .catch((err) => console.log(err));
 
-  }, [channelId, serverId])
+  }, [channelId, serverId, update])
 
   useEffect(() => {
     fetch(origin + "/app/me")
@@ -72,7 +73,7 @@ export default function App() {
     <PermissionProvider roles={roles} userId={user?.id}>
       <ServersPanel server={server} serverId={serverId} setServerId={setServerId} channels={channels} channelId={channelId} setChannelId={setChannelId} />
 
-      <Chat channelId={channelId} initialMessages={initialMessages} />
+      <Chat channelId={channelId} initialMessages={initialMessages} setUpdate={setUpdate} />
 
       <div id="social">
         <div id="search">

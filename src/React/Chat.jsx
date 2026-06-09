@@ -5,7 +5,7 @@ import { UserContext } from "./modules/UserContext";
 import { usePermission } from "./hooks/usePermission";
 import { FormPost } from "./modules/FormComponents";
 
-export default function Chat({ channelId, initialMessages }) {
+export default function Chat({ channelId, initialMessages, setUpdate }) {
   const url = (window.location.origin).replace(window.location.protocol, "").replace("//", "");
   const user = useContext(UserContext);
   const messageConteneurRef = useRef(null);
@@ -41,6 +41,10 @@ export default function Chat({ channelId, initialMessages }) {
     },
     onDeleteMessage: (message) => {
       setMessages(m => m.filter(msg => msg.id != message.id))
+    },
+    onSpecialMessage: () => {
+      // let type = message.type;
+      setUpdate(m => m+1);
     }
   });
 

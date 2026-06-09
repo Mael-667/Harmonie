@@ -1,12 +1,20 @@
 <?php
 
+use Symfony\Component\Dotenv\Dotenv;
+
 
 require __DIR__."/WebSocketServer.php";
 require __DIR__."/SymfonyIPC.php";
+require __DIR__."/WebsocketNotifier.php";
 
+$dotenv = new Dotenv();
+$dotenv->load(__DIR__ . '/../.env');
+$ipcSecret = $_ENV["IPC_SECRET"];
 
 // Démarrer la loop après avoir fini de tout initialiser sinon php ne prend plus rien en compte
 $ws = new WebSocketServer();
+
+$notifier = new WebsocketNotifier($ws, $ipcSecret);
 
 $symfonyIPC = new SymfonyIPC();
 

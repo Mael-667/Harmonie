@@ -19,7 +19,7 @@ class ChannelRepository extends ServiceEntityRepository
     public function getAllAttachments($channelId){
         return $this->createQueryBuilder("channel")
         ->select("message.attachment")
-        ->innerJoin("channel.message", "message")
+        ->innerJoin("channel.messages", "message")
         ->where("channel.id = :val")
         ->setParameter("val", $channelId)
         ->andWhere("message.attachment IS NOT NULL")
