@@ -4,6 +4,7 @@ import Modal from "./modules/Modal";
 import ServerSettings from './ServerSettings';
 import { copy } from "./modules/Utils";
 import { DynamicImageInput, FormPost } from "./modules/FormComponents";
+import { usePermission } from "./hooks/usePermission";
 
 export default function ServersPanel({ channels, channelId, server, serverId, setServerId, setChannelId }) {
 
@@ -11,6 +12,9 @@ export default function ServersPanel({ channels, channelId, server, serverId, se
   const [servers, setServers] = useState(null);
   const [opened, setOpened] = useState(false);
   const [settingsOpened, setSettingsOpened] = useState(false);
+
+  const { Permission, hasServerRight } = usePermission();
+  const hasRight = hasServerRight(Permission.EditServer);
 
 
   // Get user's servers
@@ -69,9 +73,11 @@ export default function ServersPanel({ channels, channelId, server, serverId, se
       <div id="serverInfo">
         <div id="serverDetails">
           <span className="serverName">{server?.serverName}</span>
-          <button className="actionButton editServer" id="editServer" onClick={() => setSettingsOpened(true)}>
-            <i className="fa-solid fa-ellipsis"></i>
-          </button>
+          {hasRight && 
+            <button className="actionButton editServer" id="editServer" onClick={() => setSettingsOpened(true)}>
+              <i className="fa-solid fa-ellipsis"></i>
+            </button>
+          }
           {settingsOpened && <ServerSettings setSettingsOpened={setSettingsOpened} server={server} channels={channels}/>}
         </div>
         <div id="channels">

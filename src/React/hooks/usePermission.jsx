@@ -7,6 +7,7 @@ const Permission = {
     Write: "write",
     Edit: "edit",
     Delete: "delete",
+    EditServer: "editServer",
 };
 
 export function PermissionProvider({ userId, roles, children }) {
