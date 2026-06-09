@@ -30,11 +30,11 @@ export function Field({id, label, placeholder, defaultValue}) {
             </div>
 }
 
-export function Select({id, label, options}){
+export function Select({id, label, options, defaultValue}){
     return <div className="field">
                 <label htmlFor={id}>{label}</label>
                 <select id={id} name={id}>
-                    {options.map((e, i) => <option key={i} value={e}>{e}</option>)}
+                    {options.map((e, i) => <option key={i} value={e} selected={e == defaultValue ? "selected" : ""}>{e == null ? "Sans valeur" : e}</option>)}
                 </select>
             </div>
 }

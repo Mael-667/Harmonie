@@ -48,30 +48,31 @@ final class AppController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         $userProfile = [
-                "pseudo" => $user->getPseudo(),
-                "handle" => $user->getHandle(),
-                "avatar" => $user->getAvatarUrl(),
-                "id" => $user->getId(),
-                // Token CSRF unique réutilisé par React sur toutes les requêtes mutantes.
-                // id 'app' = statefull (hors stateless_token_ids), validé via isCsrfTokenValid('app', ...).
-                "csrfToken" => $csrfTokenManager->getToken(self::CRSF_ID)->getValue()
-            ];
+            "pseudo" => $user->getPseudo(),
+            "handle" => $user->getHandle(),
+            "avatar" => $user->getAvatarUrl(),
+            "id" => $user->getId(),
+            // Token CSRF unique réutilisé par React sur toutes les requêtes mutantes.
+            // id 'app' = statefull (hors stateless_token_ids), validé via isCsrfTokenValid('app', ...).
+            "csrfToken" => $csrfTokenManager->getToken(self::CRSF_ID)->getValue()
+        ];
         return new JsonResponse($userProfile);
     }
 
     // GET /articles/42 — détail, id entier uniquement
     #[Route('/app/{id}/{serverId}', name: 'app_showServer', requirements: ['id' => '\d+'])]
-    public function showServer(Request $request, PermissionManager $permissionManager, MessageRepository $messageRepository, int $id, int $serverId = -1){
+    public function showServer(Request $request, PermissionManager $permissionManager, MessageRepository $messageRepository, int $id, int $serverId = -1)
+    {
         // Descriminer une premiere connexion d'une requete ajax avec le format de requete
         // La partie JS se chargera de request les données si elles sont demandées dans l'url
-        if ($request->getPreferredFormat() != 'json'){
+        if ($request->getPreferredFormat() != 'json') {
             return $this->index();
         }
-        
+
         // Pour vérifier si l'utilisateur a bien acces au serveur demandé,
         // Je récupère tous les serveurs de l'utilisateur puis je filtre avec l'id du serveur demandé,
         // Si l'utilisateur a bien acces au serveur il devrait y avoir un match, sinon acces denied 
-        
+
         /** @var User $user */
         $user = $this->getUser();
 
@@ -80,7 +81,8 @@ final class AppController extends AbstractController
             return $e->getId() == $id;
         })->first();
 
-        if(!$server) throw $this->createAccessDeniedException();
+        if (!$server)
+            throw $this->createAccessDeniedException();
 
         $channels = $server->getChannels()->toArray();
 
@@ -88,7 +90,7 @@ final class AppController extends AbstractController
         $channelIndex = 0;
 
         $channelsJSON = [];
-        for ($i=0; $i < count($channels); $i++) { 
+        for ($i = 0; $i < count($channels); $i++) {
             $channelsJSON[$i] = [
                 "id" => $channels[$i]->getId(),
                 "type" => $channels[$i]->getType()->value,
@@ -96,15 +98,17 @@ final class AppController extends AbstractController
                 "category" => $channels[$i]->getCategory()
             ];
 
-            if ($channelsJSON[$i]["id"] == $serverId) $channelIndex = $i;
+            if ($channelsJSON[$i]["id"] == $serverId)
+                $channelIndex = $i;
         }
 
-        if($permissionManager->canAccessChannel($channelsJSON[$channelIndex]["id"], $user->getId(), $server->getRoles())){
+        if ($permissionManager->canAccessChannel($channelsJSON[$channelIndex]["id"], $user->getId(), $server->getRoles())) {
             $messages = $messageRepository->getLastMessages($channels[$channelIndex]);
         } else {
             $messages = ["error" => "access denied"];
-        };
-        
+        }
+        ;
+
         return new Response(json_encode([
             "serverName" => $server->getName(),
             "serverId" => $server->getId(),
@@ -117,20 +121,21 @@ final class AppController extends AbstractController
     }
 
     #[Route('/app/getServers', name: 'app_getServers', methods: ["GET"])]
-    public function getServers(){
+    public function getServers()
+    {
         $user = $this->getUser();
-        if($user instanceof User){
+        if ($user instanceof User) {
             $package = new Package(new EmptyVersionStrategy());
             $serversObject = $user->getServers()->toArray();
             // dd($serversObject);
 
             $servers = [];
 
-            for ($i=0; $i < count($serversObject); $i++) { 
+            for ($i = 0; $i < count($serversObject); $i++) {
                 $servers[$i] = [
                     "id" => $serversObject[$i]->getId(),
                     "name" => $serversObject[$i]->getName(),
-                    "icon" => $package->getUrl("uploads/serverIcon/".$serversObject[$i]->getIcon()),
+                    "icon" => $package->getUrl("uploads/serverIcon/" . $serversObject[$i]->getIcon()),
                 ];
             }
 
@@ -148,7 +153,7 @@ final class AppController extends AbstractController
         EntityManagerInterface $entityManager,
         PermissionManager $permissionManager,
         #[Autowire('%kernel.project_dir%/public/uploads/serverIcon')] string $serverIcon
-    ){
+    ) {
         if (!$this->isCsrfTokenValid(self::CRSF_ID, $request->getPayload()->get('token'))) {
             return new Response('Token invalide', 403);
         }
@@ -182,8 +187,8 @@ final class AppController extends AbstractController
             /** @var User $admin */
             $admin = $this->getUser();
             $server->addUser($admin);
-            
-            
+
+
             $defaultChannel = new Channel();
             $defaultChannel->setType(ChannelTypeEnum::Textual);
             $defaultChannel->setName("Général");
@@ -215,7 +220,7 @@ final class AppController extends AbstractController
         EntityManagerInterface $entityManager,
         PermissionManager $permissionManager,
         #[Autowire('%kernel.project_dir%/public/uploads/attachments')] string $attachmentDir
-    ){
+    ) {
         if (!$this->isCsrfTokenValid(self::CRSF_ID, $request->getPayload()->get('token'))) {
             return new Response('Token invalide', 403);
         }
@@ -241,11 +246,16 @@ final class AppController extends AbstractController
 
 
     #[Route('/app/setupInvit', name: 'app_setupInvit', methods: ["POST"])]
-    public function getUniqueInvitId(ServerInvitationRepository $sir,
-    Request $request, EntityManagerInterface $entityManager, PermissionManager $permissionManager, ServerInvitationRepository $serverInvitationRepository){
-        
+    public function getUniqueInvitId(
+        ServerInvitationRepository $sir,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        PermissionManager $permissionManager,
+        ServerInvitationRepository $serverInvitationRepository
+    ) {
+
         $data = $request->getPayload();
-    
+
         // bloque ce chemin si l'utilisateur n'a pas le role créer invit
         $server = $entityManager->getRepository(Server::class)->findOneBy(["id" => $data->get('serverId')]);
         $roles = $server->getRoles();
@@ -253,15 +263,16 @@ final class AppController extends AbstractController
         // vérifie en meme temps si l'utilisateur a acces au serveur et si il a la permission de créer une invitation
         /** @var User $user */
         $user = $this->getUser();
-        if(!$permissionManager->hasServerRight($user->getId(), $roles, PermissionEnum::CreateInvit)){
-             throw $this->createAccessDeniedException();
-        };
+        if (!$permissionManager->hasServerRight($user->getId(), $roles, PermissionEnum::CreateInvit)) {
+            throw $this->createAccessDeniedException();
+        }
+        ;
 
         //génère un identifiant unique 
-        do{
+        do {
             $random = bin2hex(random_bytes(4));
             $result = $sir->findOneBy(["identifiant" => $random]);
-        } while($result != null); 
+        } while ($result != null);
 
         //récupère les invitations existantes 
         $invitations = $serverInvitationRepository->findBy(["server" => $server]);
@@ -280,14 +291,16 @@ final class AppController extends AbstractController
     }
 
     #[Route('/app/newInvit', name: 'app_newInvit', methods: ["POST"])]
-    public function createNewInvit(ServerInvitationRepository $sir, Request $request, 
+    public function createNewInvit(
+        ServerInvitationRepository $sir,
+        Request $request,
         EntityManagerInterface $entityManager,
         PermissionManager $permissionManager
-    ){
+    ) {
         // $status, $data, $server, $user
         extract(self::validateRequest($request, $entityManager, $permissionManager, PermissionEnum::CreateInvit));
 
-        if($status[0] != 200){
+        if ($status[0] != 200) {
             return new Response($status[1], $status[0]);
         }
 
@@ -295,7 +308,8 @@ final class AppController extends AbstractController
 
         $identifiant = $data->get('newInvit');
 
-        if($sir->findOneBy(["identifiant" => $identifiant])) return new Response('Identifiant déjà utilisé', 400);
+        if ($sir->findOneBy(["identifiant" => $identifiant]))
+            return new Response('Identifiant déjà utilisé', 400);
 
         $invit = new ServerInvitation();
         $invit->setIdentifiant($identifiant);
@@ -312,13 +326,16 @@ final class AppController extends AbstractController
     }
 
     #[Route('/app/joinServer', name: 'app_joinServer', methods: ["POST"])]
-    public function joinServer(ServerInvitationRepository $sir, Request $request, 
+    public function joinServer(
+        ServerInvitationRepository $sir,
+        Request $request,
         EntityManagerInterface $entityManager,
         PermissionManager $permissionManager
-    ){
+    ) {
         $data = $request->getPayload();
-        if (!$this->isCsrfTokenValid(self::CRSF_ID, $data->get('token'))) return new Response('Token invalide', 403);
-        
+        if (!$this->isCsrfTokenValid(self::CRSF_ID, $data->get('token')))
+            return new Response('Token invalide', 403);
+
         $link = trim($data->get("serverLink"));
 
         // l'identifiant est la portion entre "/join/" et le "/" suivant (ou la fin de la chaîne)
@@ -328,7 +345,8 @@ final class AppController extends AbstractController
         $identifiant = $matches[1];
 
         $invitation = $sir->findOneBy(["identifiant" => $identifiant]);
-        if(!$invitation) return new Response('Invitation invalide', 403);
+        if (!$invitation)
+            return new Response('Invitation invalide', 403);
 
         $server = $invitation->getServer();
 
@@ -350,11 +368,11 @@ final class AppController extends AbstractController
         EntityManagerInterface $entityManager,
         PermissionManager $permissionManager,
         #[Autowire('%kernel.project_dir%/public/uploads/serverIcon')] string $serverIcon
-    ){
+    ) {
         // $status, $data, $server, $user
         extract(self::validateRequest($request, $entityManager, $permissionManager, PermissionEnum::EditServer));
 
-        if($status[0] != 200){
+        if ($status[0] != 200) {
             return new Response($status[1], $status[0]);
         }
 
@@ -364,8 +382,8 @@ final class AppController extends AbstractController
         if ($file) {
 
             // si l'utilisateur envoie une nouvelle icone, on doit supprimer l'ancienne
-            $serverIconUrl = $serverIcon."/".$server->getIcon();
-            if(is_file($serverIconUrl)){
+            $serverIconUrl = $serverIcon . "/" . $server->getIcon();
+            if (is_file($serverIconUrl)) {
                 if (!unlink($serverIconUrl)) {
                     // TODO: handle échec de la suppression (droits, fichier verrouillé…)
                 }
@@ -386,7 +404,7 @@ final class AppController extends AbstractController
 
         $newName = $data->get("editName");
 
-        if($newName){
+        if ($newName) {
             $server->setName($newName);
         }
 
@@ -402,16 +420,16 @@ final class AppController extends AbstractController
         EntityManagerInterface $entityManager,
         PermissionManager $permissionManager,
         #[Autowire('%kernel.project_dir%/public/uploads/serverIcon')] string $serverIcon
-    ){
+    ) {
         // $status, $data, $server, $user
         extract(self::validateRequest($request, $entityManager, $permissionManager, PermissionEnum::EditServer));
 
-        if($status[0] != 200){
+        if ($status[0] != 200) {
             return new Response($status[1], $status[0]);
         }
-        
-        $serverIconUrl = $serverIcon."/".$server->getIcon();
-        if(is_file($serverIconUrl)){
+
+        $serverIconUrl = $serverIcon . "/" . $server->getIcon();
+        if (is_file($serverIconUrl)) {
             if (!unlink($serverIconUrl)) {
                 // TODO: handle échec de la suppression (droits, fichier verrouillé…)
             }
@@ -430,21 +448,22 @@ final class AppController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         PermissionManager $permissionManager,
-    ){
+    ) {
         // $status, $data, $server, $user
         extract(self::validateRequest($request, $entityManager, $permissionManager, PermissionEnum::EditServer));
 
-        if($status[0] != 200){
+        if ($status[0] != 200) {
             return new Response($status[1], $status[0]);
         }
-        
+
         $channel = new Channel();
         $channel->setName($data->get("channelName"));
         $channel->setServer($server);
 
         $category = $data->get("category");
-        if($category) $channel->setCategory($category);
-        
+        if ($category)
+            $channel->setCategory($category);
+
         // todo: remplacer les défauts
         $channel->setType(ChannelTypeEnum::Textual);
 
@@ -454,11 +473,92 @@ final class AppController extends AbstractController
         return new JsonResponse(["error" => "prank"], 200);
     }
 
+    #[Route('/app/editChannel', name: 'app_editChannel', methods: ["POST"])]
+    public function editChannel(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        PermissionManager $permissionManager,
+    ) {
+        // champs reçus : token, serverId, channelId, editedChannelName, category
+
+        // $status, $data, $server, $user
+        extract(self::validateRequest($request, $entityManager, $permissionManager, PermissionEnum::EditServer));
+
+        if ($status[0] != 200) {
+            return new Response($status[1], $status[0]);
+        }
+
+        $channel = $entityManager->getRepository(Channel::class)->find($data->get("channelId"));
+
+        // le canal doit appartenir au serveur validé (sinon on éditerait le canal d'un autre serveur)                                           
+        if (!$channel || $channel->getServer()->getId() != $server->getId()) {
+            return new Response("Bad request", 403);
+        }
+
+        $channel->setName($data->get("editedChannelName"));
+
+        // catégorie vide => null (canal sans catégorie)                                                                                         
+        $category = $data->get("category");
+        if ($category === "")
+            $category = null;
+        $channel->setCategory($category);
+
+        $entityManager->flush();
+
+
+        return new JsonResponse(["error" => "prank"], 200);
+    }
+
+    #[Route('/app/deleteChannel', name: 'app_deleteChannel', methods: ["POST"])]
+    public function deleteChannel(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        PermissionManager $permissionManager,
+        #[Autowire('%kernel.project_dir%/public/uploads/attachments')] string $attachmentDir
+    ) {
+        // champs reçus : token, serverId, channelId
+
+        // $status, $data, $server, $user
+        extract(self::validateRequest($request, $entityManager, $permissionManager, PermissionEnum::EditServer));
+
+        if ($status[0] != 200) {
+            return new Response($status[1], $status[0]);
+        }
+
+        $channel = $entityManager->getRepository(Channel::class)->find($data->get("channelId"));
+
+        // le canal doit appartenir au serveur validé (sinon on éditerait le canal d'un autre serveur)                                           
+        if (!$channel || $channel->getServer()->getId() != $server->getId()) {
+            return new Response("Bad request", 403);
+        }
+
+        self::deleteAllChannelAttachment($data->get("channelId"), $entityManager, $attachmentDir);
+
+        $entityManager->remove($channel);
+        $entityManager->flush();
+
+        return new JsonResponse(["error" => "prank"], 200);
+    }
+
+    private function deleteAllChannelAttachment($channelId, EntityManagerInterface $entityManager, $attachmentDir)
+    {
+        $attachments = $entityManager->getRepository(Channel::class)->getAllAttachments($channelId);
+
+        foreach ($attachments as $attachment) {
+            $attachmentUrl = $attachmentDir . "/" . $attachment["attachment"];
+            if (is_file($attachmentUrl)) {
+                if (!unlink($attachmentUrl)) {
+                    // TODO: handle échec de la suppression (droits, fichier verrouillé…)
+                }
+            }
+        }
+    }
 
 
 
 
-    private function validateRequest(Request $request, EntityManagerInterface $entityManager, PermissionManager $permissionManager, PermissionEnum $permission){
+    private function validateRequest(Request $request, EntityManagerInterface $entityManager, PermissionManager $permissionManager, PermissionEnum $permission)
+    {
         $status = [200, "All Good"];
         $data = null;
         $server = null;
@@ -468,19 +568,20 @@ final class AppController extends AbstractController
             $status = [403, "Token invalide"];
         } else {
             $data = $request->getPayload();
-    
+
             $server = $entityManager->getRepository(Server::class)->findOneBy(["id" => $data->get('serverId')]);
-    
-            if(!$server){
+
+            if (!$server) {
                 $status = [403, "Bad request"];
             } else {
                 $roles = $server->getRoles();
-        
+
                 /** @var User $user */
                 $user = $this->getUser();
-                if(!$permissionManager->hasServerRight($user->getId(), $roles, $permission)){
+                if (!$permissionManager->hasServerRight($user->getId(), $roles, $permission)) {
                     $status = [403, "Permission manquante"];
-                };
+                }
+                ;
             }
         }
 

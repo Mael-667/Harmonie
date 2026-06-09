@@ -1,15 +1,20 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useContext } from "react";
 import Modal from "./modules/Modal";
 import { copy } from "./modules/Utils";
+import { UserContext } from "./modules/UserContext";
 import { DynamicImageInput, Field, FormPost, Select } from "./modules/FormComponents";
 
 export default function ServerSettings({ setSettingsOpened, server, channels }) {
     // set la valeur par défaut
     const [tab, setTab] = useState("properties");
     const [invitDetails, setInvitDetails] = useState(null);
+    const [creatingCategory, setCreatingCategory] = useState(false);
+
+    const user = useContext(UserContext);
+
     const url = (window.location.origin).replace(window.location.protocol, "").replace("//", "");
 
-    const categories = useMemo(() => getCategories(channels) ,[channels])
+    const categories = useMemo(() => getCategories(channels), [channels])
 
     useEffect(() => {
         let form = new FormData();
@@ -25,10 +30,10 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
             });
     }, [server, url])
 
-    function getCategories(channels){
+    function getCategories(channels) {
         let categories = [];
         channels.forEach(c => {
-            if (c.category && !categories.includes(c.category)) {
+            if (!categories.includes(c.category)) {
                 categories.push(c.category);
             }
         })
@@ -63,11 +68,11 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
             // Set the FormData instance as the request body
             body: form,
         })
-        .then((response) => response.json())
-        .then((e) => {
-            console.log(e);
-        })
-        .catch((err) => console.log(err))
+            .then((response) => response.json())
+            .then((e) => {
+                console.log(e);
+            })
+            .catch((err) => console.log(err))
     }
 
     function deleteServer(e) {
@@ -80,11 +85,11 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
             // Set the FormData instance as the request body
             body: form,
         })
-        .then((response) => response.json())
-        .then((e) => {
-            console.log(e);
-        })
-        .catch((err) => console.log(err))
+            .then((response) => response.json())
+            .then((e) => {
+                console.log(e);
+            })
+            .catch((err) => console.log(err))
     }
 
     function createChannel(e) {
@@ -97,11 +102,48 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
             // Set the FormData instance as the request body
             body: form,
         })
-        .then((response) => response.json())
-        .then((e) => {
-            console.log(e);
+            .then((response) => response.json())
+            .then((e) => {
+                console.log(e);
+            })
+            .catch((err) => console.log(err))
+    }
+
+    function updateChannel(e, channelId) {
+        e.preventDefault();
+        let form = new FormData(e.currentTarget);
+        form.append("serverId", server.serverId)
+        form.append("channelId", channelId)
+
+        fetch(origin + "/app/editChannel", {
+            method: "POST",
+            // Set the FormData instance as the request body
+            body: form,
         })
-        .catch((err) => console.log(err))
+            .then((response) => response.json())
+            .then((e) => {
+                console.log(e);
+            })
+            .catch((err) => console.log(err))
+    }
+
+    function deleteChannel(channelId) {
+        // pas de <FormPost> ici (onClick), on ajoute donc le token CSRF à la main
+        let form = new FormData();
+        form.append("token", user?.csrfToken)
+        form.append("serverId", server.serverId)
+        form.append("channelId", channelId)
+
+        fetch(origin + "/app/deleteChannel", {
+            method: "POST",
+            // Set the FormData instance as the request body
+            body: form,
+        })
+            .then((response) => response.json())
+            .then((e) => {
+                console.log(e);
+            })
+            .catch((err) => console.log(err))
     }
 
 
@@ -171,15 +213,38 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
                         <h3>Créer un canal</h3>
                         <FormPost className="singleLineForm" onSubmit={createChannel}>
                             <Field id={"channelName"} label={"Nom de votre canal"} />
-                            <Select id="category" label="Séléctionnez une catégorie" options={categories} />
+                            <div className="selectCategory">
+                                {categories.length != 0 && !creatingCategory && <Select id="category" label="Séléctionnez une catégorie" options={categories} />}
+                                {creatingCategory && <Field id="category" label="Nom de votre nouvelle catégorie" />}
+                                <button type="button" className="actionButton formActionButton" onClick={!creatingCategory ? () => setCreatingCategory(true) : () => setCreatingCategory(false)}>{categories.length == 0 && !creatingCategory && "Ajouter une catégorie"} {!creatingCategory ? <i className="fa-solid fa-circle-plus"></i> : <i className="fa-solid fa-circle-xmark"></i>}</button>
+                            </div>
                             <button type="submit" className="button crimsonButton">Créer le canal</button>
                         </FormPost>
                     </div>
                     <div>
                         <h3>Gérez vos canaux</h3>
-                        <div>
-                            {channels.map((e, i) => 
-                                <div key={i}>{e.name}</div>
+                        <div className="listConteneur" style={{ flexDirection: "column", padding: "0.3rem" }}>
+                            {channels.map((e, i) =>
+                                <FormPost key={i} className="channelDetails" onSubmit={(event) => updateChannel(event, e.id)}>
+                                    <div className="editChannelName">
+                                    #<input
+                                        name="editedChannelName"
+                                        defaultValue={e.name}   /* ex-`editInput.value = oldContent` */
+                                        placeholder="Nommez votre canal"
+                                        aria-label="Nom de votre canal"
+                                        className="editedMessage"
+                                    />
+                                    </div>
+                                    <div className="selectCategory">
+                                        {categories.length != 0 && !creatingCategory && <Select id="category" label="Séléctionnez une catégorie" options={categories} defaultValue={e.category} />}
+                                        {creatingCategory && <Field id="category" label="Nom de votre nouvelle catégorie" />}
+                                        <button type="button" className="actionButton formActionButton" onClick={!creatingCategory ? () => setCreatingCategory(true) : () => setCreatingCategory(false)}>{categories.length == 0 && !creatingCategory && "Ajouter une catégorie"} {!creatingCategory ? <i className="fa-solid fa-circle-plus"></i> : <i className="fa-solid fa-circle-xmark"></i>}</button>
+                                    </div>
+                                    <button className="actionButton formActionButton" type="button" aria-label="Supprimer le message" onClick={() => deleteChannel(e.id)}>
+                                        <i className="fa-solid fa-trash-can" aria-hidden="true"></i>
+                                    </button>
+                                    <button type="submit" className="button crimsonButton">Mettre à jour le canal</button>
+                                </FormPost>
                             )}
                         </div>
                     </div>

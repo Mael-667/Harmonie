@@ -3,7 +3,7 @@ body {
     background: var(--background);
 }
 
-#root{
+#root {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
     grid-template-rows: 1fr;
@@ -27,7 +27,7 @@ body {
     background-color: var(--background-secondary);
 }
 
-.serverButton{
+.serverButton {
     width: 3.7rem;
     height: 3.7rem;
     border-radius: 1rem;
@@ -39,52 +39,54 @@ body {
     display: block;
     transition: 150ms;
     border: none;
-    &:hover{
+
+    &:hover {
         filter: brightness(0.8);
     }
 }
 
-.serverButtonActive{
+.serverButtonActive {
     border: 2px solid var(--main-color);
 }
 
-#newServer{
+#newServer {
     background-color: var(--field-bg);
     border: 1px solid var(--main-outline);
     display: flex;
     align-items: center;
     justify-content: center;
-    & i{
+
+    & i {
         color: var(--secondary-color);
         font-size: 3.5rem;
         transition: 150ms;
     }
 }
 
-#serverInfo{
+#serverInfo {
     width: 100%;
     border: 1px solid var(--main-outline);
 }
 
-#serverDetails{
+#serverDetails {
     display: flex;
     justify-content: space-between;
     border-bottom: 1px solid var(--main-outline);
     padding: 0 1rem;
 }
 
-.serverName{
+.serverName {
     color: var(--main-color);
     font-size: 1.5rem;
     margin: 1.25rem 0;
 }
 
-.editServer{
+.editServer {
     font-size: 1.2rem !important;
     padding: 0;
 }
 
-#channels{
+#channels {
     padding: 1rem;
     display: flex;
     flex-direction: column;
@@ -92,7 +94,7 @@ body {
     align-items: flex-start;
 }
 
-.channelButton{
+.channelButton {
     background: none;
     border: none;
     color: var(--main-color);
@@ -101,12 +103,12 @@ body {
     cursor: pointer;
     transition: 50ms;
 
-    &:hover{
+    &:hover {
         filter: brightness(1.4);
     }
 }
 
-.channelButtonActive{
+.channelButtonActive {
     border-bottom: 2px solid var(--main-color);
 }
 
@@ -127,7 +129,7 @@ body {
     border-radius: 50%;
 }
 
-#userHandles{
+#userHandles {
     display: flex;
     align-items: flex-start;
     justify-content: space-around;
@@ -137,26 +139,28 @@ body {
 
     font-family: "Roboto", sans-serif;
     font-size: 1.15rem;
-    &>*{
+
+    &>* {
         margin: 0;
     }
 }
 
-#userHandle{
+#userHandle {
     color: var(--main-color);
     cursor: pointer;
 }
 
-#settings{
+#settings {
     margin-left: auto;
 }
 
-#profileSetting{
+#profileSetting {
     color: var(--secondary-color);
     font-size: 1.8rem;
     padding-top: 3px;
     transition: 1000ms;
-    &:hover{
+
+    &:hover {
         transform: rotate(180deg);
     }
 }
@@ -181,55 +185,56 @@ body {
     scrollbar-color: var(--scrollbar) var(--background);
 }
 
-.message{
+.message {
     display: flex;
 }
 
-.message:hover:has(.contentBox > *:only-child){
+.message:hover:has(.contentBox > *:only-child) {
     background-color: var(--background-hover);
 }
 
-.msgSideContent{
+.msgSideContent {
     width: 3.5rem;
 }
 
-.pfpBox{
+.pfpBox {
     width: 100%;
     height: auto;
     border-radius: 50%;
 }
 
-.messageInfo{
+.messageInfo {
     margin-top: 0.4rem;
 }
 
-.messageContent{
+.messageContent {
     flex-grow: 1;
 }
 
-.pseudo{
+.pseudo {
     font-family: 'Roboto';
     font-size: 1.2rem;
     color: var(--secondary-color);
     margin-left: 0.6rem;
 }
 
-.messageDate{
+.messageDate {
     font-size: 0.7rem;
     /* font-weight: 300; */
     font-family: 'Roboto';
     color: var(--main-color);
 }
 
-.contentBox{
+.contentBox {
     padding-top: 0.22rem;
     position: relative;
-    &>*{
+
+    &>* {
         padding-left: 0.6rem;
     }
 }
 
-.content{
+.content {
     margin: 0;
     font-family: arial;
     padding: 0.07rem 0;
@@ -238,24 +243,26 @@ body {
 
 }
 
-.message:hover{
+.message:hover {
     background-color: var(--background-hover);
 }
-.content:has(.editForm){
+
+.content:has(.editForm) {
     padding-left: 0;
-    &:hover{
+
+    &:hover {
         background: none !important;
     }
 }
 
-.attachment{
+.attachment {
     display: block;
     max-height: 15rem;
     margin-bottom: 0.5rem;
     border-radius: 7px;
 }
 
-.actionButtons{
+.actionButtons {
     position: absolute;
     top: -0.6rem;
     right: 1rem;
@@ -270,19 +277,19 @@ body {
     display: block;
 }
 
-.actionButton{
+.actionButton {
     background: none;
     border: none;
     position: relative;
     color: var(--secondary-color-hover);
     font-size: 1.07rem;
 
-    &:hover{
+    &:hover {
         color: var(--secondary-color);
     }
 }
 
-.editForm{
+.editForm {
     display: flex;
     flex-direction: row;
     height: 1.7rem;
@@ -294,7 +301,7 @@ body {
     background-color: var(--background-secondary);
 }
 
-#editedMessage{
+.editedMessage {
     padding: 0;
     margin: 0;
     background: none;
@@ -306,18 +313,18 @@ body {
     outline: #ffffff00;
 }
 
-.cancelDiv{
+.cancelDiv {
     margin-bottom: 0.3rem;
 }
 
-.editButton{
+.editButton {
     color: var(--secondary-color);
     font-size: 1.3rem;
     position: relative;
     top: 2px;
 }
 
-.textButton{
+.textButton {
     background: none;
     border: none;
     color: var(--main-color);
@@ -337,7 +344,7 @@ body {
     margin-bottom: 0.7rem;
 }
 
-#input button{
+#input button {
     background-color: #ffffff00;
     border: none;
     padding: 0;
@@ -356,7 +363,8 @@ body {
         font-size: 2rem;
         color: var(--secondary-color-hover);
         transition: 150ms;
-        &:hover{
+
+        &:hover {
             color: var(--secondary-color);
         }
     }
@@ -375,15 +383,16 @@ body {
     font-size: 1.15rem;
     color: var(--text-color);
 
-    &::placeholder{
+    &::placeholder {
         color: var(--field-placeholder);
     }
-    &:focus{
+
+    &:focus {
         outline: none;
     }
 }
 
-#submitButton>i{
+#submitButton>i {
     font-size: 1.8rem !important;
     position: relative;
     top: 0.1rem;
@@ -398,12 +407,12 @@ body {
     align-self: center;
 }
 
-.attachmentPreview{
+.attachmentPreview {
     height: 10rem;
     border-radius: 3px;
 }
 
-.attachmentPreviewDiv{
+.attachmentPreviewDiv {
     padding: 1rem;
 }
 
@@ -411,7 +420,7 @@ body {
     grid-column: 11 / 13;
 }
 
-.popupBackground{
+.popupBackground {
     position: absolute;
     top: 0;
     right: 0;
@@ -424,7 +433,7 @@ body {
     align-items: center;
 }
 
-.popup{
+.popup {
     background-color: var(--background);
     border: 1px solid var(--main-outline);
     box-shadow: 0 0 4px var(--main-color);
@@ -432,17 +441,17 @@ body {
     padding: 2rem 1.5rem;
 }
 
-#popupNewServer{
+#popupNewServer {
     gap: 2.5rem;
     width: 30rem;
     align-items: center;
 
-    &>div{
+    &>div {
         width: 90%;
     }
 }
 
-.dynamicImageInput{
+.dynamicImageInput {
     display: flex;
     height: 6.5rem;
     width: 6.5rem;
@@ -462,16 +471,16 @@ body {
     position: relative;
 }
 
-.imgInputPlaceholder{
+.imgInputPlaceholder {
     text-align: center;
     padding: 0.4rem;
 }
 
-.imageInput{
+.imageInput {
     display: none;
 }
 
-.imgInputIcon{
+.imgInputIcon {
     position: absolute;
     bottom: 0.1rem;
     right: 0;
@@ -479,17 +488,18 @@ body {
     filter: drop-shadow(0 0 5px #000000);
 }
 
-form{
+form {
     color: var(--secondary-color);
 }
 
-.field{
+.field {
     display: flex;
     flex-direction: column;
     padding: 0.3em 0;
     flex-grow: 1;
 
-    & input, select{
+    & input,
+    select {
         background: var(--field-bg);
         border: 1px solid var(--main-outline);
         border-radius: 0.5rem;
@@ -501,42 +511,46 @@ form{
     }
 }
 
-.singleLineForm{
+.singleLineForm {
     display: flex;
     align-items: flex-end;
     justify-content: space-evenly;
     gap: 1rem;
 
-    & button{
+    & button {
         border-radius: 0.5rem;
         padding: 0.55rem;
         margin: 0.3rem 0;
     }
 }
 
-#popupServerSettings{
+#popupServerSettings {
     /* min-width: 70%; */
 }
 
-#settingsContent{
+#settingsContent {
     display: flex;
-    flex: 1;          /* occupe la hauteur restante de .popup (sous le h2) */
-    min-height: 0;    /* lève le min-height:auto des flex items -> autorise le scroll des enfants */
-}
-
-#settingsDetails{
-    flex: 1;          /* occupe l'espace restant a cote de la nav */
+    flex: 1;
+    /* occupe la hauteur restante de .popup (sous le h2) */
     min-height: 0;
-    overflow-y: auto; /* scroll vertical quand le contenu depasse */
+    /* lève le min-height:auto des flex items -> autorise le scroll des enfants */
 }
 
-#serverSettingsNav{
+#settingsDetails {
+    flex: 1;
+    /* occupe l'espace restant a cote de la nav */
+    min-height: 0;
+    overflow-y: auto;
+    /* scroll vertical quand le contenu depasse */
+}
+
+#serverSettingsNav {
     display: flex;
     flex-direction: column;
     margin-right: 2rem;
 }
 
-#invitUrlConteneur{
+#invitUrlConteneur {
     background: var(--field-bg);
     border: 1px solid var(--main-outline);
     border-radius: 0.5rem;
@@ -547,7 +561,7 @@ form{
     align-items: center;
 }
 
-#newInvit{
+#newInvit {
     padding: 0;
     border: none;
     background: #ffffff00;
@@ -556,14 +570,14 @@ form{
     font-size: 1rem;
 }
 
-.settingsContent{
+.settingsContent {
     display: flex;
     flex-direction: column;
     gap: 2rem;
     padding-right: 0.5rem;
 }
 
-.listConteneur{
+.listConteneur {
     background: var(--background-secondary);
     border: 1px solid var(--main-outline);
     border-radius: 0.6rem;
@@ -571,7 +585,7 @@ form{
     justify-content: space-evenly;
 }
 
-.activeInvitation{
+.activeInvitation {
     margin: 0.5rem;
     padding: 0.4rem;
     border: 1px solid var(--main-color);
@@ -579,36 +593,37 @@ form{
     background-color: var(--field-bg);
     cursor: pointer;
     transition: 150ms;
-    & p{
+
+    & p {
         margin: 0.3rem 0;
     }
 
-    &:hover{
+    &:hover {
         background-color: var(--background-hover);
     }
 }
 
-.smallText{
+.smallText {
     font-size: 0.8rem;
 }
 
-.secondaryColor{
+.secondaryColor {
     color: var(--secondary-color);
 }
 
-.servInfoForm{
+.servInfoForm {
     display: flex;
     flex-direction: column;
     gap: 0.7rem;
 }
 
-.servInfoEdit{
+.servInfoEdit {
     display: flex;
     align-items: flex-end;
     gap: 2rem;
 }
 
-.navButton{
+.navButton {
     background: none;
     border: none;
     color: var(--main-color);
@@ -617,11 +632,57 @@ form{
     border-bottom: 1px solid var(--main-outline);
     transition: 150ms;
 
-    &:hover{
+    &:hover {
         background-color: var(--background-secondary)
     }
 }
 
-.navButtonActive{
+.navButtonActive {
     text-decoration: underline;
+}
+
+.formActionButton {
+    margin: 0.45rem 0 !important;
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+
+    & i {
+        font-size: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+.selectCategory {
+    display: flex;
+    align-items: flex-end;
+}
+
+.channelDetails {
+    padding: 0.2rem 0.5rem;
+    border: 1px solid var(--main-outline);
+    border-radius: 0.4rem;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    margin: 0.35rem 0.4rem;
+    background-color: var(--background);
+    gap: 1rem;
+
+    & input {
+        font-family: 'Roboto';
+        font-size: 1.2rem;
+    }
+}
+
+.editChannelName {
+    display: flex;
+    align-items: center;
+    padding: 0.35rem;
+    margin: 0.35rem 0;
+    background: var(--background-secondary);
+    border-radius: 0.4rem;
+    border: 1px solid var(--main-darker);
 }

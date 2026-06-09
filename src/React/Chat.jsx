@@ -25,6 +25,7 @@ export default function Chat({ channelId, initialMessages }) {
   }
 
   // utilise les callback pour queue les modifs au cas où on reçoit 2 messages entre 2 render
+  // TODO: ajouter route update
   const ws = useWebsocket({
     url: url,
     onReceiveMessage: (message) => {
@@ -202,7 +203,7 @@ function EditMessage({ handleEdit, content, cancelEdit, messageId }) {
         placeholder="Votre nouveau message ici."
         aria-label="Nouveau contenu du message"
         autoFocus
-        id="editedMessage"
+        className="editedMessage"
       />
       <div className="horizontalLine"></div>
       <button type="submit" className="transparentButton editButton" aria-label="Envoyer la modification">

@@ -16,6 +16,17 @@ class ChannelRepository extends ServiceEntityRepository
         parent::__construct($registry, Channel::class);
     }
 
+    public function getAllAttachments($channelId){
+        return $this->createQueryBuilder("channel")
+        ->select("message.attachment")
+        ->innerJoin("channel.message", "message")
+        ->where("channel.id = :val")
+        ->setParameter("val", $channelId)
+        ->andWhere("message.attachment IS NOT NULL")
+        ->getQuery()
+        ->getArrayResult();
+    }
+
 //    /**
 //     * @return Channel[] Returns an array of Channel objects
 //     */
