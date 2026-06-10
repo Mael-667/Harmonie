@@ -616,8 +616,8 @@ final class AppController extends AbstractController
     #[Route('/app/deleteUser', name: 'app_deleteUser', methods: ["POST"])]
     public function deleteUser(
         Request $request,
-        SluggerInterface $slugger,
         EntityManagerInterface $entityManager,
+        #[Autowire('%kernel.project_dir%/public/uploads/pdp')] string $pdpDirectory
     ) {
         if (!$this->isCsrfTokenValid(self::CRSF_ID, $request->getPayload()->get('token'))) {
             return new Response('Token invalide', 403);
@@ -626,9 +626,15 @@ final class AppController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
+        $avatarUrl = $pdpDirectory . "/" . $user->getAvatarUrl();
+        if (is_file($avatarUrl)) {
+            if (!unlink($avatarUrl)) {
+            }
+        }
+
         $entityManager->remove($user);
         $entityManager->flush();
-        
+
         return new JsonResponse(["error" => "prank"], 200);
     }
 

@@ -29,9 +29,11 @@ export default function UserSettings({ close, user }) {
         .then((response) => response.json())
         .then((e) => {
             console.log(e);
+            window.location.replace(window.location.origin+"/logout");
         })
         .catch((err) => console.log(err))
     }
+    
 
     return <Modal onClose={close} className="userSettings">
         <div>
