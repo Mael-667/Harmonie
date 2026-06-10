@@ -1,4 +1,4 @@
-import { DynamicImageInput, Field, FormPost } from "./modules/FormComponents";
+import { DynamicImageInput, Field, FormButtonWithConfirmation, FormPost } from "./modules/FormComponents";
 import Modal from "./modules/Modal";
 
 export default function UserSettings({ close, user }) {
@@ -51,9 +51,7 @@ export default function UserSettings({ close, user }) {
         </div>
         <div>
             <h3>Section dangereuse</h3>
-            <FormPost onSubmit={deleteProfile}>
-                <button type="submit" className="button crimsonButton">Supprimer le profil</button>
-            </FormPost>
+            <FormButtonWithConfirmation label={"Supprimer votre profil"} onSubmit={deleteProfile} confirmationMessage={"Voulez vous vraiment supprimer votre profil ?"} />
         </div>
     </Modal>
 }

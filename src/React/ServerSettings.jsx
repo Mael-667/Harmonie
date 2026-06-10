@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useContext } from "react";
 import Modal from "./modules/Modal";
 import { copy } from "./modules/Utils";
 import { UserContext } from "./modules/UserContext";
-import { DynamicImageInput, Field, FormPost, Select } from "./modules/FormComponents";
+import { DynamicImageInput, Field, FormButtonWithConfirmation, FormPost, Select } from "./modules/FormComponents";
 
 export default function ServerSettings({ setSettingsOpened, server, channels }) {
     // set la valeur par défaut
@@ -88,6 +88,7 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
             .then((response) => response.json())
             .then((e) => {
                 console.log(e);
+                window.location.replace(window.location.origin+"/app");
             })
             .catch((err) => console.log(err))
     }
@@ -202,9 +203,7 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
                     </div>
                     <div>
                         <h3>Section dangereuse</h3>
-                        <FormPost onSubmit={deleteServer}>
-                            <button type="submit" className="button crimsonButton">Supprimer le serveur</button>
-                        </FormPost>
+                        <FormButtonWithConfirmation label={"Supprimer le serveur"} onSubmit={deleteServer} confirmationMessage={"Voulez vous vraiment supprimer ce serveur ?"} />
                     </div>
                 </div>)}
 

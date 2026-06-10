@@ -619,6 +619,7 @@ final class AppController extends AbstractController
         EntityManagerInterface $entityManager,
         #[Autowire('%kernel.project_dir%/public/uploads/pdp')] string $pdpDirectory
     ) {
+        // TODO: supprimer les serveurs orphelins et passer le role admin a un membre
         if (!$this->isCsrfTokenValid(self::CRSF_ID, $request->getPayload()->get('token'))) {
             return new Response('Token invalide', 403);
         }

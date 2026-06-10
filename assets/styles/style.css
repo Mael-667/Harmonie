@@ -1,4 +1,4 @@
-html{
+html {
     --main-color: #A81848;
     --main-outline: #a81848a0;
     --main-darker: #4e0a21b3;
@@ -16,14 +16,14 @@ html{
     font-family: Arial, Helvetica, sans-serif;
 }
 
-body{
+body {
     min-height: 100vh;
     background: var(--background);
     background: linear-gradient(135deg, rgba(22, 22, 22, 1) 0%, rgb(22 17 17) 16%, rgb(7 0 2) 90%, rgba(10, 9, 9, 1) 100%);
     color: var(--text-color);
 }
 
-#title{
+#title {
     padding-top: 20vh;
     display: flex;
     justify-content: center;
@@ -31,28 +31,28 @@ body{
     flex-direction: column;
 }
 
-h1{
-  font-family: "Cabin Sketch", sans-serif;
-  font-weight: 700;
-  font-style: normal;
-  color: var(--secondary-color);
-  font-size: 6.5rem;
+h1 {
+    font-family: "Cabin Sketch", sans-serif;
+    font-weight: 700;
+    font-style: normal;
+    color: var(--secondary-color);
+    font-size: 6.5rem;
 }
 
-h2{
-  font-family: "Cabin Sketch", sans-serif;
-  font-weight: 700;
-  font-style: normal;
-  color: var(--secondary-color);
-  font-size: 3.3rem;
-  text-align: center;
+h2 {
+    font-family: "Cabin Sketch", sans-serif;
+    font-weight: 700;
+    font-style: normal;
+    color: var(--secondary-color);
+    font-size: 3.3rem;
+    text-align: center;
 
-  margin: 0;
-  margin-top: 0.5rem;
-  margin-bottom: 1rem;
+    margin: 0;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
 }
 
-h2::after{
+h2::after {
     content: " ";
     display: block;
     height: 1px;
@@ -61,13 +61,13 @@ h2::after{
     margin: 0 10%;
 }
 
-h3{
+h3 {
     color: var(--secondary-color);
     margin: 0.9rem 0;
     font-size: 1.5rem;
     width: fit-content;
 
-    &::after{
+    &::after {
         content: " ";
         display: block;
         height: 1px;
@@ -78,11 +78,11 @@ h3{
     }
 }
 
-button{
+button {
     cursor: pointer;
 }
 
-.soustitre{
+.soustitre {
     font-family: "Cabin Sketch", sans-serif;
     font-weight: 700;
     font-style: normal;
@@ -94,17 +94,19 @@ button{
     margin-bottom: 1.8rem;
 }
 
-.titleButtons{
+.titleButtons {
     display: flex;
     gap: 3rem;
-    &>a{
+    justify-content: center;
+
+    &>a {
         text-decoration: none;
         color: var(--secondary-color);
         font-size: 1.25rem;
     }
 }
 
-.button{
+.button {
     border: 1px solid var(--main-color);
     padding: 0.55rem;
     border-radius: 0.5rem;
@@ -115,15 +117,19 @@ button{
     cursor: pointer;
 }
 
-.button:hover{
+.button:hover {
     box-shadow: 0 0 4px var(--main-color);
 }
 
-.crimsonButton{
+.crimsonButton {
     background-color: var(--main-darker);
 }
 
-.popup{
+.secondaryButton {
+    background-color: #0a090900;
+}
+
+.popup {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -136,14 +142,14 @@ button{
     box-shadow: 0px 0px 6px 0px var(--main-color);
 }
 
-.buttons{
+.buttons {
     display: flex;
     flex-direction: row;
     justify-content: space-around;
     margin: 0.7rem 0;
 }
 
-.horizontalLine{
+.horizontalLine {
     width: 1px;
     height: 70%;
     background-color: var(--main-outline);
@@ -151,7 +157,7 @@ button{
     margin: 0 0.4rem;
 }
 
-.transparentButton{
+.transparentButton {
     background: none;
     border: none;
     padding: 0;

@@ -81,6 +81,27 @@ $ws->onMessage(function($msg, $user) use (&$ws, &$symfonyIPC){
                     });
                 };
                 break;
+            case "currentLocation":
+                $user->channelId = $msg->channel;
+                $user->serverId = $msg->server;
+
+                $preparedMessage = json_encode(connectedUser($user->id));
+                $ws->broadcastMessageTo($preparedMessage, function($user) use (&$msg){
+                    return $user->serverId == $msg->server;
+                });
+                break;
+            case "getUsersStatus":
+                $connectedUsersIds = [];
+                $users = $ws->getAllUsers();
+                foreach($users as $u){
+                    if($u->serverId == $msg->server){
+                        $connectedUsersIds[] = $u->id;
+                    }
+                }
+
+                $preparedMessage = json_encode(["type" => "usersStatus", "payload" => ["connectedUsers" => $connectedUsersIds]]);
+                $ws->respond($user, $preparedMessage);
+                break;
             default:
                 //todo: renvoyer un message d'erreur requete invalide
                 break;
@@ -89,6 +110,13 @@ $ws->onMessage(function($msg, $user) use (&$ws, &$symfonyIPC){
         var_dump($msg);
     }
         
+});
+
+$ws->onClose(function($disconnectedUser) use (&$ws){
+    $preparedMessage = json_encode(disconnectedUser($disconnectedUser->id));
+    $ws->broadcastMessageTo($preparedMessage, function($user) use (&$msg, &$disconnectedUser){
+        return $disconnectedUser->serverId == $user->serverId;
+    });
 });
 
 function validateWsMessage($user, $msg): bool{
@@ -143,6 +171,25 @@ function deletedMessage($messageId){
         ]    
     ];
 }
+
+function connectedUser($userId){
+    return [
+        "type" => "connectedUser",
+        "payload" => [
+            "userId" => $userId
+        ]    
+    ];
+}
+
+function disconnectedUser($userId){
+    return [
+        "type" => "disconnectedUser",
+        "payload" => [
+            "userId" => $userId
+        ]    
+    ];
+}
+
 
 $ws->run();
 

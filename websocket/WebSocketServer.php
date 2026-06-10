@@ -61,6 +61,7 @@ class WebSocketServer
             });
 
             $conn->on("close", function() use ($user) {
+                $this->callback("onClose", null, $user);
                 unset($this->users[array_search($user, $this->users)]);
             });
         });
@@ -205,7 +206,9 @@ class WebSocketServer
             case 'onMessage':
                 if(isset($this->callbacks["onMessage"])) ($this->callbacks["onMessage"])($data, $user);
                 break;
-            
+            case 'onClose':
+                if(isset($this->callbacks["onClose"])) ($this->callbacks["onClose"])($user);
+                break;
             default:
                 # code...
                 break;
@@ -214,6 +217,10 @@ class WebSocketServer
 
     public function onMessage(callable $fun){
         $this->callbacks["onMessage"] = $fun;
+    }
+
+    public function onClose(callable $fun){
+        $this->callbacks["onClose"] = $fun;
     }
 
     public function broadcastMessage($message){
@@ -230,5 +237,13 @@ class WebSocketServer
                 $user->conn->write($this->encodeFrame($message));
             }
         }
+    }
+
+    public function respond($user, $message){
+        $user->conn->write($this->encodeFrame($message));
+    }
+
+    public function getAllUsers(){
+        return $this->users;
     }
 }

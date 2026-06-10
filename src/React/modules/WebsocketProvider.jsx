@@ -1,15 +1,14 @@
-import { useEffect, useRef } from "react";
+import { createContext, useEffect, useMemo, useRef } from "react";
 
-export default function useWebsocket({ url, onReceiveMessage, onEditMessage, onDeleteMessage, onSpecialMessage }) {
+export const WebsocketContext = createContext(null);
+
+export default function WebsocketProvider({ url, children }) {
 
   const ws = useRef(null);
 
   // Les callbacks changent à chaque render (ils capturent messages/channelId).
   // On les garde à jour dans un ref pour ne PAS recréer la socket à chaque fois.
-  const handlersRef = useRef(null);
-  useEffect(() => {
-    handlersRef.current = { onReceiveMessage, onEditMessage, onDeleteMessage, onSpecialMessage };
-  });
+  const callbacksRef = useRef({});
 
   useEffect(() => {
     let closedByUs = false;
@@ -37,20 +36,11 @@ export default function useWebsocket({ url, onReceiveMessage, onEditMessage, onD
       ws.current.onmessage = (e) => {
         console.log(e.data);
         const data = JSON.parse(e.data);   // { type, payload } : le type est sur l'objet EXTÉRIEUR
-        const h = handlersRef.current;
-        switch (data.type) {
-          case "newMessage":
-            h?.onReceiveMessage(data.payload);
-            break;
-          case "editMessage":
-            h?.onEditMessage(data.payload);
-            break;
-          case "deleteMessage":
-            h?.onDeleteMessage(data.payload);
-            break;
-          default:
-            h?.onSpecialMessage(data);
-            break;
+        const callback = callbacksRef.current[data.type]
+        if(callback){
+          callback(data.payload);
+        } else {
+          console.log(data);
         }
       };
 
@@ -81,5 +71,9 @@ export default function useWebsocket({ url, onReceiveMessage, onEditMessage, onD
     }
   }, [url])
 
-  return { send: (data) => ws.current?.send(data) };
+  const value = useMemo(() => ({ send: (data) => ws.current?.send(data), addListener: (event, callback) => callbacksRef.current[event] = callback}), [])
+
+  return <WebsocketContext value={value}>
+    {children}
+  </WebsocketContext>
 }

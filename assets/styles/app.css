@@ -701,3 +701,9 @@ form {
     display: flex;
     align-items: stretch;
 }
+
+.confirmationPopup{
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}

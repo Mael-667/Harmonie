@@ -3,6 +3,8 @@ import ServersPanel from "./ServersPanel";
 import Chat from "./Chat";
 import { UserContext } from "./modules/UserContext";
 import { PermissionProvider } from "./hooks/usePermission";
+import SocialPanel from "./SocialPanel";
+import WebsocketProvider from "./modules/WebsocketProvider";
 
 export default function App() {
   // Charge automatiquement les info du serveur si l'utilisateur accède spécifiquement a un lien contenant id serveur et ou channel
@@ -22,6 +24,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [update, setUpdate] = useState(0);
 
+  const url = (window.location.origin).replace(window.location.protocol, "").replace("//", "");
 
   // todo: update serverid et channelid quand on clique sur retour
 
@@ -30,7 +33,7 @@ export default function App() {
   useEffect(() => {
     // TODO: pouvoir customiser l'ordre des serveurs
     if (!serverId) return;
-    
+
     window.history.pushState("", "", origin + "/app/" + serverId + "/" + (channelId ?? ""));
 
     // return apres le setchannelid de l'effet qui l'a fait rerun
@@ -71,23 +74,13 @@ export default function App() {
 
   return <UserContext value={user}>
     <PermissionProvider roles={roles} userId={user?.id}>
-      <ServersPanel server={server} serverId={serverId} setServerId={setServerId} channels={channels} channelId={channelId} setChannelId={setChannelId} />
+      <WebsocketProvider url={url}>
+        <ServersPanel server={server} serverId={serverId} setServerId={setServerId} channels={channels} channelId={channelId} setChannelId={setChannelId} />
 
-      <Chat channelId={channelId} initialMessages={initialMessages} setUpdate={setUpdate} channel={channels?.find(e => e.id == channelId)} />
+        <Chat channelId={channelId} initialMessages={initialMessages} setUpdate={setUpdate} channel={channels?.find(e => e.id == channelId)} />
 
-      <div id="social">
-        <div id="search">
-          <form action="" method="get">
-            <input type="text" name="query" id="query" />
-            <button type="submit">
-              <i className="fa-solid fa-magnifying-glass"></i>
-            </button>
-          </form>
-        </div>
-        <div id="users">
-
-        </div>
-      </div>
+        <SocialPanel channelId={channelId} serverId={serverId}/>
+      </WebsocketProvider>
     </PermissionProvider>
   </UserContext>
 }

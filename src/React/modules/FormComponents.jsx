@@ -1,5 +1,6 @@
 import { useState, useContext } from "react";
 import { UserContext } from "./UserContext";
+import Modal from "./Modal";
 
 export function DynamicImageInput({ name, id, placeholder, tempPreview, children, ...props }) {
     const [preview, setPreview] = useState(tempPreview ?? null);
@@ -37,4 +38,20 @@ export function Select({id, label, options, defaultValue}){
                     {options.map((e, i) => <option key={i} value={e ?? ""} selected={e == defaultValue ? "selected" : ""}>{e == null ? "Sans valeur" : e}</option>)}
                 </select>
             </div>
+}
+
+export function FormButtonWithConfirmation({label, onSubmit, confirmationMessage}){
+    const [confirm, setConfirm] = useState(false);
+    return <button type="button" className="button crimsonButton" onClick={() => setConfirm(true)}>
+                {label}
+                {confirm && <Modal onClose={() => setConfirm(false)}>
+                        <FormPost onSubmit={onSubmit} className={"confirmationPopup"}>
+                            {confirmationMessage}
+                            <div className="titleButtons">
+                                <button type="button" onClick={() => setConfirm(false)} className="button secondaryButton">Annuler</button>
+                                <button type="submit" className="button crimsonButton">{label}</button>
+                            </div>
+                        </FormPost>
+                    </Modal>}
+            </button>
 }
