@@ -173,13 +173,23 @@ body {
 }
 
 #header {
-    min-height: 3rem;
-    max-height: 3rem;
+    max-height: 3.5rem;
+    min-height: 3.5rem;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--main-outline);
+    border-top: 1px solid var(--main-outline);
+}
+
+#channel-name{
+    color: var(--main-color);
+    font-size: 1.3rem;
+    margin-left: 1rem;
 }
 
 #messages {
     height: stretch;
-    padding: 0 1.3rem;
+    padding: 1.3rem;
     overflow-y: scroll;
     padding-bottom: 1rem;
     scrollbar-color: var(--scrollbar) var(--background);

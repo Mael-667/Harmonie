@@ -5,7 +5,7 @@ import { UserContext } from "./modules/UserContext";
 import { usePermission } from "./hooks/usePermission";
 import { FormPost } from "./modules/FormComponents";
 
-export default function Chat({ channelId, initialMessages, setUpdate }) {
+export default function Chat({ channelId, initialMessages, setUpdate, channel }) {
   const url = (window.location.origin).replace(window.location.protocol, "").replace("//", "");
   const user = useContext(UserContext);
   const messageConteneurRef = useRef(null);
@@ -114,7 +114,7 @@ export default function Chat({ channelId, initialMessages, setUpdate }) {
 
   return <div id="main">
     <div id="header">
-      <h3 id="channel-name"></h3>
+      <span id="channel-name">#{channel?.name}</span>
     </div>
 
     <div id="messages" ref={messageConteneurRef}>

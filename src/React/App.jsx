@@ -73,7 +73,7 @@ export default function App() {
     <PermissionProvider roles={roles} userId={user?.id}>
       <ServersPanel server={server} serverId={serverId} setServerId={setServerId} channels={channels} channelId={channelId} setChannelId={setChannelId} />
 
-      <Chat channelId={channelId} initialMessages={initialMessages} setUpdate={setUpdate} />
+      <Chat channelId={channelId} initialMessages={initialMessages} setUpdate={setUpdate} channel={channels?.find(e => e.id == channelId)} />
 
       <div id="social">
         <div id="search">
