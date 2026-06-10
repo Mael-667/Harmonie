@@ -25,7 +25,6 @@ export default function Chat({ channelId, initialMessages, setUpdate }) {
   }
 
   // utilise les callback pour queue les modifs au cas où on reçoit 2 messages entre 2 render
-  // TODO: ajouter route update
   const ws = useWebsocket({
     url: url,
     onReceiveMessage: (message) => {
@@ -42,9 +41,15 @@ export default function Chat({ channelId, initialMessages, setUpdate }) {
     onDeleteMessage: (message) => {
       setMessages(m => m.filter(msg => msg.id != message.id))
     },
-    onSpecialMessage: () => {
-      // let type = message.type;
-      setUpdate(m => m+1);
+    onSpecialMessage: (message) => {
+      let type = message.type;
+      switch (type) {
+        case "updateServer":
+          setUpdate(m => m+1);
+          break;
+        default:
+          break;
+      }
     }
   });
 

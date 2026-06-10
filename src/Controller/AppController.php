@@ -387,7 +387,6 @@ final class AppController extends AbstractController
             $serverIconUrl = $serverIcon . "/" . $server->getIcon();
             if (is_file($serverIconUrl)) {
                 if (!unlink($serverIconUrl)) {
-                    // TODO: handle échec de la suppression (droits, fichier verrouillé…)
                 }
             }
 
@@ -568,7 +567,6 @@ final class AppController extends AbstractController
             $attachmentUrl = $attachmentDir . "/" . $attachment["attachment"];
             if (is_file($attachmentUrl)) {
                 if (!unlink($attachmentUrl)) {
-                    // TODO: handle échec de la suppression (droits, fichier verrouillé…)
                 }
             }
         }

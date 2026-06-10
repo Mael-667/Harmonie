@@ -113,7 +113,6 @@ function NewServerPopup({ setOpened, onCreated, setServerId, getServers}) {
       .then((e) => {
         console.log(e);
         setOpened(false);
-        // TODO: refresh le form apres
         onCreated();
       })
       .catch((err) => console.log(err))

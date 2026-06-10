@@ -38,7 +38,6 @@ export default function useWebsocket({ url, onReceiveMessage, onEditMessage, onD
         console.log(e.data);
         const data = JSON.parse(e.data);   // { type, payload } : le type est sur l'objet EXTÉRIEUR
         const h = handlersRef.current;
-        // TODO: CRSF TOKEN ICI AUSSI
         switch (data.type) {
           case "newMessage":
             h?.onReceiveMessage(data.payload);
