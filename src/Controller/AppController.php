@@ -441,8 +441,8 @@ final class AppController extends AbstractController
         }
 
         $channels = $server->getChannels();
-        
-        foreach($channels as $channel){
+
+        foreach ($channels as $channel) {
             self::deleteAllChannelAttachment($channel->getId(), $entityManager, $attachmentDir);
         }
 
@@ -559,6 +559,80 @@ final class AppController extends AbstractController
         return new JsonResponse(["error" => "prank"], 200);
     }
 
+
+
+    #[Route('/app/editUser', name: 'app_editUser', methods: ["POST"])]
+    public function editUser(
+        Request $request,
+        SluggerInterface $slugger,
+        EntityManagerInterface $entityManager,
+        #[Autowire('%kernel.project_dir%/public/uploads/pdp')] string $pdpDirectory
+    ) {
+        if (!$this->isCsrfTokenValid(self::CRSF_ID, $request->getPayload()->get('token'))) {
+            return new Response('Token invalide', 403);
+        }
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $data = $request->getPayload();
+        $file = $request->files->get('avatar');
+
+        // si l'utilisateur envoie une nouvelle icone, on doit supprimer l'ancienne
+        if ($file) {
+            $avatarUrl = $pdpDirectory . "/" . $user->getAvatarUrl();
+            if (is_file($avatarUrl)) {
+                if (!unlink($avatarUrl)) {
+                }
+            }
+
+            $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $safeFilename = $slugger->slug($originalFilename);
+            $newFilename = $safeFilename . '-' . uniqid() . '.' . $file->guessExtension();
+            try {
+                $file->move($pdpDirectory, $newFilename);
+            } catch (FileException $e) {
+                // ... handle exception if something happens during file upload
+            }
+
+            $user->setAvatarUrl($newFilename);
+        }
+
+        $newName = $data->get("editPseudo");
+        if ($newName) {
+            $user->setPseudo($newName);
+        }
+
+        $newHandle = $data->get("editHandle");
+        if ($newHandle) {
+            $user->setHandle($newHandle);
+        }
+
+        $entityManager->flush();
+
+        return new JsonResponse(["error" => "prank"], 200);
+    }
+
+    #[Route('/app/deleteUser', name: 'app_deleteUser', methods: ["POST"])]
+    public function deleteUser(
+        Request $request,
+        SluggerInterface $slugger,
+        EntityManagerInterface $entityManager,
+    ) {
+        if (!$this->isCsrfTokenValid(self::CRSF_ID, $request->getPayload()->get('token'))) {
+            return new Response('Token invalide', 403);
+        }
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $entityManager->remove($user);
+        $entityManager->flush();
+        
+        return new JsonResponse(["error" => "prank"], 200);
+    }
+
+
     private function deleteAllChannelAttachment($channelId, EntityManagerInterface $entityManager, $attachmentDir)
     {
         $attachments = $entityManager->getRepository(Channel::class)->getAllAttachments($channelId);
@@ -573,7 +647,8 @@ final class AppController extends AbstractController
     }
 
 
-    private function updateUsers(WebsocketNotifier $websocketNotifier, Server $server, string $message = "updateServer"){
+    private function updateUsers(WebsocketNotifier $websocketNotifier, Server $server, string $message = "updateServer")
+    {
         $recipientIds = [];
         $serverUsers = $server->getUsers();
         foreach ($serverUsers as $member) {

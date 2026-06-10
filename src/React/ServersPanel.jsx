@@ -5,6 +5,7 @@ import ServerSettings from './ServerSettings';
 import { copy } from "./modules/Utils";
 import { DynamicImageInput, FormPost } from "./modules/FormComponents";
 import { usePermission } from "./hooks/usePermission";
+import UserSettings from "./UserSettings";
 
 export default function ServersPanel({ channels, channelId, server, serverId, setServerId, setChannelId }) {
 
@@ -12,6 +13,7 @@ export default function ServersPanel({ channels, channelId, server, serverId, se
   const [servers, setServers] = useState(null);
   const [opened, setOpened] = useState(false);
   const [settingsOpened, setSettingsOpened] = useState(false);
+  const [userSettingsOpened, setUserSettingsOpened] = useState(false);
 
   const { Permission, hasServerRight } = usePermission();
   const hasRight = hasServerRight(Permission.EditServer);
@@ -95,7 +97,8 @@ export default function ServersPanel({ channels, channelId, server, serverId, se
           <p id="userHandle" onClick={() => copy(user.handle)}>@{user.handle}</p>
         </div>
         <div id="settings">
-          <button aria-label="settings" className="transparentButton" id="profileSetting"><i className="fa-solid fa-gear" aria-hidden="true"></i></button>
+          <button aria-label="settings" className="transparentButton" id="profileSetting" onClick={() => setUserSettingsOpened(true)}><i className="fa-solid fa-gear" aria-hidden="true"></i></button>
+          {userSettingsOpened && <UserSettings close={() => setUserSettingsOpened(false)} user={user} />}
         </div>
       </div>
     }

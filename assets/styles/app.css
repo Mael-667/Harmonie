@@ -686,3 +686,8 @@ form {
     border-radius: 0.4rem;
     border: 1px solid var(--main-darker);
 }
+
+.userSettings{
+    display: flex;
+    align-items: stretch;
+}
