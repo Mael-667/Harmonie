@@ -3,21 +3,21 @@
 import { useContext, useEffect, useState } from "react";
 import { WebsocketContext } from "./modules/WebsocketProvider";
 
-export default function SocialPanel({channelId, serverId}) {
+export default function SocialPanel({ userList }) {
 
     const ws = useContext(WebsocketContext);
 
     // Liste des utilisateurs connectés sur le serveur courant
     const [connectedUsers, setConnectedUsers] = useState([]);
 
-    // Émission : signaler notre position + demander la liste initiale des connectés
     useEffect(() => {
-        ws.send(JSON.stringify({ type: "currentLocation", channel: channelId, server: serverId }));
-    }, [channelId, serverId, ws]);
+        const userIds = [];
+        userList.forEach(user => {
+            userIds.push(user.id)
+        });
 
-    useEffect(() => {
-        ws.send(JSON.stringify({ type: "getUsersStatus", server: serverId }));
-    }, [serverId, ws])
+        ws.send(JSON.stringify({ type: "whichOnline", users: userIds }));
+    }, [userList, ws]);
 
     useEffect(() => {
         // Réponse à getUsersStatus → liste initiale
@@ -28,13 +28,11 @@ export default function SocialPanel({channelId, serverId}) {
 
         // Un utilisateur arrive / change de position sur le serveur courant
         ws.addListener("connectedUser", (payload) => {
-            // payload = { userId }
             setConnectedUsers(m => [...m, payload.userId])
         });
 
         // Un utilisateur se déconnecte
         ws.addListener("disconnectedUser", (payload) => {
-            // payload = { userId }
             setConnectedUsers(m => m.filter(userId => userId != payload.userId));
         });
     }, [ws]);
@@ -48,8 +46,22 @@ export default function SocialPanel({channelId, serverId}) {
                 </button>
             </form>
         </div>
-        <div id="users">
+        <div id="members">
+            {userList.map((e, i) => <Member key={i} user={e} connectedUsers={connectedUsers} />)}
+        </div>
+    </div>
+}
 
+function Member({ key, user, connectedUsers }) {
+    const connected = connectedUsers.find(i => i == user.id);
+    return <div key={key} className="member">
+        <div className="memberPfp">
+            <img src={`/uploads/pdp/${user.avatar_url}`} alt="Member avatar" />
+            <div className="statusPastille" style={{backgroundColor: connected ? "#14a900" :"#5e5e5e"}}></div>
+        </div>
+        <div id="userHandles">
+            <p id="userPseudo">{user.pseudo}</p>
+            <p id="userHandle">@{user.handle}</p>
         </div>
     </div>
 }

@@ -19,6 +19,7 @@ export default function WebsocketProvider({ url, children }) {
       ws.current = new WebSocket(`ws://${url}:443`);
 
       ws.current.onopen = () => {
+        console.log("Websocket connecté !");
         const token = getCookie("token");
         let message = {
           "type": "authentification",

@@ -34,6 +34,11 @@ $ws->onMessage(function($msg, $user) use (&$ws, &$symfonyIPC){
                     $user->avatar = $userDetails->userAvatar;
                     $user->pseudo = $userDetails->pseudo;
                     // associer les infos de l'utilisateur a la connexion
+
+                    $preparedMessage = json_encode(connectedUser($user->id));
+                    $ws->broadcastMessageTo($preparedMessage, function($connectedUser) use (&$msg, &$user){
+                        return in_array($user->id, $connectedUser->userList);
+                    });
                 } else {
                     //todo: message d'erreur si le token est erroné
                     // rediriger l'utilisateur vers la page de connexion
@@ -81,20 +86,15 @@ $ws->onMessage(function($msg, $user) use (&$ws, &$symfonyIPC){
                     });
                 };
                 break;
-            case "currentLocation":
-                $user->channelId = $msg->channel;
-                $user->serverId = $msg->server;
+            case "whichOnline":
+                if(!$user->authenticated) return false;
 
-                $preparedMessage = json_encode(connectedUser($user->id));
-                $ws->broadcastMessageTo($preparedMessage, function($user) use (&$msg){
-                    return $user->serverId == $msg->server;
-                });
-                break;
-            case "getUsersStatus":
+                $serverUsers = $msg->users;
+                $user->userList = $serverUsers;
                 $connectedUsersIds = [];
                 $users = $ws->getAllUsers();
                 foreach($users as $u){
-                    if($u->serverId == $msg->server){
+                    if(in_array($u->id, $serverUsers)){
                         $connectedUsersIds[] = $u->id;
                     }
                 }
@@ -114,8 +114,8 @@ $ws->onMessage(function($msg, $user) use (&$ws, &$symfonyIPC){
 
 $ws->onClose(function($disconnectedUser) use (&$ws){
     $preparedMessage = json_encode(disconnectedUser($disconnectedUser->id));
-    $ws->broadcastMessageTo($preparedMessage, function($user) use (&$msg, &$disconnectedUser){
-        return $disconnectedUser->serverId == $user->serverId;
+    $ws->broadcastMessageTo($preparedMessage, function($user) use (&$disconnectedUser){
+        return in_array($disconnectedUser->id, $user->userList);
     });
 });
 

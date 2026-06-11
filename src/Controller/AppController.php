@@ -12,6 +12,7 @@ use App\Enum\PermissionEnum;
 use App\Form\ServerType;
 use App\Repository\MessageRepository;
 use App\Repository\ServerInvitationRepository;
+use App\Repository\ServerRepository;
 use App\Service\PermissionManager;
 use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -62,7 +63,7 @@ final class AppController extends AbstractController
 
     // GET /articles/42 — détail, id entier uniquement
     #[Route('/app/{id}/{serverId}', name: 'app_showServer', requirements: ['id' => '\d+'])]
-    public function showServer(Request $request, PermissionManager $permissionManager, MessageRepository $messageRepository, int $id, int $serverId = -1)
+    public function showServer(Request $request, PermissionManager $permissionManager, MessageRepository $messageRepository, ServerRepository $serverRepository, int $id, int $serverId = -1)
     {
         // Descriminer une premiere connexion d'une requete ajax avec le format de requete
         // La partie JS se chargera de request les données si elles sont demandées dans l'url
@@ -117,7 +118,8 @@ final class AppController extends AbstractController
             "roles" => $server->getRoles(),
             "channels" => $channelsJSON,
             "currentChannel" => $channelsJSON[$channelIndex]["id"],
-            "messages" => $messages
+            "messages" => $messages,
+            "members" => $serverRepository->getUsersInfo($id)
         ]));
     }
 

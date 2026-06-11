@@ -23,6 +23,7 @@ export default function App() {
   const [initialMessages, setInitialMessages] = useState([]);
   const [user, setUser] = useState(null);
   const [update, setUpdate] = useState(0);
+  const [userList, setUserList] = useState([]);
 
   const url = (window.location.origin).replace(window.location.protocol, "").replace("//", "");
 
@@ -55,6 +56,7 @@ export default function App() {
         setChannels(json.channels);
         setServer({ serverName: json.serverName, serverId: json.serverId, serverIcon: json.serverIcon })
         setInitialMessages(json.messages)
+        setUserList(json.members ?? [])
         console.log(json);
       })
       .catch((err) => console.log(err));
@@ -79,7 +81,7 @@ export default function App() {
 
         <Chat channelId={channelId} initialMessages={initialMessages} setUpdate={setUpdate} channel={channels?.find(e => e.id == channelId)} />
 
-        <SocialPanel channelId={channelId} serverId={serverId}/>
+        <SocialPanel channelId={channelId} serverId={serverId} userList={userList}/>
       </WebsocketProvider>
     </PermissionProvider>
   </UserContext>

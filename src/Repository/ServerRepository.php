@@ -16,6 +16,17 @@ class ServerRepository extends ServiceEntityRepository
         parent::__construct($registry, Server::class);
     }
 
+    public function getUsersInfo($serverId){
+        // On ne sélectionne que les champs d'affichage : surtout PAS password / token / email.
+        return $this->createQueryBuilder("server")
+                    ->select("users.id", "users.pseudo", "users.handle", "users.avatar_url", "users.status")
+                    ->innerJoin("server.users", "users")
+                    ->where("server.id = :serverId")
+                    ->setParameter("serverId", $serverId)
+                    ->getQuery()
+                    ->getArrayResult();
+    }
+
 //    /**
 //     * @return Server[] Returns an array of Server objects
 //     */
