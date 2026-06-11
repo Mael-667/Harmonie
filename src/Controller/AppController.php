@@ -405,9 +405,8 @@ final class AppController extends AbstractController
             $server->setIcon($newFilename);
         }
 
-        $newName = $data->get("editName");
-
-        if ($newName) {
+        $newName = trim($data->get("editName"));
+        if ($newName && $newName != "") {
             $server->setName($newName);
         }
 
@@ -471,7 +470,13 @@ final class AppController extends AbstractController
         }
 
         $channel = new Channel();
-        $channel->setName($data->get("channelName"));
+        $newName = trim($data->get("channelName"));
+        if ($newName && $newName != "") {
+            $channel->setName($newName);
+        } else {
+            return new Response(null, 400);
+        }
+
         $channel->setServer($server);
 
         $category = $data->get("category");
@@ -511,8 +516,11 @@ final class AppController extends AbstractController
         if (!$channel || $channel->getServer()->getId() != $server->getId()) {
             return new Response("Bad request", 403);
         }
-
-        $channel->setName($data->get("editedChannelName"));
+        
+        $newName = trim($data->get("editedChannelName"));
+        if ($newName && $newName != "") {
+            $channel->setName($newName);
+        }
 
         // catégorie vide => null (canal sans catégorie)                                                                                         
         $category = $data->get("category");
@@ -600,13 +608,13 @@ final class AppController extends AbstractController
             $user->setAvatarUrl($newFilename);
         }
 
-        $newName = $data->get("editPseudo");
-        if ($newName) {
+        $newName = trim($data->get("editPseudo"));
+        if ($newName && $newName != "") {
             $user->setPseudo($newName);
         }
 
-        $newHandle = $data->get("editHandle");
-        if ($newHandle) {
+        $newHandle = trim($data->get("editHandle"));
+        if ($newHandle && $newHandle != "") {
             $user->setHandle($newHandle);
         }
 
@@ -639,6 +647,31 @@ final class AppController extends AbstractController
         $entityManager->flush();
 
         return new JsonResponse(["error" => "prank"], 200);
+    }
+
+    #[Route('/app/search', name: 'app_search', methods: ["POST"])]
+    public function search(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        PermissionManager $permissionManager,
+        MessageRepository $messageRepository
+    ) {
+        // $status, $data, $server, $user, $channel
+        extract(self::accessChannel($request, $entityManager, $permissionManager, PermissionEnum::Read));
+
+        if ($status[0] != 200) {
+            return new Response($status[1], $status[0]);
+        }
+
+        $query = trim($data->get("query"));
+
+        if($query == ""){
+            return new Response(null, 404);
+        }
+
+        $result = $messageRepository->search($query, $data->get("channelId"));
+
+        return new JsonResponse(["result" => $result], 200);
     }
 
 
@@ -685,13 +718,11 @@ final class AppController extends AbstractController
                 $status = [403, "Bad request"];
             } else {
                 $roles = $server->getRoles();
-
                 /** @var User $user */
                 $user = $this->getUser();
                 if (!$permissionManager->hasServerRight($user->getId(), $roles, $permission)) {
                     $status = [403, "Permission manquante"];
-                }
-                ;
+                };
             }
         }
 
@@ -700,6 +731,49 @@ final class AppController extends AbstractController
             "data" => $data,
             "server" => $server,
             "user" => $user
+        ];
+    }
+
+    private function accessChannel(Request $request, EntityManagerInterface $entityManager, PermissionManager $permissionManager, PermissionEnum $permission)
+    {
+        $status = [200, "All Good"];
+        $data = null;
+        $server = null;
+        $user = null;
+        $channel = null;
+
+        if (!$this->isCsrfTokenValid(self::CRSF_ID, $request->getPayload()->get('token'))) {
+            $status = [403, "Token invalide"];
+        } else {
+            $data = $request->getPayload();
+
+            $server = $entityManager->getRepository(Server::class)->findOneBy(["id" => $data->get('serverId')]);
+
+            if (!$server) {
+                $status = [403, "Bad request"];
+            } else {
+                $roles = $server->getRoles();
+
+                $channel = $entityManager->getRepository(Channel::class)->findOneBy(["id" => $data->get("channelId")]);
+
+                if (!$channel) {
+                    $status = [403, "Bad request"];
+                } else {
+                    /** @var User $user */
+                    $user = $this->getUser();
+                    if (!$permissionManager->canAccessChannel($data->get("channelId"), $user->getId(), $roles, $permission)) {
+                        $status = [403, "Permission manquante"];
+                    }
+                }
+            }
+        }
+
+        return [
+            "status" => $status,
+            "data" => $data,
+            "server" => $server,
+            "user" => $user,
+            "channel" => $channel
         ];
     }
 

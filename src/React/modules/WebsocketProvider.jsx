@@ -10,6 +10,9 @@ export default function WebsocketProvider({ url, children }) {
   // On les garde à jour dans un ref pour ne PAS recréer la socket à chaque fois.
   const callbacksRef = useRef({});
 
+  // File des messages émis avant l'ouverture de la socket (état CONNECTING).
+  const pendingRef = useRef([]);
+
   useEffect(() => {
     let closedByUs = false;
     let reconnectTimer;
@@ -21,11 +24,13 @@ export default function WebsocketProvider({ url, children }) {
       ws.current.onopen = () => {
         console.log("Websocket connecté !");
         const token = getCookie("token");
-        let message = {
-          "type": "authentification",
-          "token": token
-        }
-        ws.current.send(JSON.stringify(message));
+        // L'auth doit TOUJOURS partir en premier : le serveur exige
+        // $user->authenticated pour whichOnline/message/etc.
+        ws.current.send(JSON.stringify({ type: "authentification", token }));
+
+        // Puis on rejoue les messages mis en attente avant l'ouverture.
+        pendingRef.current.forEach((data) => ws.current.send(data));
+        pendingRef.current = [];
       };
 
       ws.current.onclose = () => {
@@ -72,7 +77,18 @@ export default function WebsocketProvider({ url, children }) {
     }
   }, [url])
 
-  const value = useMemo(() => ({ send: (data) => ws.current?.send(data), addListener: (event, callback) => callbacksRef.current[event] = callback}), [])
+  const value = useMemo(() => ({
+    send: (data) => {
+      const socket = ws.current;
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(data);
+      } else {
+        // CONNECTING (ou pas encore créée) → on bufferise, flush à l'onopen.
+        pendingRef.current.push(data);
+      }
+    },
+    addListener: (event, callback) => (callbacksRef.current[event] = callback),
+  }), [])
 
   return <WebsocketContext value={value}>
     {children}

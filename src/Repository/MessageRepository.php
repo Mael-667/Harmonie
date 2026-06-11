@@ -66,6 +66,20 @@ class MessageRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
+    public function search($query, $channelId){
+        return $this->createQueryBuilder("message")
+              ->select("message.id, message.attachment, message.content, message.timestamp")
+              ->addSelect("user.pseudo AS authorPseudo", "user.avatar_url as authorAvatar", "user.id as authorId")
+              ->innerJoin("message.channel", "channel")
+              ->innerJoin("message.user", "user")
+              ->where("channel.id = :channelId")
+              ->setParameter("channelId", $channelId)
+              ->andWhere("message.content LIKE :query")
+              ->setParameter("query", "%" . $query . "%")
+              ->getQuery()
+              ->getArrayResult();
+    }
+
     //    /**
     //     * @return Message[] Returns an array of Message objects
     //     */

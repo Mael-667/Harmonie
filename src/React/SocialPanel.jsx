@@ -2,13 +2,16 @@
 
 import { useContext, useEffect, useState } from "react";
 import { WebsocketContext } from "./modules/WebsocketProvider";
+import { FormPost } from "./modules/FormComponents";
+import Message from "./Message";
 
-export default function SocialPanel({ userList }) {
+export default function SocialPanel({ channelId, serverId, userList }) {
 
     const ws = useContext(WebsocketContext);
 
     // Liste des utilisateurs connectés sur le serveur courant
     const [connectedUsers, setConnectedUsers] = useState([]);
+    const [searchResult, setSearchResult] = useState(null);
 
     useEffect(() => {
         const userIds = [];
@@ -37,18 +40,52 @@ export default function SocialPanel({ userList }) {
         });
     }, [ws]);
 
+    function search(e){
+        e.preventDefault();
+        let form = new FormData(e.currentTarget);
+        form.append("channelId", channelId);
+        form.append("serverId", serverId);
+
+        fetch(origin + "/app/search", {
+            method: "POST",
+            body: form,
+        })
+        .then((response) => response.json())
+        .then((e) => {
+            console.log(e);
+            setSearchResult(e.result);
+        })
+        .catch((err) => console.log(err))
+    }
+
+    function resetResults(e){
+        if(e.target.value == ""){
+            setSearchResult(null)
+        }
+    }
+
     return <div id="social">
         <div id="search">
-            <form action="" method="get">
-                <input type="text" name="query" id="query" />
-                <button type="submit">
+            <FormPost className={"searchForm"} onSubmit={search}>
+                <input type="text" name="query" id="query" className="searchInput" autoComplete="off" placeholder="Recherchez un message" onChange={resetResults}/>
+                <button type="submit" className="actionButton">
                     <i className="fa-solid fa-magnifying-glass"></i>
                 </button>
-            </form>
+            </FormPost>
         </div>
-        <div id="members">
-            {userList.map((e, i) => <Member key={i} user={e} connectedUsers={connectedUsers} />)}
-        </div>
+        {!searchResult ? (
+            <div id="members" className="socialPanelContent">
+                {userList.map((e, i) => <Member key={i} user={e} connectedUsers={connectedUsers} />)}
+            </div>
+        ) : (
+            <div id="searchResults" className="socialPanelContent">
+                {searchResult.length != 0 ? (
+                    searchResult.map((e, i) => <Message key={i} message={e} firstOfAuthor={true} />)
+                ) : (
+                    <p>Pas de résultat</p>
+                )}
+            </div>
+        )}
     </div>
 }
 
@@ -61,7 +98,7 @@ function Member({ key, user, connectedUsers }) {
         </div>
         <div id="userHandles">
             <p id="userPseudo">{user.pseudo}</p>
-            <p id="userHandle">@{user.handle}</p>
+            {/* <p id="userHandle">@{user.handle}</p> */}
         </div>
     </div>
 }
