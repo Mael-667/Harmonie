@@ -10,7 +10,7 @@ export function DynamicImageInput({ name, id, placeholder, tempPreview, children
     }
 
     return <label htmlFor={id} className="dynamicImageInput" style={preview ? { backgroundImage: `url(${preview})` } : undefined} {...props}>
-        <input type="file" className="imageInput" id={id} name={name} onChange={updatePreview} />
+        <input type="file" className="imageInput" id={id} name={name} onChange={updatePreview} accept="image/*" />
         {!preview && <span className="imgInputPlaceholder">{placeholder}</span>}
         {children}
     </label>
@@ -24,10 +24,10 @@ export function FormPost({ className, id, onSubmit, children, ...props }) {
     </form>
 }
 
-export function Field({id, label, placeholder, defaultValue}) {
+export function Field({id, label, placeholder, defaultValue, ...props}) {
     return <div className="field">
                 <label htmlFor={id}>{label}</label>
-                <input type="text" name={id} id={id} placeholder={placeholder} defaultValue={defaultValue} />
+                <input type="text" name={id} id={id} placeholder={placeholder} defaultValue={defaultValue} {...props} />
             </div>
 }
 

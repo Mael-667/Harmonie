@@ -72,9 +72,15 @@ function MessageContent({ hasAttachment, content, attachment }) {
 }
 
 function EditMessage({ handleEdit, content, cancelEdit, messageId }) {
+  function submitEdit(e) {
+    e.preventDefault();
+    handleEdit(new FormData(e.currentTarget), messageId);
+    cancelEdit();
+  }
+
   return <>
     <FormPost className="editForm" aria-label="Modifier le message"
-      onSubmit={(e) => { e.preventDefault(); handleEdit(new FormData(e.currentTarget), messageId); cancelEdit(); }}>
+      onSubmit={submitEdit}>
       <input
         name="editedMessage"
         defaultValue={content}   /* ex-`editInput.value = oldContent` */

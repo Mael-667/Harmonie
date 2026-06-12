@@ -61,7 +61,7 @@ export default function MessageInput({ ws, channelId }) {
       </label>
       <div className="horizontalLine"></div>
       <label htmlFor="message" id="messageLabel" aria-label="Saisir un message">
-        <input type="text" name="message" id="message" placeholder="Écrivez ici" autoComplete="off" />
+        <input type="text" name="message" id="message" placeholder="Écrivez ici" autoComplete="off" minLength={1} maxLength={2000} />
       </label>
       <button type="button" id="emoji-btn" aria-label="Ouvrir le sélecteur d'émojis">
         <i className="fa-regular fa-face-laugh-beam" aria-hidden="true"></i>

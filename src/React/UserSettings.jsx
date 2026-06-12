@@ -43,8 +43,8 @@ export default function UserSettings({ close, user }) {
                     <DynamicImageInput name="avatar" id="avatar" tempPreview={`/uploads/pdp/${user.avatar}`}>
                         <i className="fa-solid fa-pen imgInputIcon" aria-hidden="true"></i>
                     </DynamicImageInput>
-                    <Field id={"editPseudo"} label={"Modifiez votre pseudo"} defaultValue={user.pseudo} />
-                    <Field id={"editHandle"} label={"Modifiez votre handle"} defaultValue={user.handle} />
+                    <Field id={"editPseudo"} label={"Modifiez votre pseudo"} defaultValue={user.pseudo} minLength={1} maxLength={27}/>
+                    <Field id={"editHandle"} label={"Modifiez votre handle"} defaultValue={user.handle} minLength={1} maxLength={27}/>
                 </div>
                 <button type="submit" className="button crimsonButton" style={{ alignSelf: "end" }}>Mettre à jour</button>
             </FormPost>

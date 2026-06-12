@@ -40,7 +40,9 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
         return categories;
     }
 
-    function submitNewInvit(form) {
+    function submitNewInvit(e) {
+        e.preventDefault();
+        const form = new FormData(e.currentTarget);
         form.append("serverId", server.serverId);
         form.append("expirationDate", (Date.now()) + 99999999999);
 
@@ -170,7 +172,7 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
                                 <DynamicImageInput name="serverIcon" id="serverIcon" tempPreview={`${origin}/uploads/serverIcon/${server.serverIcon}`}>
                                     <i className="fa-solid fa-pen imgInputIcon" aria-hidden="true"></i>
                                 </DynamicImageInput>
-                                <Field id={"editName"} label={"Renommez votre serveur"} defaultValue={server.serverName} />
+                                <Field id={"editName"} label={"Renommez votre serveur"} defaultValue={server.serverName} minLength={1} maxLength={27}/>
                             </div>
                             <button type="submit" className="button crimsonButton" style={{ alignSelf: "end" }}>Mettre à jour</button>
                         </FormPost>
@@ -178,10 +180,10 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
                     <div>
                         <h3>Créer une invitation</h3>
                         <FormPost className="singleLineForm" id="newInvitForm"
-                            onSubmit={(e) => { e.preventDefault(); submitNewInvit(new FormData(e.currentTarget)); }}>
+                            onSubmit={submitNewInvit}>
                             <div className="field">
                                 <label htmlFor="newInvit">Modifiez l'url selon vos besoins</label>
-                                <span id="invitUrlConteneur"><span id="invitUrl">{url + "/join/"}</span><input type="text" name="newInvit" id="newInvit" defaultValue={invitDetails.randomId} /></span>
+                                <span id="invitUrlConteneur"><span id="invitUrl">{url + "/join/"}</span><input type="text" name="newInvit" id="newInvit" required defaultValue={invitDetails.randomId} minLength={1} maxLength={27} /></span>
                             </div>
                             <button type="submit" className="button crimsonButton">Créer et copier le lien</button>
                         </FormPost>
@@ -214,7 +216,7 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
                             <Field id={"channelName"} label={"Nom de votre canal"} />
                             <div className="selectCategory">
                                 {categories.length != 0 && !creatingCategory && <Select id="category" label="Séléctionnez une catégorie" options={categories} />}
-                                {creatingCategory && <Field id="category" label="Nom de votre nouvelle catégorie" />}
+                                {creatingCategory && <Field id="category" label="Nom de votre nouvelle catégorie" required minLength={1} maxLength={27} />}
                                 <button type="button" className="actionButton formActionButton" aria-label="Créer une catégorie" onClick={!creatingCategory ? () => setCreatingCategory(true) : () => setCreatingCategory(false)}>{categories.length == 0 && !creatingCategory && "Ajouter une catégorie"} {!creatingCategory ? <i className="fa-solid fa-circle-plus"></i> : <i className="fa-solid fa-circle-xmark"></i>}</button>
                             </div>
                             <button type="submit" className="button crimsonButton">Créer le canal</button>
@@ -260,7 +262,7 @@ function ChannelRow({ channel, categories, onUpdate, onDelete }) {
         </div>
         <div className="selectCategory">
             {categories.length != 0 && !creatingCategory && <Select id="category" label="Séléctionnez une catégorie" options={categories} defaultValue={channel.category} />}
-            {creatingCategory && <Field id="category" label="Nom de votre nouvelle catégorie" />}
+            {creatingCategory && <Field id="category" required label="Nom de votre nouvelle catégorie" />}
             <button type="button" className="actionButton formActionButton" aria-label="Créer une catégorie" onClick={() => setCreatingCategory(!creatingCategory)}>{categories.length == 0 && !creatingCategory && "Ajouter une catégorie"} {!creatingCategory ? <i className="fa-solid fa-circle-plus"></i> : <i className="fa-solid fa-circle-xmark"></i>}</button>
         </div>
         <button className="actionButton formActionButton" type="button" aria-label="Supprimer le canal" onClick={() => onDelete(channel.id)}>

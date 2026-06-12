@@ -106,7 +106,9 @@ export default function ServersPanel({ channels, channelId, server, serverId, se
 }
 
 function NewServerPopup({ setOpened, onCreated, setServerId, getServers}) {
-  function createServer(form) {
+  function createServer(e) {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
     fetch(origin + "/app/newServer", {
       method: "POST",
       // Set the FormData instance as the request body
@@ -148,7 +150,7 @@ function NewServerPopup({ setOpened, onCreated, setServerId, getServers}) {
       <FormPost method="post" className="singleLineForm" onSubmit={(e) => joinServer(e)}>
         <div className="field">
           <label htmlFor="serverLink">Lien du serveur</label>
-          <input type="text" name="serverLink" id="serverLink" placeholder="harmonie.gg/1" />
+          <input type="text" name="serverLink" id="serverLink" required placeholder="harmonie.gg/1" minLength={1} maxLength={27}/>
         </div>
         <button type="submit" className="button crimsonButton">Ajouter</button>
       </FormPost>
@@ -156,12 +158,12 @@ function NewServerPopup({ setOpened, onCreated, setServerId, getServers}) {
     <div id="createServer">
       <h2>Ou créez en un !</h2>
       <FormPost name="server" method="post" encType="multipart/form-data"
-        onSubmit={(e) => { e.preventDefault(); createServer(new FormData(e.currentTarget)); }}>
+        onSubmit={createServer}>
         <DynamicImageInput name={"server[icon]"} id={"server_icon"} placeholder={"L'image de votre serveur ici"}/>
         <div className="singleLineForm">
           <div className="field">
             <label htmlFor="server_name">Nom du serveur</label>
-            <input type="text" id="server_name" name="server[name]" required />
+            <input type="text" id="server_name" name="server[name]" required minLength={1} maxLength={27}/>
           </div>
           <button type="submit" className="button crimsonButton">Créer</button>
         </div>
