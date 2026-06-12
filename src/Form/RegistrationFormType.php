@@ -52,10 +52,11 @@ class RegistrationFormType extends AbstractType
                     new Length(
                         min: 1,
                         minMessage: 'Votre pseudo doit faire au moins {{ limit }} charactères',
-                        max: 27,
+                        max: 25,
                         maxMessage: 'Votre pseudo ne peut pas faire plus de {{ limit }} charactères',
                     )
-                ]
+                ],
+                "attr" => ['maxlength' => 25]
             ])
             ->add('handle', TextType::class, [
                 "constraints" => [

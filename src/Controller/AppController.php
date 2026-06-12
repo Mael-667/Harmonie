@@ -38,6 +38,7 @@ final class AppController extends AbstractController
 {
     private const string CRSF_ID = "app";
     private const int MAX_NAME_LENGTH = 27;
+    private const int MAX_PSEUDO_LENGTH = 25;
     private const array IMAGE_MIME = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
 
     #[Route('/app', name: 'app')]
@@ -428,7 +429,7 @@ final class AppController extends AbstractController
 
         $newName = trim($data->get("editName"));
         if (!empty($newName)) {
-            if(mb_strlen($newName) < self::MAX_NAME_LENGTH){
+            if(mb_strlen($newName) <= self::MAX_NAME_LENGTH){
                 $server->setName($newName);
             } else {
                 return new JsonResponse(["error" => "Nom de serveur trop long"], 400);
@@ -497,7 +498,7 @@ final class AppController extends AbstractController
         $channel = new Channel();
         $newName = trim($data->get("channelName"));
         if (!empty($newName)) {
-            if(mb_strlen($newName) < self::MAX_NAME_LENGTH){
+            if(mb_strlen($newName) <= self::MAX_NAME_LENGTH){
                 $channel->setName($newName);
             } else {
                 return new JsonResponse(["error" => "Nom de canal trop long"], 400);
@@ -510,7 +511,7 @@ final class AppController extends AbstractController
 
         $category = trim($data->get("category"));
         if (!empty($category)) {
-            if(mb_strlen($category) < self::MAX_NAME_LENGTH){
+            if(mb_strlen($category) <= self::MAX_NAME_LENGTH){
                 $channel->setCategory($category);
             } else {
                 return new JsonResponse(["error" => "Nom de catégorie trop long"], 400);
@@ -553,7 +554,7 @@ final class AppController extends AbstractController
         
         $newName = trim($data->get("editedChannelName"));
         if ($newName && $newName != "") {
-            if(mb_strlen($newName) < self::MAX_NAME_LENGTH){
+            if(mb_strlen($newName) <= self::MAX_NAME_LENGTH){
                 $channel->setName($newName);
             } else {
                 return new JsonResponse(["error" => "Nom de canal trop long"], 400);
@@ -564,7 +565,7 @@ final class AppController extends AbstractController
         $category = trim($data->get("category") ?? "");
         if ($category === "") {
             $category = null;
-        } elseif (mb_strlen($category) >= self::MAX_NAME_LENGTH) {
+        } elseif (mb_strlen($category) > self::MAX_NAME_LENGTH) {
             return new JsonResponse(["error" => "Nom de catégorie trop long"], 400);
         }
         $channel->setCategory($category);
@@ -649,7 +650,7 @@ final class AppController extends AbstractController
 
         $newName = trim($data->get("editPseudo"));
         if (!empty($newName)) {
-            if(mb_strlen($newName) < self::MAX_NAME_LENGTH){
+            if(mb_strlen($newName) <= self::MAX_PSEUDO_LENGTH){
                 $user->setPseudo($newName);
             } else {
                 return new JsonResponse(["error" => "Pseudo trop long"], 400);
@@ -658,7 +659,7 @@ final class AppController extends AbstractController
 
         $newHandle = trim($data->get("editHandle"));
         if (!empty($newHandle)) {
-            if(mb_strlen($newHandle) < self::MAX_NAME_LENGTH){
+            if(mb_strlen($newHandle) <= self::MAX_NAME_LENGTH){
                 $user->setHandle($newHandle);
             } else {
                 return new JsonResponse(["error" => "Handle trop long"], 400);
