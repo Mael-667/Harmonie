@@ -64,12 +64,12 @@ export default function SocialPanel({ channelId, serverId, userList }) {
         }
     }
 
-    return <div id="social">
+    return <section id="social" aria-label="Membres et recherche">
         <div id="search">
             <FormPost className={"searchForm"} onSubmit={search}>
-                <input type="text" name="query" id="query" className="searchInput" autoComplete="off" placeholder="Recherchez un message" onChange={resetResults}/>
-                <button type="submit" className="actionButton">
-                    <i className="fa-solid fa-magnifying-glass"></i>
+                <input type="text" name="query" id="query" className="searchInput" autoComplete="off" placeholder="Recherchez un message" aria-label="Rechercher un message" onChange={resetResults}/>
+                <button type="submit" className="actionButton" aria-label="Rechercher">
+                    <i className="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                 </button>
             </FormPost>
         </div>
@@ -86,7 +86,7 @@ export default function SocialPanel({ channelId, serverId, userList }) {
                 )}
             </div>
         )}
-    </div>
+    </section>
 }
 
 function Member({ key, user, connectedUsers }) {
@@ -94,7 +94,7 @@ function Member({ key, user, connectedUsers }) {
     return <div key={key} className="member">
         <div className="memberPfp">
             <img src={`/uploads/pdp/${user.avatar_url}`} alt="Member avatar" />
-            <div className="statusPastille" style={{backgroundColor: connected ? "#14a900" :"#5e5e5e"}}></div>
+            <div className="statusPastille" role="img" style={{backgroundColor: connected ? "#14a900" :"#5e5e5e"}} aria-label={connected ? "En ligne" : "Hors ligne"}></div>
         </div>
         <div id="userHandles">
             <p id="userPseudo">{user.pseudo}</p>

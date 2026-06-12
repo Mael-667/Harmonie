@@ -59,14 +59,14 @@ export default function ServersPanel({ channels, channelId, server, serverId, se
 
   }
 
-  return <div id="side_panel">
+  return <section id="side_panel" aria-label="Navigation des serveurs et canaux">
     <div id="serversDetails">
       <div id="servers">
         <div id="serverList">
           {servers?.map(serverButton)}
         </div>
         <div id="newServer" className="serverButton">
-          <button className="transparentButton" aria-label="Create New Server" onClick={() => setOpened(true)}>
+          <button className="transparentButton" aria-label="Créer un serveur" onClick={() => setOpened(true)}>
             <i className="fa-solid fa-plus" aria-hidden="true"></i>
           </button>
           {opened && <NewServerPopup setOpened={setOpened} onCreated={getServers} setServerId={setServerId} getServers={getServers} />}
@@ -76,8 +76,8 @@ export default function ServersPanel({ channels, channelId, server, serverId, se
         <div id="serverDetails">
           <span className="serverName">{server?.serverName}</span>
           {hasRight && 
-            <button className="actionButton editServer" id="editServer" onClick={() => setSettingsOpened(true)}>
-              <i className="fa-solid fa-ellipsis"></i>
+            <button className="actionButton editServer" id="editServer" aria-label="Paramètres du serveur" onClick={() => setSettingsOpened(true)}>
+              <i className="fa-solid fa-ellipsis" aria-hidden="true"></i>
             </button>
           }
           {settingsOpened && <ServerSettings setSettingsOpened={setSettingsOpened} server={server} channels={channels}/>}
@@ -94,15 +94,15 @@ export default function ServersPanel({ channels, channelId, server, serverId, se
         </div>
         <div id="userHandles">
           <p id="userPseudo">{user.pseudo}</p>
-          <p id="userHandle" onClick={() => copy(user.handle)}>@{user.handle}</p>
+          <button type="button" id="userHandle" className="textButton" onClick={() => copy(user.handle)}>@{user.handle}</button>
         </div>
         <div id="settings">
-          <button aria-label="settings" className="transparentButton" id="profileSetting" onClick={() => setUserSettingsOpened(true)}><i className="fa-solid fa-gear" aria-hidden="true"></i></button>
+          <button aria-label="Paramètres" className="transparentButton" id="profileSetting" onClick={() => setUserSettingsOpened(true)}><i className="fa-solid fa-gear" aria-hidden="true"></i></button>
           {userSettingsOpened && <UserSettings close={() => setUserSettingsOpened(false)} user={user} />}
         </div>
       </div>
     }
-  </div>
+  </section>
 }
 
 function NewServerPopup({ setOpened, onCreated, setServerId, getServers}) {

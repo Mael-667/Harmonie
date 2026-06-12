@@ -107,7 +107,7 @@ export default function Chat({ channelId, initialMessages, setUpdate, channel })
   }
 
 
-  return <div id="main">
+  return <section id="main" aria-label="Conversation">
     <div id="header">
       <span id="channel-name">{channel && `#${channel?.name}`}</span>
     </div>
@@ -128,5 +128,5 @@ export default function Chat({ channelId, initialMessages, setUpdate, channel })
 
 
     <MessageInput ws={ws} channelId={channelId} />
-  </div>
+  </section>
 }

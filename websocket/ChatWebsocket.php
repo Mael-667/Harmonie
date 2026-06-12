@@ -48,11 +48,11 @@ $ws->onMessage(function($msg, $user) use (&$ws, &$symfonyIPC){
                 if(!validateWsMessage($user, $msg)) return;
                 
                 // on attend le retour de cette fonction pour savoir si l'utilisateur a l'acces ou non, elle retournera les utilisateurs qui pourront voir le msssage
-                $ans = $symfonyIPC->saveNewMessage($user->id, $msg->content, $msg->attachment, $msg->channel);
+                $ans = $symfonyIPC->saveNewMessage($user->id, trim($msg->content), trim($msg->attachment), $msg->channel);
                 if($ans){
                     $recipientIds = $ans->recipients;
                     $messageId = $ans->messageId;
-                    $preparedMessage = json_encode(newMessage($user, $msg->content, $msg->attachment, $msg->channel, $messageId));
+                    $preparedMessage = json_encode(newMessage($user, trim($msg->content), trim($msg->attachment), $msg->channel, $messageId));
                     $ws->broadcastMessageTo($preparedMessage, function($user) use (&$recipientIds){
                         return in_array($user->id, $recipientIds, true);
                     });
@@ -64,10 +64,10 @@ $ws->onMessage(function($msg, $user) use (&$ws, &$symfonyIPC){
                 $messageId = $msg->messageId;
                 if(!is_numeric($messageId)) return;
 
-                $ans = $symfonyIPC->editMessage($user->id, $messageId, $msg->content, $msg->attachment, $msg->channel);
+                $ans = $symfonyIPC->editMessage($user->id, $messageId, trim($msg->content), trim($msg->attachment), $msg->channel);
                 if($ans){
                     $recipientIds = $ans->recipients;
-                    $preparedMessage = json_encode(editedMessage($msg->content, $msg->attachment, $ans->channelId, $messageId));
+                    $preparedMessage = json_encode(editedMessage(trim($msg->content), trim($msg->attachment), $ans->channelId, $messageId));
                     $ws->broadcastMessageTo($preparedMessage, function($user) use (&$recipientIds){
                         return in_array($user->id, $recipientIds, true);
                     });
@@ -90,6 +90,8 @@ $ws->onMessage(function($msg, $user) use (&$ws, &$symfonyIPC){
                 if(!$user->authenticated) return false;
 
                 $serverUsers = $msg->users;
+                if(!isset($serverUsers) || !is_array($serverUsers)) return false;
+                
                 $user->userList = $serverUsers;
                 $connectedUsersIds = [];
                 $users = $ws->getAllUsers();
@@ -127,6 +129,8 @@ function validateWsMessage($user, $msg): bool{
 
     if($content == "" && $attachment == "") return false;
     // TODO: renvoyer une véritable erreur si le msg est empty
+
+    if(mb_strlen($content) > 2000 || mb_strlen($attachment) > 500) return false;
 
     $channel = $msg->channel;
     if(!is_numeric($channel)) return false;

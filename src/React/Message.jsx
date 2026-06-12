@@ -2,7 +2,7 @@ import { useState } from "react";
 import { usePermission } from "./hooks/usePermission";
 import { FormPost } from "./modules/FormComponents";
 
-export default function Message({ user, message, firstOfAuthor, handleEdit, onDelete, key }) {
+export default function Message({ user, message, firstOfAuthor, handleEdit, onDelete}) {
   const origin = window.location.origin;
   const dateString = new Date(message.timestamp.date).toLocaleTimeString();
   const hasAttachment = message.attachment !== "" && message.attachment != null;
@@ -14,7 +14,7 @@ export default function Message({ user, message, firstOfAuthor, handleEdit, onDe
   const [editing, setEditing] = useState(false);
 
   return (
-    <div className="message" data-user-id={message.authorId} key={key}>
+    <div className="message" data-user-id={message.authorId}>
       <div className="msgSideContent" data-user-id={message.authorId}>
         {firstOfAuthor && <img
           src={`${origin}/uploads/pdp/${message.authorAvatar}`}
@@ -64,6 +64,7 @@ function MessageContent({ hasAttachment, content, attachment }) {
       <img
         className="attachment"
         src={`${origin}/uploads/attachments/${attachment}`}
+        alt="Pièce jointe"
       />
     )}
     {content}

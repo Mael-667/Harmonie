@@ -153,16 +153,16 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
     return <Modal id="popupServerSettings" onClose={() => setSettingsOpened(false)}>
         <h2>Administration du serveur</h2>
         <div id="settingsContent">
-            <nav id="serverSettingsNav">
-                <button className={`navButton ${tab === "properties" ? "navButtonActive" : ""}`} onClick={() => setTab('properties')}>Propriétés du serveur</button>
-                <button className={`navButton ${tab === "channels" ? "navButtonActive" : ""}`} onClick={() => setTab('channels')}>Canaux de discussion</button>
-                <button className={`navButton ${tab === "users" ? "navButtonActive" : ""}`} onClick={() => setTab('users')}>Gestion d'utilisateurs</button>
-                <button className={`navButton ${tab === "roles" ? "navButtonActive" : ""}`} onClick={() => setTab('roles')}>Gestion des rôles</button>
+            <nav id="serverSettingsNav" role="tablist" aria-label="Sections des paramètres du serveur">
+                <button type="button" role="tab" id="tab-properties" aria-selected={tab === "properties"} aria-controls="propertiesContent" className={`navButton ${tab === "properties" ? "navButtonActive" : ""}`} onClick={() => setTab('properties')}>Propriétés du serveur</button>
+                <button type="button" role="tab" id="tab-channels" aria-selected={tab === "channels"} aria-controls="channelsContent" className={`navButton ${tab === "channels" ? "navButtonActive" : ""}`} onClick={() => setTab('channels')}>Canaux de discussion</button>
+                <button type="button" role="tab" id="tab-users" aria-selected={tab === "users"} aria-controls="usersContent" className={`navButton ${tab === "users" ? "navButtonActive" : ""}`} onClick={() => setTab('users')}>Gestion d'utilisateurs</button>
+                <button type="button" role="tab" id="tab-roles" aria-selected={tab === "roles"} aria-controls="rolesContent" className={`navButton ${tab === "roles" ? "navButtonActive" : ""}`} onClick={() => setTab('roles')}>Gestion des rôles</button>
             </nav>
 
             <div id="settingsDetails">
 
-                {tab === "properties" && (<div id="propertiesContent" className="settingsContent">
+                {tab === "properties" && (<div id="propertiesContent" role="tabpanel" aria-labelledby="tab-properties" className="settingsContent">
                     <div>
                         <h3>Modifier le serveur</h3>
                         <FormPost className={"servInfoForm"} onSubmit={editServer}>
@@ -192,11 +192,11 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
                         {invitDetails.invitations && (
                             <div className="listConteneur">
                                 {invitDetails.invitations.map((e, i) =>
-                                    <div key={i} className="activeInvitation" onClick={() => { copy(`${url}/join/${e.identifiant}`) }}>
+                                    <button type="button" key={i} className="textButton activeInvitation" onClick={() => { copy(`${url}/join/${e.identifiant}`) }}>
                                         <p className="messageDate">Id du lien : </p>
                                         <p>{e.identifiant}</p>
                                         <p className="messageDate">Expire le : <span className="secondaryColor">{new Date(e.expirationDate).toLocaleDateString()}</span></p>
-                                    </div>)
+                                    </button>)
                                 }
                             </div>
                         )}
@@ -207,7 +207,7 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
                     </div>
                 </div>)}
 
-                {tab === "channels" && (<div id="channelsContent" className="settingsContent">
+                {tab === "channels" && (<div id="channelsContent" role="tabpanel" aria-labelledby="tab-channels" className="settingsContent">
                     <div>
                         <h3>Créer un canal</h3>
                         <FormPost className="singleLineForm" onSubmit={createChannel}>
@@ -215,7 +215,7 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
                             <div className="selectCategory">
                                 {categories.length != 0 && !creatingCategory && <Select id="category" label="Séléctionnez une catégorie" options={categories} />}
                                 {creatingCategory && <Field id="category" label="Nom de votre nouvelle catégorie" />}
-                                <button type="button" className="actionButton formActionButton" onClick={!creatingCategory ? () => setCreatingCategory(true) : () => setCreatingCategory(false)}>{categories.length == 0 && !creatingCategory && "Ajouter une catégorie"} {!creatingCategory ? <i className="fa-solid fa-circle-plus"></i> : <i className="fa-solid fa-circle-xmark"></i>}</button>
+                                <button type="button" className="actionButton formActionButton" aria-label="Créer une catégorie" onClick={!creatingCategory ? () => setCreatingCategory(true) : () => setCreatingCategory(false)}>{categories.length == 0 && !creatingCategory && "Ajouter une catégorie"} {!creatingCategory ? <i className="fa-solid fa-circle-plus"></i> : <i className="fa-solid fa-circle-xmark"></i>}</button>
                             </div>
                             <button type="submit" className="button crimsonButton">Créer le canal</button>
                         </FormPost>
@@ -231,11 +231,11 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
 
                 </div>)}
 
-                {tab === "users" && (<div id="usersContent">
+                {tab === "users" && (<div id="usersContent" role="tabpanel" aria-labelledby="tab-users">
 
                 </div>)}
 
-                {tab === "roles" && (<div id="rolesContent">
+                {tab === "roles" && (<div id="rolesContent" role="tabpanel" aria-labelledby="tab-roles">
 
                 </div>)}
             </div>
@@ -261,7 +261,7 @@ function ChannelRow({ channel, categories, onUpdate, onDelete }) {
         <div className="selectCategory">
             {categories.length != 0 && !creatingCategory && <Select id="category" label="Séléctionnez une catégorie" options={categories} defaultValue={channel.category} />}
             {creatingCategory && <Field id="category" label="Nom de votre nouvelle catégorie" />}
-            <button type="button" className="actionButton formActionButton" onClick={() => setCreatingCategory(!creatingCategory)}>{categories.length == 0 && !creatingCategory && "Ajouter une catégorie"} {!creatingCategory ? <i className="fa-solid fa-circle-plus"></i> : <i className="fa-solid fa-circle-xmark"></i>}</button>
+            <button type="button" className="actionButton formActionButton" aria-label="Créer une catégorie" onClick={() => setCreatingCategory(!creatingCategory)}>{categories.length == 0 && !creatingCategory && "Ajouter une catégorie"} {!creatingCategory ? <i className="fa-solid fa-circle-plus"></i> : <i className="fa-solid fa-circle-xmark"></i>}</button>
         </div>
         <button className="actionButton formActionButton" type="button" aria-label="Supprimer le canal" onClick={() => onDelete(channel.id)}>
             <i className="fa-solid fa-trash-can" aria-hidden="true"></i>

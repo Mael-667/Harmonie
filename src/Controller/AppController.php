@@ -17,10 +17,10 @@ use App\Service\PermissionManager;
 use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
@@ -37,6 +37,8 @@ use App\Service\WebsocketNotifier;
 final class AppController extends AbstractController
 {
     private const string CRSF_ID = "app";
+    private const int MAX_NAME_LENGTH = 27;
+    private const array IMAGE_MIME = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
 
     #[Route('/app', name: 'app')]
     public function index(): Response
@@ -84,7 +86,7 @@ final class AppController extends AbstractController
         })->first();
 
         if (!$server)
-            throw $this->createAccessDeniedException();
+            return new JsonResponse(["error" => "Accès refusé à ce serveur"], 403);
 
         $channels = $server->getChannels()->toArray();
 
@@ -111,7 +113,7 @@ final class AppController extends AbstractController
         }
         ;
 
-        return new Response(json_encode([
+        return new JsonResponse([
             "serverName" => $server->getName(),
             "serverId" => $server->getId(),
             "serverIcon" => $server->getIcon(),
@@ -120,7 +122,7 @@ final class AppController extends AbstractController
             "currentChannel" => $channelsJSON[$channelIndex]["id"],
             "messages" => $messages,
             "members" => $serverRepository->getUsersInfo($id)
-        ]));
+        ]);
     }
 
     #[Route('/app/getServers', name: 'app_getServers', methods: ["GET"])]
@@ -142,9 +144,9 @@ final class AppController extends AbstractController
                 ];
             }
 
-            return new Response(json_encode($servers));
+            return new JsonResponse($servers);
         } else {
-            throw new HttpException(400, 'Bad request');
+            return new JsonResponse(["error" => "Requête invalide"], 400);
         }
     }
 
@@ -158,7 +160,7 @@ final class AppController extends AbstractController
         #[Autowire('%kernel.project_dir%/public/uploads/serverIcon')] string $serverIcon
     ) {
         if (!$this->isCsrfTokenValid(self::CRSF_ID, $request->getPayload()->get('token'))) {
-            return new Response('Token invalide', 403);
+            return new JsonResponse(["error" => "Token invalide"], 403);
         }
 
         $server = new Server();
@@ -209,10 +211,10 @@ final class AppController extends AbstractController
             // On sauvegarde les rôles mis à jour sur le serveur.
             $entityManager->flush();
 
-            return new Response(json_encode(["message" => "ALL IS GOOD"]));
+            return new JsonResponse(["status" => "ok"], 200);
         } else {
             // Renvoie un acces denied
-            throw $this->createAccessDeniedException();
+            return new JsonResponse(["error" => "Données du serveur invalides"], 400);
         }
     }
 
@@ -225,25 +227,21 @@ final class AppController extends AbstractController
         #[Autowire('%kernel.project_dir%/public/uploads/attachments')] string $attachmentDir
     ) {
         if (!$this->isCsrfTokenValid(self::CRSF_ID, $request->getPayload()->get('token'))) {
-            return new Response('Token invalide', 403);
+            return new JsonResponse(["error" => "Token invalide"], 403);
         }
         // retrieves an instance of UploadedFile identified by "attachment"
         $file = $request->files->get('attachment');
 
         if ($file) {
-            $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            extract(self::handleFileUpload($attachmentDir, $file, 50, $slugger, self::IMAGE_MIME));
 
-            $safeFilename = $slugger->slug($originalFilename);
-            $newFilename = $safeFilename . '-' . uniqid() . '.' . $file->guessExtension();
-            try {
-                $file->move($attachmentDir, $newFilename);
-            } catch (FileException $e) {
-                // ... handle exception if something happens during file upload
+            if($status[0] != 200){
+                return new JsonResponse(["error" => $status[1]], $status[0]);
             }
 
-            return new Response(json_encode(["fileName" => $newFilename]), 200);
+            return new JsonResponse(["fileName" => $newFilename], 200);
         } else {
-            return new Response(json_encode(["error" => "Aucun fichier"]), 400);
+            return new JsonResponse(["error" => "Aucun fichier"], 400);
         }
     }
 
@@ -261,13 +259,16 @@ final class AppController extends AbstractController
 
         // bloque ce chemin si l'utilisateur n'a pas le role créer invit
         $server = $entityManager->getRepository(Server::class)->findOneBy(["id" => $data->get('serverId')]);
+        if(!$server){
+            return new JsonResponse(["error" => "Serveur introuvable"], 400);
+        }
         $roles = $server->getRoles();
 
         // vérifie en meme temps si l'utilisateur a acces au serveur et si il a la permission de créer une invitation
         /** @var User $user */
         $user = $this->getUser();
         if (!$permissionManager->hasServerRight($user->getId(), $roles, PermissionEnum::CreateInvit)) {
-            throw $this->createAccessDeniedException();
+            return new JsonResponse(["error" => "Permission insuffisante"], 403);
         }
         ;
 
@@ -280,9 +281,16 @@ final class AppController extends AbstractController
         //récupère les invitations existantes 
         $invitations = $serverInvitationRepository->findBy(["server" => $server]);
 
-        // Todo: supprimer les invit expirées
         $data = [];
         foreach ($invitations as $invitation) {
+            // supprime les invit expirées
+            $expirationDate = $invitation->getExpirationDate();
+            if($expirationDate && $expirationDate < new DateTime("now")){
+                $entityManager->remove($invitation);
+                $entityManager->flush();
+                continue;
+            }
+
             $data[] = [
                 "id" => $invitation->getId(),
                 "identifiant" => $invitation->getIdentifiant(),
@@ -290,7 +298,7 @@ final class AppController extends AbstractController
             ];
         }
 
-        return new Response(json_encode(["randomId" => $random, "invitations" => $data]), 200);
+        return new JsonResponse(["randomId" => $random, "invitations" => $data], 200);
     }
 
     #[Route('/app/newInvit', name: 'app_newInvit', methods: ["POST"])]
@@ -304,20 +312,31 @@ final class AppController extends AbstractController
         extract(self::validateRequest($request, $entityManager, $permissionManager, PermissionEnum::CreateInvit));
 
         if ($status[0] != 200) {
-            return new Response($status[1], $status[0]);
+            return new JsonResponse(["error" => $status[1]], $status[0]);
         }
 
         // TODO: bloquer le nombre d'invit par serveur à 10
 
-        $identifiant = $data->get('newInvit');
+        $identifiant = trim($data->get('newInvit'));
+
+        if(empty($identifiant)){
+            return new JsonResponse(["error" => "Identifiant vide"], 400);
+        }
+
+        if(mb_strlen($identifiant) > 77){
+            return new JsonResponse(["error" => "Identifiant trop long"], 400);
+        }
 
         if ($sir->findOneBy(["identifiant" => $identifiant]))
-            return new Response('Identifiant déjà utilisé', 400);
+            return new JsonResponse(["error" => "Identifiant déjà utilisé"], 400);
 
         $invit = new ServerInvitation();
         $invit->setIdentifiant($identifiant);
         $invit->setServer($server);
 
+        if(empty($data->get('expirationDate'))){
+            return new JsonResponse(["error" => "Insérer une date d'expiration"], 400);
+        }
         $ms = (int) $data->get('expirationDate');
         $expirationDate = (new DateTime())->setTimestamp(intdiv($ms, 1000));
         $invit->setExpirationDate($expirationDate);
@@ -325,7 +344,7 @@ final class AppController extends AbstractController
         $entityManager->persist($invit);
         $entityManager->flush();
 
-        return new Response(json_encode(["error" => "Aucun pas d'error"]));
+        return new JsonResponse(["status" => "ok"], 200);
     }
 
     #[Route('/app/joinServer', name: 'app_joinServer', methods: ["POST"])]
@@ -333,23 +352,29 @@ final class AppController extends AbstractController
         ServerInvitationRepository $sir,
         Request $request,
         EntityManagerInterface $entityManager,
-        PermissionManager $permissionManager
     ) {
         $data = $request->getPayload();
         if (!$this->isCsrfTokenValid(self::CRSF_ID, $data->get('token')))
-            return new Response('Token invalide', 403);
+            return new JsonResponse(["error" => "Token invalide"], 403);
 
         $link = trim($data->get("serverLink"));
 
         // l'identifiant est la portion entre "/join/" et le "/" suivant (ou la fin de la chaîne)
         if (!preg_match('#/join/([^/]+)#', $link, $matches)) {
-            return new Response(json_encode(["error" => "Lien d'invitation invalide"]), 400);
+            return new JsonResponse(["error" => "Lien d'invitation invalide"], 400);
         }
         $identifiant = $matches[1];
 
         $invitation = $sir->findOneBy(["identifiant" => $identifiant]);
         if (!$invitation)
-            return new Response('Invitation invalide', 403);
+            return new JsonResponse(["error" => "Invitation invalide"], 403);
+
+        $expirationDate = $invitation->getExpirationDate();
+        if($expirationDate && $expirationDate < new DateTime("now")){
+            $entityManager->remove($invitation);
+            $entityManager->flush();
+            return new JsonResponse(["error" => "Invitation expirée"], 400);
+        }
 
         $server = $invitation->getServer();
 
@@ -377,7 +402,7 @@ final class AppController extends AbstractController
         extract(self::validateRequest($request, $entityManager, $permissionManager, PermissionEnum::EditServer));
 
         if ($status[0] != 200) {
-            return new Response($status[1], $status[0]);
+            return new JsonResponse(["error" => $status[1]], $status[0]);
         }
 
         // retrieves an instance of UploadedFile identified by "attachment"
@@ -392,29 +417,29 @@ final class AppController extends AbstractController
                 }
             }
 
-            $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            extract(self::handleFileUpload($serverIcon, $file, 8, $slugger, self::IMAGE_MIME));
 
-            $safeFilename = $slugger->slug($originalFilename);
-            $newFilename = $safeFilename . '-' . uniqid() . '.' . $file->guessExtension();
-            try {
-                $file->move($serverIcon, $newFilename);
-            } catch (FileException $e) {
-                // ... handle exception if something happens during file upload
+            if($status[0] != 200){
+                return new JsonResponse(["error" => $status[1]], $status[0]);
             }
 
             $server->setIcon($newFilename);
         }
 
         $newName = trim($data->get("editName"));
-        if ($newName && $newName != "") {
-            $server->setName($newName);
+        if (!empty($newName)) {
+            if(mb_strlen($newName) < self::MAX_NAME_LENGTH){
+                $server->setName($newName);
+            } else {
+                return new JsonResponse(["error" => "Nom de serveur trop long"], 400);
+            }
         }
 
         $entityManager->flush();
 
         self::updateUsers($websocketNotifier, $server);
 
-        return new JsonResponse(["error" => "prank"], 200);
+        return new JsonResponse(["status" => "ok"], 200);
     }
 
 
@@ -431,7 +456,7 @@ final class AppController extends AbstractController
         extract(self::validateRequest($request, $entityManager, $permissionManager, PermissionEnum::EditServer));
 
         if ($status[0] != 200) {
-            return new Response($status[1], $status[0]);
+            return new JsonResponse(["error" => $status[1]], $status[0]);
         }
 
         $serverIconUrl = $serverIcon . "/" . $server->getIcon();
@@ -452,7 +477,7 @@ final class AppController extends AbstractController
         $entityManager->remove($server);
         $entityManager->flush();
 
-        return new JsonResponse(["error" => "prank"], 200);
+        return new JsonResponse(["status" => "ok"], 200);
     }
 
     #[Route('/app/createChannel', name: 'app_createChannel', methods: ["POST"])]
@@ -466,22 +491,31 @@ final class AppController extends AbstractController
         extract(self::validateRequest($request, $entityManager, $permissionManager, PermissionEnum::EditServer));
 
         if ($status[0] != 200) {
-            return new Response($status[1], $status[0]);
+            return new JsonResponse(["error" => $status[1]], $status[0]);
         }
 
         $channel = new Channel();
         $newName = trim($data->get("channelName"));
-        if ($newName && $newName != "") {
-            $channel->setName($newName);
+        if (!empty($newName)) {
+            if(mb_strlen($newName) < self::MAX_NAME_LENGTH){
+                $channel->setName($newName);
+            } else {
+                return new JsonResponse(["error" => "Nom de canal trop long"], 400);
+            }
         } else {
-            return new Response(null, 400);
+            return new JsonResponse(["error" => "Le nom du canal ne peut pas être vide"], 400);
         }
 
         $channel->setServer($server);
 
-        $category = $data->get("category");
-        if ($category)
-            $channel->setCategory($category);
+        $category = trim($data->get("category"));
+        if (!empty($category)) {
+            if(mb_strlen($category) < self::MAX_NAME_LENGTH){
+                $channel->setCategory($category);
+            } else {
+                return new JsonResponse(["error" => "Nom de catégorie trop long"], 400);
+            }
+        }
 
         // todo: remplacer les défauts
         $channel->setType(ChannelTypeEnum::Textual);
@@ -491,7 +525,7 @@ final class AppController extends AbstractController
 
         self::updateUsers($websocketNotifier, $server);
 
-        return new JsonResponse(["error" => "prank"], 200);
+        return new JsonResponse(["status" => "ok"], 200);
     }
 
     #[Route('/app/editChannel', name: 'app_editChannel', methods: ["POST"])]
@@ -507,32 +541,39 @@ final class AppController extends AbstractController
         extract(self::validateRequest($request, $entityManager, $permissionManager, PermissionEnum::EditServer));
 
         if ($status[0] != 200) {
-            return new Response($status[1], $status[0]);
+            return new JsonResponse(["error" => $status[1]], $status[0]);
         }
 
         $channel = $entityManager->getRepository(Channel::class)->find($data->get("channelId"));
 
         // le canal doit appartenir au serveur validé (sinon on éditerait le canal d'un autre serveur)                                           
         if (!$channel || $channel->getServer()->getId() != $server->getId()) {
-            return new Response("Bad request", 403);
+            return new JsonResponse(["error" => "Bad request"], 403);
         }
         
         $newName = trim($data->get("editedChannelName"));
         if ($newName && $newName != "") {
-            $channel->setName($newName);
+            if(mb_strlen($newName) < self::MAX_NAME_LENGTH){
+                $channel->setName($newName);
+            } else {
+                return new JsonResponse(["error" => "Nom de canal trop long"], 400);
+            }
         }
 
         // catégorie vide => null (canal sans catégorie)                                                                                         
-        $category = $data->get("category");
-        if ($category === "")
+        $category = trim($data->get("category") ?? "");
+        if ($category === "") {
             $category = null;
+        } elseif (mb_strlen($category) >= self::MAX_NAME_LENGTH) {
+            return new JsonResponse(["error" => "Nom de catégorie trop long"], 400);
+        }
         $channel->setCategory($category);
 
         $entityManager->flush();
 
         self::updateUsers($websocketNotifier, $server);
 
-        return new JsonResponse(["error" => "prank"], 200);
+        return new JsonResponse(["status" => "ok"], 200);
     }
 
     #[Route('/app/deleteChannel', name: 'app_deleteChannel', methods: ["POST"])]
@@ -549,14 +590,14 @@ final class AppController extends AbstractController
         extract(self::validateRequest($request, $entityManager, $permissionManager, PermissionEnum::EditServer));
 
         if ($status[0] != 200) {
-            return new Response($status[1], $status[0]);
+            return new JsonResponse(["error" => $status[1]], $status[0]);
         }
 
         $channel = $entityManager->getRepository(Channel::class)->find($data->get("channelId"));
 
         // le canal doit appartenir au serveur validé (sinon on éditerait le canal d'un autre serveur)                                           
         if (!$channel || $channel->getServer()->getId() != $server->getId()) {
-            return new Response("Bad request", 403);
+            return new JsonResponse(["error" => "Bad request"], 403);
         }
 
         self::deleteAllChannelAttachment($data->get("channelId"), $entityManager, $attachmentDir);
@@ -566,7 +607,7 @@ final class AppController extends AbstractController
         $entityManager->remove($channel);
         $entityManager->flush();
 
-        return new JsonResponse(["error" => "prank"], 200);
+        return new JsonResponse(["status" => "ok"], 200);
     }
 
 
@@ -579,7 +620,7 @@ final class AppController extends AbstractController
         #[Autowire('%kernel.project_dir%/public/uploads/pdp')] string $pdpDirectory
     ) {
         if (!$this->isCsrfTokenValid(self::CRSF_ID, $request->getPayload()->get('token'))) {
-            return new Response('Token invalide', 403);
+            return new JsonResponse(["error" => "Token invalide"], 403);
         }
 
         /** @var User $user */
@@ -596,31 +637,37 @@ final class AppController extends AbstractController
                 }
             }
 
-            $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-            $safeFilename = $slugger->slug($originalFilename);
-            $newFilename = $safeFilename . '-' . uniqid() . '.' . $file->guessExtension();
-            try {
-                $file->move($pdpDirectory, $newFilename);
-            } catch (FileException $e) {
-                // ... handle exception if something happens during file upload
+            //$newFilename, $status
+            extract(self::handleFileUpload($pdpDirectory, $file, 8, $slugger, self::IMAGE_MIME));
+
+            if($status[0] != 200){
+                return new JsonResponse(["error" => $status[1]], $status[0]);
             }
 
             $user->setAvatarUrl($newFilename);
         }
 
         $newName = trim($data->get("editPseudo"));
-        if ($newName && $newName != "") {
-            $user->setPseudo($newName);
+        if (!empty($newName)) {
+            if(mb_strlen($newName) < self::MAX_NAME_LENGTH){
+                $user->setPseudo($newName);
+            } else {
+                return new JsonResponse(["error" => "Pseudo trop long"], 400);
+            }
         }
 
         $newHandle = trim($data->get("editHandle"));
-        if ($newHandle && $newHandle != "") {
-            $user->setHandle($newHandle);
+        if (!empty($newHandle)) {
+            if(mb_strlen($newHandle) < self::MAX_NAME_LENGTH){
+                $user->setHandle($newHandle);
+            } else {
+                return new JsonResponse(["error" => "Handle trop long"], 400);
+            }
         }
 
         $entityManager->flush();
 
-        return new JsonResponse(["error" => "prank"], 200);
+        return new JsonResponse(["status" => "ok"], 200);
     }
 
     #[Route('/app/deleteUser', name: 'app_deleteUser', methods: ["POST"])]
@@ -631,7 +678,7 @@ final class AppController extends AbstractController
     ) {
         // TODO: supprimer les serveurs orphelins et passer le role admin a un membre
         if (!$this->isCsrfTokenValid(self::CRSF_ID, $request->getPayload()->get('token'))) {
-            return new Response('Token invalide', 403);
+            return new JsonResponse(["error" => "Token invalide"], 403);
         }
 
         /** @var User $user */
@@ -646,7 +693,7 @@ final class AppController extends AbstractController
         $entityManager->remove($user);
         $entityManager->flush();
 
-        return new JsonResponse(["error" => "prank"], 200);
+        return new JsonResponse(["status" => "ok"], 200);
     }
 
     #[Route('/app/search', name: 'app_search', methods: ["POST"])]
@@ -660,13 +707,13 @@ final class AppController extends AbstractController
         extract(self::accessChannel($request, $entityManager, $permissionManager, PermissionEnum::Read));
 
         if ($status[0] != 200) {
-            return new Response($status[1], $status[0]);
+            return new JsonResponse(["error" => $status[1]], $status[0]);
         }
 
         $query = trim($data->get("query"));
 
         if($query == ""){
-            return new Response(null, 404);
+            return new JsonResponse(["error" => "Requête vide"], 404);
         }
 
         $result = $messageRepository->search($query, $data->get("channelId"));
@@ -775,6 +822,29 @@ final class AppController extends AbstractController
             "user" => $user,
             "channel" => $channel
         ];
+    }
+
+    private function handleFileUpload($directory, UploadedFile $file, int $maxMoSize, SluggerInterface $slugger, $acceptedMimes): array{
+            $status = [200, "All Good"];
+            $newFilename = "";
+            if($file->getSize() > $maxMoSize * 1000000){
+                $status = [400, "Fichier trop large"];
+            } else {
+                if ($acceptedMimes && !in_array($file->getMimeType(), $acceptedMimes, true)) {
+                    $status = [400, "Type de fichier non autorisé"];
+                } else {
+                    $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                    $safeFilename = $slugger->slug($originalFilename);
+                    $newFilename = $safeFilename . '-' . uniqid() . '.' . $file->guessExtension();
+                    try {
+                        $file->move($directory, $newFilename);
+                    } catch (FileException $e) {
+                        $status = [400, "Erreur lors de l'envoi du fichier"];
+                    }
+                }
+            };
+
+            return ["newFilename" => $newFilename, "status" => $status];
     }
 
 }

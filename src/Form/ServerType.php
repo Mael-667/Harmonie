@@ -9,6 +9,8 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Validator\Constraints\Image;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class ServerType extends AbstractType
 {
@@ -20,11 +22,24 @@ class ServerType extends AbstractType
                 'label' => " ",
                 'required' => false,
                 'constraints' => [
-                    new Image()
+                    new Image(
+                        maxSize: "8Mi"
+                    ),
                 ]
             ])
             ->add('name', TextType::class, [
-                'label' => "Nom du serveur"
+                'label' => "Nom du serveur",
+                "constraints" => [
+                    new NotBlank(
+                        message: "Le nom du serveur ne peut pas être vide"
+                    ),
+                    new Length(
+                        min: 1,
+                        minMessage: 'Le nom du serveur doit faire au moins {{ limit }} charactères',
+                        max: 27,
+                        maxMessage: 'Le nom du serveur ne peut pas faire plus de {{ limit }} charactères',
+                    )
+                ]
             ])
         ;
     }

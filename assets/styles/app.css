@@ -214,7 +214,8 @@ body {
 }
 
 .messageInfo {
-    margin-top: 0.4rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.25rem;
 }
 
 .messageContent {
@@ -236,7 +237,7 @@ body {
 }
 
 .contentBox {
-    padding-top: 0.22rem;
+    /* padding-top: 0.22rem; */
     position: relative;
 
     &>* {
@@ -428,6 +429,8 @@ body {
 
 #social {
     grid-column: 11 / 13;
+    display: flex;
+    flex-direction: column;
 }
 
 .popupBackground {
@@ -734,7 +737,8 @@ form {
 
 .socialPanelContent{
     padding: 1rem;
-    border: 1px solid var(--main-outline);
+    border-top: 1px solid var(--main-outline);
+    border-left: 1px solid var(--main-outline);
     height: stretch;
 }
 

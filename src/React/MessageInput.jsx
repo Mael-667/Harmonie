@@ -55,15 +55,15 @@ export default function MessageInput({ ws, channelId }) {
   return <div id="input">
     {attachment && <AttachmentPreview attachmentUrl={attachment} />}
     <FormPost id="msgForm" method="post" onSubmit={handleSubmit}>
-      <label htmlFor="attachment" id="attachmentButton" aria-label="Select a file to upload">
+      <label htmlFor="attachment" id="attachmentButton" aria-label="Joindre un fichier">
         <i className="fa-solid fa-file-arrow-up" aria-hidden="true"></i>
         <input type="file" name="attachment" id="attachment" onChange={e => {updatePreview(e.target.files[0])}} />
       </label>
       <div className="horizontalLine"></div>
-      <label htmlFor="message" id="messageLabel">
+      <label htmlFor="message" id="messageLabel" aria-label="Saisir un message">
         <input type="text" name="message" id="message" placeholder="Écrivez ici" autoComplete="off" />
       </label>
-      <button type="button" id="emoji-btn" aria-label="Open emoji selector">
+      <button type="button" id="emoji-btn" aria-label="Ouvrir le sélecteur d'émojis">
         <i className="fa-regular fa-face-laugh-beam" aria-hidden="true"></i>
       </button>
       <div className="horizontalLine"></div>
@@ -76,6 +76,6 @@ export default function MessageInput({ ws, channelId }) {
 
 function AttachmentPreview({ attachmentUrl }) {
   return <div className="attachmentPreviewDiv">
-    <img src={attachmentUrl} className="attachmentPreview" />
+    <img src={attachmentUrl} className="attachmentPreview" alt="Aperçu de la pièce jointe" />
   </div>
 }
