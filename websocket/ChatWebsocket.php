@@ -18,34 +18,44 @@ $notifier = new WebsocketNotifier($ws, $ipcSecret);
 
 $symfonyIPC = new SymfonyIPC();
 
+// associer les infos de l'utilisateur a la connexion
+$ws->onOpen(function($buffer, $user) use (&$symfonyIPC, &$ws){
+    if (!preg_match('/tokenHarmonie=(.*?)(?:;)/i', $buffer, $matches)) {
+        return false;
+    }
+
+    $token = trim($matches[1]);
+
+    $userDetails = $symfonyIPC->checkCredentials($token);
+    if($userDetails){
+        $user->authenticated = true;
+        // TODO: générer un token de session
+        $user->token = $token;
+        $user->id = $userDetails->userId;
+        $user->avatar = $userDetails->userAvatar;
+        $user->pseudo = $userDetails->pseudo;
+
+        $preparedMessage = json_encode(connectedUser($user->id));
+        $ws->broadcastMessageTo($preparedMessage, function($connectedUser) use (&$msg, &$user){
+            return in_array($user->id, $connectedUser->userList);
+        });
+        return true;
+    } else {
+        //todo: message d'erreur si le token est erroné
+        // rediriger l'utilisateur vers la page de connexion
+        return false;
+    }
+});
+
 $ws->onMessage(function($msg, $user) use (&$ws, &$symfonyIPC){
     // $ws->broadcastMessage($msg);
-    $msg = json_decode($msg);
+    if(!$user->authenticated) return false;
 
+    $msg = json_decode($msg);
     if(isset($msg->type)){
         switch ($msg->type) {
-            case "authentification":
-                $userDetails = $symfonyIPC->checkCredentials($msg->token);
-                if($userDetails){
-                    $user->authenticated = true;
-                    // TODO: générer un token de session
-                    $user->token = $msg->token;
-                    $user->id = $userDetails->userId;
-                    $user->avatar = $userDetails->userAvatar;
-                    $user->pseudo = $userDetails->pseudo;
-                    // associer les infos de l'utilisateur a la connexion
-
-                    $preparedMessage = json_encode(connectedUser($user->id));
-                    $ws->broadcastMessageTo($preparedMessage, function($connectedUser) use (&$msg, &$user){
-                        return in_array($user->id, $connectedUser->userList);
-                    });
-                } else {
-                    //todo: message d'erreur si le token est erroné
-                    // rediriger l'utilisateur vers la page de connexion
-                }
-                break;
             case "message":
-                if(!validateWsMessage($user, $msg)) return;
+                if(!validateWsMessage($msg)) return;
                 
                 // on attend le retour de cette fonction pour savoir si l'utilisateur a l'acces ou non, elle retournera les utilisateurs qui pourront voir le msssage
                 $ans = $symfonyIPC->saveNewMessage($user->id, trim($msg->content), trim($msg->attachment), $msg->channel);
@@ -59,7 +69,7 @@ $ws->onMessage(function($msg, $user) use (&$ws, &$symfonyIPC){
                 };
                 break;
             case "messageEdit":
-                if(!validateWsMessage($user, $msg)) return;
+                if(!validateWsMessage($msg)) return;
 
                 $messageId = $msg->messageId;
                 if(!is_numeric($messageId)) return;
@@ -74,7 +84,6 @@ $ws->onMessage(function($msg, $user) use (&$ws, &$symfonyIPC){
                 };
                 break;
             case "messageDelete":
-                if(!$user->authenticated) return false;
                 if(!is_numeric($msg->messageId)) return false;
 
                 $ans = $symfonyIPC->deleteMessage($user->id, $msg->messageId);
@@ -87,8 +96,6 @@ $ws->onMessage(function($msg, $user) use (&$ws, &$symfonyIPC){
                 };
                 break;
             case "whichOnline":
-                if(!$user->authenticated) return false;
-
                 $serverUsers = $msg->users;
                 if(!isset($serverUsers) || !is_array($serverUsers)) return false;
                 
@@ -121,9 +128,7 @@ $ws->onClose(function($disconnectedUser) use (&$ws){
     });
 });
 
-function validateWsMessage($user, $msg): bool{
-    if(!$user->authenticated) return false;
-
+function validateWsMessage($msg): bool{
     $content = trim($msg->content);
     $attachment = trim($msg->attachment);
 

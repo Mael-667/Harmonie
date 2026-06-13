@@ -12,7 +12,7 @@ final class LogoutListener
     {
         $response = $event->getResponse();
 
-        $response->headers->clearCookie("token");
+        $response->headers->clearCookie("tokenHarmonie");
 
         $event->setResponse($response);
     }

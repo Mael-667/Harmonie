@@ -23,11 +23,6 @@ export default function WebsocketProvider({ url, children }) {
 
       ws.current.onopen = () => {
         console.log("Websocket connecté !");
-        const token = getCookie("token");
-        // L'auth doit TOUJOURS partir en premier : le serveur exige
-        // $user->authenticated pour whichOnline/message/etc.
-        ws.current.send(JSON.stringify({ type: "authentification", token }));
-
         // Puis on rejoue les messages mis en attente avant l'ouverture.
         pendingRef.current.forEach((data) => ws.current.send(data));
         pendingRef.current = [];
@@ -49,23 +44,6 @@ export default function WebsocketProvider({ url, children }) {
           console.log(data);
         }
       };
-
-      function getCookie(cname) {
-        let name = cname + "=";
-        let decodedCookie = decodeURIComponent(document.cookie);
-        let ca = decodedCookie.split(';');
-        for (let i = 0; i < ca.length; i++) {
-          let c = ca[i];
-          while (c.charAt(0) == ' ') {
-            c = c.substring(1);
-          }
-          if (c.indexOf(name) == 0) {
-            return c.substring(name.length, c.length);
-          }
-        }
-        return "";
-      }
-
     }
     
     connect();

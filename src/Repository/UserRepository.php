@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Channel;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -33,18 +34,32 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->flush();
     }
 
-    public function findWithChannelAccess(int $userId, int $channelId)
+    public function findWithChannelAccess(int $userId, int $channelId): ?array
     {
-        return $this->createQueryBuilder("user")
-                  ->select("server.roles AS roles")
-                  ->innerJoin("user.servers", "server")
-                  ->innerJoin("server.channels", "channel")
-                  ->where("user.id = :userId AND channel.id = :channelId")
+        /** @var Channel|null $channel */
+        $channel = $this->getEntityManager()->createQueryBuilder()
+                  ->select("channel", "server")
+                  ->from(Channel::class, "channel")
+                  ->innerJoin("channel.server", "server")
+                  ->innerJoin("server.users", "membre")
+                  ->where("channel.id = :channelId AND membre.id = :userId")
                   ->setParameter('channelId', $channelId)
                   ->setParameter('userId', $userId)
                   ->setMaxResults(1)
                   ->getQuery()
                   ->getOneOrNullResult();
+
+        if ($channel === null) {
+            return null;
+        }
+
+        $server = $channel->getServer();
+
+        return [
+            "server" => $server,
+            "channel" => $channel,
+            "roles" => $server->getRoles(),
+        ];
     }
 
     //    /**

@@ -39,7 +39,7 @@ class WebSocketServer
                 $buffer .= $data;
 
                 if (!$handshake) {
-                    $this->handshake($buffer, $conn);
+                    $this->handshake($buffer, $conn, $user);
                     $buffer = '';
                     $handshake = true;
                 } else {
@@ -74,7 +74,7 @@ class WebSocketServer
     }
 
     // Gestion du handshake websocket
-    private function handshake(&$buffer, &$conn)
+    private function handshake(&$buffer, &$conn, &$user)
     {
         // On attend la fin des headers HTTP (\r\n\r\n)
         if (strpos($buffer, "\r\n\r\n") === false) {
@@ -91,6 +91,11 @@ class WebSocketServer
         $acceptKey = base64_encode(
             sha1($key . '258EAFA5-E914-47DA-95CA-C5AB0DC85B11', true)
         );
+
+        if(!$this->callback("onOpen", $buffer, $user)){
+            $conn->end("HTTP/1.1 400 Bad Request\r\n\r\n");
+            return;
+        };
 
         $response = implode("\r\n", [
             'HTTP/1.1 101 Switching Protocols',
@@ -209,6 +214,9 @@ class WebSocketServer
             case 'onClose':
                 if(isset($this->callbacks["onClose"])) ($this->callbacks["onClose"])($user);
                 break;
+            case 'onOpen':
+                if(isset($this->callbacks["onOpen"])) return ($this->callbacks["onOpen"])($data, $user);
+                break;
             default:
                 # code...
                 break;
@@ -221,6 +229,10 @@ class WebSocketServer
 
     public function onClose(callable $fun){
         $this->callbacks["onClose"] = $fun;
+    }
+
+    public function onOpen(callable $fun){
+        $this->callbacks["onOpen"] = $fun;
     }
 
     public function broadcastMessage($message){

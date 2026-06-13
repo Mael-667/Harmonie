@@ -790,28 +790,24 @@ final class AppController extends AbstractController
         $user = null;
         $channel = null;
 
+        /** @var User $user */
+        $user = $this->getUser();
+
         if (!$this->isCsrfTokenValid(self::CRSF_ID, $request->getPayload()->get('token'))) {
             $status = [403, "Token invalide"];
         } else {
             $data = $request->getPayload();
-
-            $server = $entityManager->getRepository(Server::class)->findOneBy(["id" => $data->get('serverId')]);
-
-            if (!$server) {
-                $status = [403, "Bad request"];
+            
+            $result = $entityManager->getRepository(User::class)->findWithChannelAccess($user->getId(), $data->get('channelId'));
+            if(!$result){
+                $status = [403, "Accès non autorisé"];
             } else {
-                $roles = $server->getRoles();
-
-                $channel = $entityManager->getRepository(Channel::class)->findOneBy(["id" => $data->get("channelId")]);
-
-                if (!$channel) {
-                    $status = [403, "Bad request"];
-                } else {
-                    /** @var User $user */
-                    $user = $this->getUser();
-                    if (!$permissionManager->canAccessChannel($data->get("channelId"), $user->getId(), $roles, $permission)) {
-                        $status = [403, "Permission manquante"];
-                    }
+                $server = $result["server"];
+                $roles = $result["roles"];
+                $channel = $result["channel"];
+                
+                if (!$permissionManager->canAccessChannel($data->get("channelId"), $user->getId(), $roles, $permission)) {
+                    $status = [403, "Permission manquante"];
                 }
             }
         }

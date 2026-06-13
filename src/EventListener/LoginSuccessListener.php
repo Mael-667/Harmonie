@@ -24,12 +24,12 @@ final class LoginSuccessListener
 
         $token = $event->getUser()->getToken();
 
-        $cookie = Cookie::create('token')
+        $cookie = Cookie::create('tokenHarmonie')
             ->withValue($token)
             ->withExpires(new \DateTimeImmutable('+6 month'))
             ->withPath('/')
             ->withSecure(true)       // HTTPS uniquement
-            ->withHttpOnly(false)     // Inaccessible via JS
+            ->withHttpOnly(true)     // Inaccessible via JS
             ->withSameSite('strict');
 
         $response->headers->setCookie($cookie);
