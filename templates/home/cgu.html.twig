@@ -1,0 +1,142 @@
+{% extends 'base.html.twig' %}
+
+{#
+    Conditions générales d'utilisation.
+    NB : contenu rédigé pour un projet d'école, éditeur fictif (Harmonie SAS).
+    À faire relire par un professionnel en cas de mise en production réelle.
+#}
+
+{% block title %}Harmonie - Conditions générales d'utilisation{% endblock %}
+
+{% block meta_description %}Conditions générales d'utilisation du service de chat communautaire Harmonie : compte, règles de conduite et modération.{% endblock %}
+
+{% block body %}
+
+<main class="legal" aria-label="Conditions générales d'utilisation">
+    <h1>Conditions générales d'utilisation</h1>
+    <p class="legal__updated">Dernière mise à jour : 14 juin 2026</p>
+
+    <section>
+        <h2>1. Objet</h2>
+        <p>
+            Les présentes conditions générales d'utilisation (les « CGU ») régissent l'accès
+            et l'utilisation du service de messagerie communautaire Harmonie (le « Service »),
+            édité par Harmonie SAS. Elles définissent les droits et obligations de Harmonie SAS
+            et des utilisateurs.
+        </p>
+    </section>
+
+    <section>
+        <h2>2. Acceptation</h2>
+        <p>
+            La création d'un compte et l'utilisation du Service impliquent l'acceptation pleine
+            et entière des présentes CGU. Si vous n'acceptez pas ces conditions, vous ne devez
+            pas utiliser le Service.
+        </p>
+    </section>
+
+    <section>
+        <h2>3. Accès au Service et inscription</h2>
+        <p>
+            Le Service est accessible gratuitement à toute personne disposant d'un accès à
+            Internet. L'inscription nécessite une adresse e-mail valide, un pseudonyme et un
+            mot de passe. Les utilisateurs de moins de 15 ans doivent obtenir l'autorisation
+            préalable de leur représentant légal.
+        </p>
+    </section>
+
+    <section>
+        <h2>4. Compte utilisateur</h2>
+        <p>
+            Vous êtes responsable de la confidentialité de vos identifiants et de toutes les
+            activités effectuées depuis votre compte. En cas d'utilisation non autorisée, vous
+            vous engagez à en informer Harmonie SAS dans les meilleurs délais à l'adresse
+            <a href="mailto:harmonie@contact.fr">harmonie@contact.fr</a>.
+        </p>
+    </section>
+
+    <section>
+        <h2>5. Règles de conduite</h2>
+        <p>En utilisant le Service, vous vous engagez à ne pas publier de contenu :</p>
+        <ul>
+            <li>illégal, diffamatoire, haineux, violent ou discriminatoire ;</li>
+            <li>portant atteinte aux droits de tiers (propriété intellectuelle, vie privée) ;</li>
+            <li>inapproprié pour un public mineur ;</li>
+            <li>relevant du harcèlement, du spam ou de l'hameçonnage ;</li>
+            <li>contenant des logiciels malveillants ou nuisibles au Service.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>6. Contenus publiés par les utilisateurs</h2>
+        <p>
+            Vous conservez la propriété des contenus que vous publiez (messages, images).
+            Vous accordez toutefois à Harmonie SAS une licence non exclusive et gratuite
+            permettant d'héberger et d'afficher ces contenus dans le seul but de fournir le
+            Service. Vous garantissez disposer des droits nécessaires sur les contenus publiés.
+        </p>
+    </section>
+
+    <section>
+        <h2>7. Modération et signalement</h2>
+        <p>
+            Harmonie SAS peut modérer, masquer ou supprimer tout contenu contraire aux présentes
+            CGU ou à la loi. Tout contenu illicite peut être signalé à
+            <a href="mailto:harmonie@contact.fr">harmonie@contact.fr</a> ; nous nous engageons à
+            traiter ces signalements avec diligence.
+        </p>
+    </section>
+
+    <section>
+        <h2>8. Disponibilité et responsabilité</h2>
+        <p>
+            Harmonie SAS s'efforce d'assurer la disponibilité du Service sans pouvoir la garantir
+            de manière ininterrompue. Le Service peut être suspendu pour maintenance ou en cas de
+            force majeure. Harmonie SAS ne saurait être tenue responsable des dommages indirects
+            liés à l'utilisation ou à l'indisponibilité du Service.
+        </p>
+    </section>
+
+    <section>
+        <h2>9. Suspension et suppression de compte</h2>
+        <p>
+            En cas de manquement aux présentes CGU, Harmonie SAS se réserve le droit de suspendre
+            ou de supprimer le compte concerné. Vous pouvez à tout moment demander la suppression
+            de votre compte, ce qui entraînera l'effacement des données associées dans les
+            conditions prévues par notre
+            <a href="{{ path('home_rgpd') }}">politique de confidentialité</a>.
+        </p>
+    </section>
+
+    <section>
+        <h2>10. Données personnelles</h2>
+        <p>
+            Le traitement de vos données personnelles est décrit dans notre
+            <a href="{{ path('home_rgpd') }}">politique de confidentialité</a>, qui fait partie
+            intégrante des présentes CGU.
+        </p>
+    </section>
+
+    <section>
+        <h2>11. Modification des CGU</h2>
+        <p>
+            Harmonie SAS peut modifier les présentes CGU à tout moment. Les utilisateurs seront
+            informés des modifications substantielles. La poursuite de l'utilisation du Service
+            après mise à jour vaut acceptation des nouvelles conditions.
+        </p>
+    </section>
+
+    <section>
+        <h2>12. Droit applicable</h2>
+        <p>
+            Les présentes CGU sont soumises au droit français. En cas de litige, et à défaut de
+            résolution amiable, les tribunaux français seront seuls compétents.
+        </p>
+    </section>
+
+    <a href="{{ path('home_index') }}" class="button legal__back">Retour à l'accueil</a>
+</main>
+
+{{ include('partials/footer.html.twig', { footerClass: 'footerInline' }) }}
+
+{% endblock %}

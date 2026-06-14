@@ -1,0 +1,174 @@
+{% extends 'base.html.twig' %}
+
+{#
+    Déclaration RGPD / politique de confidentialité de Harmonie.
+    NB : identité de l'éditeur et de l'hébergeur fictives (projet d'école).
+    À remplacer par les véritables informations en cas de mise en production réelle.
+#}
+
+{% block title %}Harmonie - Politique de confidentialité (RGPD){% endblock %}
+
+{% block meta_description %}Politique de confidentialité d'Harmonie : données collectées, cookies et exercice de vos droits RGPD.{% endblock %}
+
+{% block body %}
+
+<main class="legal" aria-label="Politique de confidentialité">
+    <h1>Politique de confidentialité</h1>
+    <p class="legal__updated">Dernière mise à jour : 14 juin 2026</p>
+
+    <p>
+        La présente politique décrit la manière dont Harmonie (ci-après « le Service »)
+        collecte, utilise et protège vos données à caractère personnel, conformément au
+        Règlement général sur la protection des données (RGPD, règlement UE 2016/679) et
+        à la loi « Informatique et Libertés ». En utilisant le Service, vous reconnaissez
+        en avoir pris connaissance.
+    </p>
+
+    <section>
+        <h2>1. Responsable du traitement</h2>
+        <p>
+            Le responsable du traitement des données est Harmonie SAS, société par actions
+            simplifiée, dont le siège est situé 42 rue des Mélodies, 75011 Paris, immatriculée
+            au RCS de Paris sous le numéro 912 345 678.
+        </p>
+        <p>
+            Pour toute question relative à vos données, vous pouvez nous contacter à l'adresse :
+            <a href="mailto:harmonie@contact.fr">harmonie@contact.fr</a>.
+        </p>
+    </section>
+
+    <section>
+        <h2>2. Données que nous collectons</h2>
+
+        <h3>Données de compte</h3>
+        <ul>
+            <li>adresse e-mail ;</li>
+            <li>pseudonyme et identifiant public (handle) ;</li>
+            <li>mot de passe, stocké uniquement sous forme chiffrée (haché) ;</li>
+            <li>photo de profil (avatar), si vous en ajoutez une.</li>
+        </ul>
+
+        <h3>Contenu que vous créez</h3>
+        <ul>
+            <li>messages que vous envoyez dans les canaux ;</li>
+            <li>serveurs et canaux que vous créez ou rejoignez ;</li>
+            <li>fichiers et images joints à vos messages.</li>
+        </ul>
+
+        <h3>Données techniques</h3>
+        <ul>
+            <li>adresse IP et journaux de connexion ;</li>
+            <li>cookie de session nécessaire à votre authentification ;</li>
+            <li>statut de présence (en ligne / hors ligne) pendant l'utilisation du Service.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>3. Finalités et bases légales</h2>
+        <ul>
+            <li>
+                <strong>Création et gestion de votre compte, authentification</strong> —
+                base légale : exécution du contrat (nos conditions d'utilisation).
+            </li>
+            <li>
+                <strong>Fourniture du service de messagerie</strong> (envoi et réception de
+                messages, gestion des serveurs, affichage de la présence) —
+                base légale : exécution du contrat.
+            </li>
+            <li>
+                <strong>Sécurité du Service</strong> (prévention des abus, protection contre
+                la fraude et les attaques) — base légale : intérêt légitime.
+            </li>
+            <li>
+                <strong>Communication avec vous</strong> au sujet de votre compte ou du Service —
+                base légale : exécution du contrat et intérêt légitime.
+            </li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>4. Durée de conservation</h2>
+        <ul>
+            <li>
+                <strong>Données de compte</strong> : conservées tant que votre compte est actif.
+                Elles sont supprimées à la suite de votre demande de suppression de compte.
+            </li>
+            <li>
+                <strong>Messages et contenus</strong> : conservés tant que le compte ou le serveur
+                associé existe.
+            </li>
+            <li>
+                <strong>Journaux techniques</strong> : conservés pour une durée limitée à des fins
+                de sécurité, puis supprimés ou anonymisés.
+            </li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>5. Destinataires et hébergement</h2>
+        <p>
+            Vos données sont destinées aux personnes habilitées de Harmonie. Elles ne sont ni
+            vendues, ni louées, ni cédées à des tiers à des fins commerciales.
+        </p>
+        <p>
+            Le Service est hébergé par Nebula Hosting SAS, 10 rue du Datacenter, 59000 Lille
+            (03 20 11 22 33). Vos données sont stockées au sein de l'Union européenne.
+        </p>
+    </section>
+
+    <section>
+        <h2>6. Cookies</h2>
+        <p>
+            Harmonie utilise un cookie de session strictement nécessaire à votre authentification.
+            Ce cookie est <code>HttpOnly</code> (inaccessible au JavaScript) et n'est pas utilisé à
+            des fins publicitaires ou de suivi. Étant indispensable au fonctionnement du Service,
+            il ne nécessite pas de consentement préalable. Aucun cookie tiers de publicité ou de
+            traçage n'est déposé.
+        </p>
+    </section>
+
+    <section>
+        <h2>7. Sécurité</h2>
+        <p>
+            Nous mettons en œuvre des mesures techniques et organisationnelles appropriées pour
+            protéger vos données : mots de passe hachés, communications chiffrées (HTTPS),
+            authentification par cookie sécurisé et protection contre les requêtes falsifiées (CSRF).
+        </p>
+    </section>
+
+    <section>
+        <h2>8. Vos droits</h2>
+        <p>Conformément au RGPD, vous disposez des droits suivants sur vos données :</p>
+        <ul>
+            <li>droit d'accès et d'information ;</li>
+            <li>droit de rectification ;</li>
+            <li>droit à l'effacement (« droit à l'oubli ») ;</li>
+            <li>droit à la limitation du traitement ;</li>
+            <li>droit d'opposition ;</li>
+            <li>droit à la portabilité de vos données ;</li>
+            <li>droit de définir des directives relatives au sort de vos données après votre décès.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>9. Exercer vos droits</h2>
+        <p>
+            Vous pouvez exercer ces droits à tout moment en écrivant à
+            <a href="mailto:harmonie@contact.fr">harmonie@contact.fr</a>.
+            Nous pourrons vous demander de justifier votre identité avant de traiter votre demande,
+            à laquelle nous répondrons dans un délai d'un mois.
+        </p>
+        <p>
+            Si vous estimez, après nous avoir contactés, que vos droits ne sont pas respectés, vous
+            pouvez introduire une réclamation auprès de la Commission Nationale de l'Informatique et
+            des Libertés (CNIL), 3 Place de Fontenoy, TSA 80715, 75334 Paris Cedex 07 —
+            <a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer">www.cnil.fr</a>.
+        </p>
+    </section>
+
+    <a href="{{ path('home_index') }}" class="button legal__back">Retour à l'accueil</a>
+</main>
+
+{{ include('partials/footer.html.twig', { footerClass: 'footerInline' }) }}
+
+{% endblock %}

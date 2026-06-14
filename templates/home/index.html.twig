@@ -2,6 +2,8 @@
 
 {% block title %}Harmonie - Votre application de chat{% endblock %}
 
+{% block meta_description %}Harmonie, l'application de chat communautaire pour créer des serveurs, discuter en canaux et rejoindre vos communautés.{% endblock %}
+
 {% block body %}
 
 <div id="title">
@@ -20,5 +22,7 @@
         {% endif %}
     </div>
 </div>
+
+{{ include('partials/footer.html.twig') }}
 
 {% endblock %}

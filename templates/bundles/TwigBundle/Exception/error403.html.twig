@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Harmonie - Accès refusé{% endblock %}
+
+{% block body %}
+
+<main id="title" aria-label="Accès refusé">
+    <h1 class="errorTitle">Erreur 403</h1>
+    <p class="soustitre soustitreError">Accès refusé</p>
+    <p class="errorHelp">Vous n'avez pas les droits nécessaires pour accéder à cette page.</p>
+
+    <div class="titleButtons">
+        <a href="{{ path('home_index') }}" class="button crimsonButton">Retour à l'accueil</a>
+    </div>
+</main>
+
+{% endblock %}

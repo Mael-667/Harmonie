@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Harmonie - Erreur {{ status_code }}{% endblock %}
+
+{% block body %}
+
+<main id="title" aria-label="Erreur {{ status_code }}">
+    <h1 class="errorTitle">Erreur {{ status_code }}</h1>
+    <p class="soustitre soustitreError">{{ status_text }}</p>
+    <p class="errorHelp">Une erreur est survenue. Veuillez réessayer ou revenir à l'accueil.</p>
+
+    <div class="titleButtons">
+        <a href="{{ path('home_index') }}" class="button crimsonButton">Retour à l'accueil</a>
+    </div>
+</main>
+
+{% endblock %}

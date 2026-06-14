@@ -12,7 +12,27 @@ final class HomeController extends AbstractController
     public function index(): Response
     {
         return $this->render('home/index.html.twig', [
-            'controller_name' => 'HomeController',
+        ]);
+    }
+
+    #[Route('/rgpd', name: 'home_rgpd')]
+    public function rgpd(): Response
+    {
+        return $this->render('home/rgpd.html.twig', [
+        ]);
+    }
+
+    #[Route('/mentions-legales', name: 'home_mentions_legales')]
+    public function mentionsLegales(): Response
+    {
+        return $this->render('home/mentions-legales.html.twig', [
+        ]);
+    }
+
+    #[Route('/cgu', name: 'home_cgu')]
+    public function cgu(): Response
+    {
+        return $this->render('home/cgu.html.twig', [
         ]);
     }
 }

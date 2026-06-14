@@ -21,6 +21,7 @@ body {
     background: var(--background);
     background: linear-gradient(135deg, rgba(22, 22, 22, 1) 0%, rgb(22 17 17) 16%, rgb(7 0 2) 90%, rgba(10, 9, 9, 1) 100%);
     color: var(--text-color);
+    margin: 0;
 }
 
 #title {
@@ -162,4 +163,92 @@ button {
     border: none;
     padding: 0;
     outline: #12121200;
+}
+
+.errorTitle{
+    margin: 2rem;
+}
+
+.soustitreError{
+    margin-bottom: unset;
+}
+
+.errorHelp{
+    font-size: 1.2rem;
+    margin-bottom: 3rem;
+}
+
+footer{
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    margin: 2rem 0;
+    text-align: center;
+}
+
+.footerLink{
+    color: var(--main-outline);
+}
+
+/* Footer en flux normal (pages longues : legales) plutot qu'epingle en bas */
+footer.footerInline{
+    position: static;
+    margin: 4rem 0 2rem;
+    text-align: center;
+}
+
+/* Pages legales partagees : RGPD, mentions legales, CGU */
+.legal {
+    max-width: 60rem;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 2rem;
+    line-height: 1.7;
+    font-size: 1.05rem;
+    color: var(--text-color);
+}
+
+.legal h1 {
+    font-size: 3.5rem;
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.legal h2 {
+    font-size: 1.9rem;
+    text-align: left;
+    margin-top: 2.8rem;
+}
+
+.legal h2::after {
+    width: 100%;
+    margin: 0.2rem 0 0;
+}
+
+.legal h3 {
+    font-size: 1.25rem;
+    margin-top: 1.6rem;
+}
+
+.legal a {
+    color: var(--secondary-color);
+}
+
+.legal ul {
+    padding-left: 1.4rem;
+}
+
+.legal li {
+    margin-bottom: 0.4rem;
+}
+
+.legal__updated {
+    text-align: center;
+    color: var(--secondary-color-hover);
+    margin-top: 0;
+    margin-bottom: 2.5rem;
+}
+
+.legal__back {
+    display: inline-block;
+    margin-top: 3rem;
 }

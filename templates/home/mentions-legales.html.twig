@@ -1,0 +1,81 @@
+{% extends 'base.html.twig' %}
+
+{#
+    Mentions légales (obligatoires - LCEN art. 6).
+    NB : identité de l'éditeur et de l'hébergeur fictives (projet d'école).
+    À remplacer par les véritables informations en cas de mise en production réelle.
+#}
+
+{% block title %}Harmonie - Mentions légales{% endblock %}
+
+{% block meta_description %}Mentions légales d'Harmonie : éditeur, directeur de la publication et hébergeur du site.{% endblock %}
+
+{% block body %}
+
+<main class="legal" aria-label="Mentions légales">
+    <h1>Mentions légales</h1>
+    <p class="legal__updated">Dernière mise à jour : 14 juin 2026</p>
+
+    <section>
+        <h2>1. Éditeur du site</h2>
+        <p>
+            Le site Harmonie est édité par Harmonie SAS, société par actions simplifiée
+            au capital de 5 000 €, dont le siège social est situé 42 rue des Mélodies, 75011 Paris.
+        </p>
+        <ul>
+            <li>Immatriculation : RCS Paris 912 345 678 — SIRET 912 345 678 00012 ;</li>
+            <li>Numéro de TVA intracommunautaire : FR42 912345678 ;</li>
+            <li>Adresse e-mail : <a href="mailto:harmonie@contact.fr">harmonie@contact.fr</a> ;</li>
+            <li>Téléphone : 01 23 45 67 89.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>2. Directeur de la publication</h2>
+        <p>Le directeur de la publication est Maël Durand.</p>
+    </section>
+
+    <section>
+        <h2>3. Hébergeur</h2>
+        <p>
+            Le site est hébergé par Nebula Hosting SAS, dont le siège est situé
+            10 rue du Datacenter, 59000 Lille — téléphone : 03 20 11 22 33.
+        </p>
+    </section>
+
+    <section>
+        <h2>4. Propriété intellectuelle</h2>
+        <p>
+            L'ensemble des éléments du site (structure, textes, logo, charte graphique)
+            est, sauf mention contraire, la propriété de l'éditeur. Toute reproduction ou
+            représentation, totale ou partielle, sans autorisation préalable est interdite.
+            Les contenus publiés par les utilisateurs restent leur propriété, dans les
+            conditions prévues par les <a href="{{ path('home_cgu') }}">conditions générales d'utilisation</a>.
+        </p>
+    </section>
+
+    <section>
+        <h2>5. Données personnelles et cookies</h2>
+        <p>
+            Le traitement de vos données personnelles et l'utilisation des cookies sont
+            détaillés dans notre
+            <a href="{{ path('home_rgpd') }}">politique de confidentialité</a>.
+        </p>
+    </section>
+
+    <section>
+        <h2>6. Responsabilité</h2>
+        <p>
+            L'éditeur s'efforce d'assurer l'exactitude et la mise à jour des informations
+            diffusées sur le site, sans pouvoir en garantir l'exhaustivité. Il ne saurait
+            être tenu responsable des dommages liés à l'utilisation du site ou à une
+            interruption du service.
+        </p>
+    </section>
+
+    <a href="{{ path('home_index') }}" class="button legal__back">Retour à l'accueil</a>
+</main>
+
+{{ include('partials/footer.html.twig', { footerClass: 'footerInline' }) }}
+
+{% endblock %}
