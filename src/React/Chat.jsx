@@ -3,11 +3,14 @@ import { WebsocketContext } from "./modules/WebsocketProvider";
 import MessageInput from "./MessageInput";
 import { UserContext } from "./modules/UserContext";
 import Message from "./Message";
+import useDevice from "./hooks/useDevice";
 
-export default function Chat({ channelId, initialMessages, setUpdate, channel }) {
+export default function Chat({ channelId, initialMessages, setUpdate, channel, setOpenedPanel}) {
   const user = useContext(UserContext);
   const ws = useContext(WebsocketContext);
   const messageConteneurRef = useRef(null);
+
+  const [device, DEVICE] = useDevice();
 
 
   const [lastMessage, setLastMessage] = useState(null)
@@ -109,7 +112,17 @@ export default function Chat({ channelId, initialMessages, setUpdate, channel })
 
   return <section id="main" aria-label="Conversation">
     <div id="header">
+      {device < DEVICE.tablet && 
+        <button className="textButton sidePanelButton"  onClick={() => setOpenedPanel("serverPanel")}>
+          <i className="fa-solid fa-bars"></i>
+        </button>
+      }
       <span id="channel-name">{channel && `#${channel?.name}`}</span>
+      {device < DEVICE.pc && 
+        <button className="textButton sidePanelButton" style={{marginLeft: "auto"}} onClick={() => setOpenedPanel("socialPanel")}>
+          <i className="fa-solid fa-user-group"></i>
+        </button>
+      }
     </div>
 
     <div id="messages" ref={messageConteneurRef}>

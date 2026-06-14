@@ -5,7 +5,7 @@ import { WebsocketContext } from "./modules/WebsocketProvider";
 import { FormPost } from "./modules/FormComponents";
 import Message from "./Message";
 
-export default function SocialPanel({ channelId, serverId, userList }) {
+export default function SocialPanel({ channelId, serverId, userList, isOpened}) {
 
     const ws = useContext(WebsocketContext);
 
@@ -64,7 +64,7 @@ export default function SocialPanel({ channelId, serverId, userList }) {
         }
     }
 
-    return <section id="social" aria-label="Membres et recherche">
+    return <section id="social" className={`sidePanel ${isOpened ? "openFromRight" : ""}`} aria-label="Membres et recherche">
         <div id="search">
             <FormPost className={"searchForm"} onSubmit={search}>
                 <input type="text" name="query" id="query" className="searchInput" autoComplete="off" placeholder="Recherchez un message" aria-label="Rechercher un message" onChange={resetResults}/>
@@ -96,7 +96,7 @@ function Member({ key, user, connectedUsers }) {
             <img src={`/uploads/pdp/${user.avatar_url}`} alt="Member avatar" />
             <div className="statusPastille" role="img" style={{backgroundColor: connected ? "#14a900" :"#5e5e5e"}} aria-label={connected ? "En ligne" : "Hors ligne"}></div>
         </div>
-        <div id="userHandles">
+        <div className="userHandles">
             <p id="userPseudo">{user.pseudo}</p>
             {/* <p id="userHandle">@{user.handle}</p> */}
         </div>

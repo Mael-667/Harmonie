@@ -5,6 +5,7 @@ import { UserContext } from "./modules/UserContext";
 import { PermissionProvider } from "./hooks/usePermission";
 import SocialPanel from "./SocialPanel";
 import WebsocketProvider from "./modules/WebsocketProvider";
+import useDevice from "./hooks/useDevice";
 
 export default function App() {
   // Charge automatiquement les info du serveur si l'utilisateur accède spécifiquement a un lien contenant id serveur et ou channel
@@ -24,6 +25,9 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [update, setUpdate] = useState(0);
   const [userList, setUserList] = useState([]);
+
+  const [device, DEVICE] = useDevice();
+  const [openedPanel, setOpenedPanel] = useState(null);
 
   const url = (window.location.origin).replace(window.location.protocol, "").replace("//", "");
 
@@ -77,11 +81,13 @@ export default function App() {
   return <UserContext value={user}>
     <PermissionProvider roles={roles} userId={user?.id}>
       <WebsocketProvider url={url}>
-        <ServersPanel server={server} serverId={serverId} setServerId={setServerId} channels={channels} channelId={channelId} setChannelId={setChannelId} />
+        {openedPanel && <div className="panelBackdrop" onClick={() => setOpenedPanel(null)} />}
 
-        <Chat channelId={channelId} initialMessages={initialMessages} setUpdate={setUpdate} channel={channels?.find(e => e.id == channelId)} />
+        <ServersPanel server={server} serverId={serverId} setServerId={setServerId} channels={channels} channelId={channelId} setChannelId={setChannelId} isOpened={device < DEVICE.tablet && openedPanel == "serverPanel"} onClose={() => setOpenedPanel(null)}/>
 
-        <SocialPanel channelId={channelId} serverId={serverId} userList={userList}/>
+        <Chat channelId={channelId} initialMessages={initialMessages} setUpdate={setUpdate} channel={channels?.find(e => e.id == channelId)} setOpenedPanel={setOpenedPanel}/>
+          
+        <SocialPanel channelId={channelId} serverId={serverId} userList={userList} isOpened={device < DEVICE.pc && openedPanel == "socialPanel"} onClose={() => setOpenedPanel(null)}/>
       </WebsocketProvider>
     </PermissionProvider>
   </UserContext>

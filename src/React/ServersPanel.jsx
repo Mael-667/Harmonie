@@ -7,7 +7,7 @@ import { DynamicImageInput, FormPost } from "./modules/FormComponents";
 import { usePermission } from "./hooks/usePermission";
 import UserSettings from "./UserSettings";
 
-export default function ServersPanel({ channels, channelId, server, serverId, setServerId, setChannelId }) {
+export default function ServersPanel({ channels, channelId, server, serverId, setServerId, setChannelId, isOpened, onClose }) {
 
   const user = useContext(UserContext);
   const [servers, setServers] = useState(null);
@@ -17,7 +17,6 @@ export default function ServersPanel({ channels, channelId, server, serverId, se
 
   const { Permission, hasServerRight } = usePermission();
   const hasRight = hasServerRight(Permission.EditServer);
-
 
   // Get user's servers
   function getServers() {
@@ -32,6 +31,7 @@ export default function ServersPanel({ channels, channelId, server, serverId, se
   useEffect(() => {
     getServers();
   }, [])
+
 
   function serverButton(server) {
     return (
@@ -50,7 +50,7 @@ export default function ServersPanel({ channels, channelId, server, serverId, se
     return <button
       id={channel.id}
       className={`channelButton ${channel.id == channelId ? "channelButtonActive" : ""}`}
-      onClick={() => setChannelId(channel.id)}
+      onClick={() => {setChannelId(channel.id); if(isOpened) onClose()}}
     >
       #{channel.name}
     </button>
@@ -59,7 +59,7 @@ export default function ServersPanel({ channels, channelId, server, serverId, se
 
   }
 
-  return <section id="side_panel" aria-label="Navigation des serveurs et canaux">
+  return <section id="side_panel" className={`sidePanel ${isOpened ? "openFromLeft" : ""}`} aria-label="Navigation des serveurs et canaux">
     <div id="serversDetails">
       <div id="servers">
         <div id="serverList">
@@ -92,7 +92,7 @@ export default function ServersPanel({ channels, channelId, server, serverId, se
         <div id="userPfp">
           <img src={`/uploads/pdp/${user.avatar}`} alt="User avatar" />
         </div>
-        <div id="userHandles">
+        <div className="userHandles">
           <p id="userPseudo">{user.pseudo}</p>
           <button type="button" id="userHandle" className="textButton" onClick={() => copy(user.handle)}>@{user.handle}</button>
         </div>
