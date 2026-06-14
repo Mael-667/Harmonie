@@ -184,6 +184,8 @@ footer{
     width: 100%;
     margin: 2rem 0;
     text-align: center;
+    padding: 0 2rem;
+    box-sizing: border-box;
 }
 
 .footerLink{
@@ -194,7 +196,6 @@ footer{
 footer.footerInline{
     position: static;
     margin: 4rem 0 2rem;
-    text-align: center;
 }
 
 /* Pages legales partagees : RGPD, mentions legales, CGU */
@@ -251,4 +252,20 @@ footer.footerInline{
 .legal__back {
     display: inline-block;
     margin-top: 3rem;
+}
+
+@media screen and (max-width: 425px) {
+    h1{
+        font-size: 4.5rem;
+    }
+
+    .soustitre{
+        font-size: 2rem;
+    }
+
+    .titleButtons {
+        &>a {
+            font-size: 1rem;
+        }
+    }
 }

@@ -34,6 +34,10 @@ export default function UserSettings({ close, user }) {
         .catch((err) => console.log(err))
     }
     
+    function logout(e){
+        e.preventDefault();
+        window.location.replace(window.location.origin+"/logout");
+    }
 
     return <Modal onClose={close} className="userSettings">
         <div>
@@ -51,6 +55,9 @@ export default function UserSettings({ close, user }) {
         </div>
         <div>
             <h3>Section dangereuse</h3>
+            <FormButtonWithConfirmation label={"Se déconnecter"} onSubmit={logout} confirmationMessage={"Vous allez être déconnecté, continuer ?"}></FormButtonWithConfirmation>
+            <br />
+            <br />
             <FormButtonWithConfirmation label={"Supprimer votre profil"} onSubmit={deleteProfile} confirmationMessage={"Voulez vous vraiment supprimer votre profil ?"} />
         </div>
     </Modal>

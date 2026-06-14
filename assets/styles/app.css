@@ -13,6 +13,7 @@ body {
     animation-timing-function: ease-out;
     transition: 150ms;
     background: var(--background);
+    max-width: 70vw;
 }
 
 #side_panel {
@@ -563,6 +564,7 @@ form {
     /* occupe l'espace restant a cote de la nav */
     min-height: 0;
     overflow-y: auto;
+    scrollbar-color: var(--scrollbar) var(--background);
     /* scroll vertical quand le contenu depasse */
 }
 
@@ -643,6 +645,7 @@ form {
     display: flex;
     align-items: flex-end;
     gap: 2rem;
+    flex-wrap: wrap;
 }
 
 .navButton {
@@ -712,6 +715,9 @@ form {
 .userSettings{
     display: flex;
     align-items: stretch;
+    overflow-y: auto;
+    scrollbar-color: var(--scrollbar) var(--background);
+    box-sizing: border-box;
 }
 
 .confirmationPopup{
@@ -789,6 +795,15 @@ form {
 }
 
 @media screen and (max-width: 425px) {
+
+    h2{
+        font-size: 2.5rem;
+    }
+
+    .navButton{
+        font-size: 1.1rem;
+    }
+
     #side_panel{
         z-index: 3;
         position: absolute;
