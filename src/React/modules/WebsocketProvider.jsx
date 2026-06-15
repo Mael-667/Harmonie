@@ -35,13 +35,13 @@ export default function WebsocketProvider({ url, children }) {
       };
 
       ws.current.onmessage = (e) => {
-        console.log(e.data);
+        // console.log(e.data);
         const data = JSON.parse(e.data);   // { type, payload } : le type est sur l'objet EXTÉRIEUR
         const callback = callbacksRef.current[data.type]
         if(callback){
           callback(data.payload);
         } else {
-          console.log(data);
+          console.error({"Message non reconnu : ": data});
         }
       };
     }

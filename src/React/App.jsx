@@ -61,9 +61,9 @@ export default function App() {
         setServer({ serverName: json.serverName, serverId: json.serverId, serverIcon: json.serverIcon })
         setInitialMessages(json.messages)
         setUserList(json.members ?? [])
-        console.log(json);
+        // console.log(json);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => console.error(err));
 
   }, [channelId, serverId, update])
 
@@ -73,7 +73,7 @@ export default function App() {
       .then((e) => {
         setUser(e);
       })
-      .catch((err) => console.log(err))
+      .catch((err) => console.error(err))
   }, [])
 
 

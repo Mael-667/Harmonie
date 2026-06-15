@@ -3,6 +3,7 @@ import Modal from "./modules/Modal";
 import { copy } from "./modules/Utils";
 import { UserContext } from "./modules/UserContext";
 import { DynamicImageInput, Field, FormButtonWithConfirmation, FormPost, Select } from "./modules/FormComponents";
+import useDevice from "./hooks/useDevice";
 
 export default function ServerSettings({ setSettingsOpened, server, channels }) {
     // set la valeur par défaut
@@ -15,6 +16,10 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
     const url = (window.location.origin).replace(window.location.protocol, "").replace("//", "");
 
     const categories = useMemo(() => getCategories(channels), [channels])
+
+    const [device, DEVICE] = useDevice();
+    const [opened, setOpened] = useState(false);
+    const isMobile = device < DEVICE.pc
 
     useEffect(() => {
         let form = new FormData();
@@ -56,7 +61,7 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
             })
             .catch((err) => {
                 // indiquer a l'utilisateur que l'id est deja pris
-                console.log(err);
+                console.error(err);
             })
     }
 
@@ -71,10 +76,10 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
             body: form,
         })
             .then((response) => response.json())
-            .then((e) => {
-                console.log(e);
+            .then(() => {
+                // console.log(e);
             })
-            .catch((err) => console.log(err))
+            .catch((err) => console.error(err))
     }
 
     function deleteServer(e) {
@@ -88,11 +93,11 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
             body: form,
         })
             .then((response) => response.json())
-            .then((e) => {
-                console.log(e);
+            .then(() => {
+                // console.log(e);
                 window.location.replace(window.location.origin+"/app");
             })
-            .catch((err) => console.log(err))
+            .catch((err) => console.error(err))
     }
 
     function createChannel(e) {
@@ -106,10 +111,10 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
             body: form,
         })
             .then((response) => response.json())
-            .then((e) => {
-                console.log(e);
+            .then(() => {
+                // console.log(e);
             })
-            .catch((err) => console.log(err))
+            .catch((err) => console.error(err))
     }
 
     function updateChannel(e, channelId) {
@@ -124,10 +129,10 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
             body: form,
         })
             .then((response) => response.json())
-            .then((e) => {
-                console.log(e);
+            .then(() => {
+                // console.log(e);
             })
-            .catch((err) => console.log(err))
+            .catch((err) => console.error(err))
     }
 
     function deleteChannel(channelId) {
@@ -143,24 +148,34 @@ export default function ServerSettings({ setSettingsOpened, server, channels }) 
             body: form,
         })
             .then((response) => response.json())
-            .then((e) => {
-                console.log(e);
+            .then(() => {
+                // console.log(e);
             })
-            .catch((err) => console.log(err))
+            .catch((err) => console.error(err))
     }
 
 
     if (!invitDetails) return null;   // TODO: ou un <Modal>…Chargement…</Modal>
 
     return <Modal id="popupServerSettings" onClose={() => setSettingsOpened(false)}>
-        <h2>Administration du serveur</h2>
+        <h2>
+            {isMobile && 
+                <button className="textButton sidePanelButton"  onClick={() => setOpened(true)}>
+                    <i className="fa-solid fa-bars"></i>
+                </button>
+            }
+            Administration du serveur
+        </h2>
         <div id="settingsContent">
+            {opened && <div className="serverSettingsBackdrop" onClick={() => setOpened(false)} />}
+            {(!isMobile || opened) && 
             <nav id="serverSettingsNav" role="tablist" aria-label="Sections des paramètres du serveur">
                 <button type="button" role="tab" id="tab-properties" aria-selected={tab === "properties"} aria-controls="propertiesContent" className={`navButton ${tab === "properties" ? "navButtonActive" : ""}`} onClick={() => setTab('properties')}>Propriétés du serveur</button>
                 <button type="button" role="tab" id="tab-channels" aria-selected={tab === "channels"} aria-controls="channelsContent" className={`navButton ${tab === "channels" ? "navButtonActive" : ""}`} onClick={() => setTab('channels')}>Canaux de discussion</button>
                 <button type="button" role="tab" id="tab-users" aria-selected={tab === "users"} aria-controls="usersContent" className={`navButton ${tab === "users" ? "navButtonActive" : ""}`} onClick={() => setTab('users')}>Gestion d'utilisateurs</button>
                 <button type="button" role="tab" id="tab-roles" aria-selected={tab === "roles"} aria-controls="rolesContent" className={`navButton ${tab === "roles" ? "navButtonActive" : ""}`} onClick={() => setTab('roles')}>Gestion des rôles</button>
             </nav>
+            }
 
             <div id="settingsDetails">
 

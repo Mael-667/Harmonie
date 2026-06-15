@@ -12,10 +12,10 @@ export default function UserSettings({ close, user }) {
             body: form,
         })
         .then((response) => response.json())
-        .then((e) => {
-            console.log(e);
+        .then(() => {
+            // console.log(e);
         })
-        .catch((err) => console.log(err))
+        .catch((err) => console.error(err))
     }
 
     function deleteProfile(e) {
@@ -27,11 +27,11 @@ export default function UserSettings({ close, user }) {
             body: form,
         })
         .then((response) => response.json())
-        .then((e) => {
-            console.log(e);
+        .then(() => {
+            // console.log(e);
             window.location.replace(window.location.origin+"/logout");
         })
-        .catch((err) => console.log(err))
+        .catch((err) => console.error(err))
     }
     
     function logout(e){
