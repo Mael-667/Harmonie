@@ -19,17 +19,34 @@ The front end is **hybrid**: Twig renders the static, server-side pages (home, l
 ```bash
 git clone https://github.com/Mael-667/Harmonie.git
 cd Harmonie
-npm install && npx vite build      # bundle the React chat page → public/build/islands.js
+```
+
+### Production
+
+```bash
 docker compose up --build
 ```
 
-On the Docker side, Composer install, database creation and migrations all run on first boot. The React bundle is built separately with Vite — `public/build/` is gitignored, so (re)build it after any change under `src/React/`, or run `npx vite build --watch` while developing.
+`compose.yaml` builds the production image (`dockerfile`): it copies the code, installs Composer dependencies with `--no-dev`, and bundles the React chat page with Vite **inside the image** — no host-side Node or build step needed. On first boot the container also creates the database and runs migrations.
 
-| Service | URL |
-|---|---|
-| App | http://localhost:80 |
-| WebSocket | ws://localhost:443 |
-| phpMyAdmin | http://localhost:8080 |
+### Development
+
+```bash
+docker compose -f compose.dev.yaml up --build
+```
+
+`compose.dev.yaml` uses `dev.dockerfile` and mounts your working directory into the container (`APP_ENV=dev`, `APP_DEBUG=1`), so PHP changes are picked up live. The dev image does **not** bundle the front end, so build the React page on the host — and keep it rebuilding while you work:
+
+```bash
+npm install
+npx vite build --watch      # → public/build/ (gitignored; rebuild after any change under src/React/)
+```
+
+| Service | URL | Environment |
+|---|---|---|
+| App | http://localhost:80 | prod + dev |
+| WebSocket | ws://localhost:443 | prod + dev |
+| phpMyAdmin | http://localhost:8080 | dev only |
 
 ## How it's organized
 
