@@ -10,12 +10,8 @@ COPY conf/vhost.conf /etc/apache2/sites-available/000-default.conf
 COPY conf/apache.conf /etc/apache2/conf-available/z-app.conf
 
 COPY conf/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
-COPY . /harmonie/
-
-ENV APP_ENV=prod APP_DEBUG=0
 
 RUN a2enconf z-app
 RUN docker-php-ext-install pdo pdo_mysql
-RUN apt-get update && apt-get install -y git unzip nodejs npm && rm -rf /var/lib/apt/lists/*
-RUN npm install
-RUN npx vite build
+RUN apt-get update && apt-get install -y git unzip && rm -rf /var/lib/apt/lists/*
+
