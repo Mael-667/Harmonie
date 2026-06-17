@@ -16,6 +16,8 @@ services:
             php bin/console doctrine:database:create --if-not-exists &&
             php bin/console doctrine:migrations:migrate --no-interaction &&
             apache2-foreground"
+    volumes:
+      - public-upload:/harmonie/public/uploads
     # env_file:
     #     - .env.prod
   websocket:
@@ -47,3 +49,4 @@ services:
       - mysql-data:/var/lib/mysql
 volumes:
   mysql-data:
+  public-upload:
