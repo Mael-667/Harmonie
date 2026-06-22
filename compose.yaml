@@ -2,6 +2,7 @@
 services:
   web:
     build: .
+    image: harmonie-app
     ports:
       - "80:80"
     depends_on:
@@ -21,9 +22,7 @@ services:
     # env_file:
     #     - .env.prod
   websocket:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: harmonie-app
     command: sh -c "symfony composer install --no-dev --optimize-autoloader &&
                     php websocket/ChatWebsocket.php"
     # env_file:

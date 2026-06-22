@@ -18,9 +18,11 @@ class WebSocketServer
     private $users = [];
 
     private $port = 8080;
+    private $maxBufferSize;
 
-    public function __construct()
+    public function __construct($maxBufferSize = 4000)
     {
+        $this->maxBufferSize = $maxBufferSize;
         $this->socket = new SocketServer('0.0.0.0:'.$this->port);
         // Implémentation du protocole websocket tel que décrit sur cette documentation
         // https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_servers
@@ -39,11 +41,20 @@ class WebSocketServer
                 $buffer .= $data;
 
                 if (!$handshake) {
-                    $this->handshake($buffer, $conn, $user);
-                    $buffer = '';
-                    $handshake = true;
+                    if($this->handshake($buffer, $conn, $user)) {
+                        $buffer = '';
+                        $handshake = true;
+                    };
                 } else {
+                    // On bloque les messages trop volumineux pour éviter les problèmes
+                    if(strlen($buffer) > $this->maxBufferSize){
+                        $buffer = "";
+                        return;
+                    }
+
                     $result = $this->decodeFrame($buffer);
+                    if(!$result) return;
+
                     $message .= $result['data'];
 
                     if ($result["FIN"] != 0) {
@@ -74,17 +85,17 @@ class WebSocketServer
     }
 
     // Gestion du handshake websocket
-    private function handshake(&$buffer, &$conn, &$user)
+    private function handshake(&$buffer, &$conn, &$user): bool
     {
         // On attend la fin des headers HTTP (\r\n\r\n)
         if (strpos($buffer, "\r\n\r\n") === false) {
-            return;
+            return false;
         }
 
         // echo $buffer;
         if (!preg_match('/Sec-WebSocket-Key:\s*(.+)\r\n/i', $buffer, $matches)) {
             $conn->end("HTTP/1.1 400 Bad Request\r\n\r\n");
-            return;
+            return false;
         }
 
         $key = trim($matches[1]);
@@ -94,7 +105,7 @@ class WebSocketServer
 
         if(!$this->callback("onOpen", $buffer, $user)){
             $conn->end("HTTP/1.1 400 Bad Request\r\n\r\n");
-            return;
+            return false;
         };
 
         $response = implode("\r\n", [
@@ -106,7 +117,7 @@ class WebSocketServer
             '',   // \r\n\r\n final obligatoire
         ]);
         $conn->write($response);
-        return;
+        return true;
     }
 
     private function decodeFrame(&$buffer)
@@ -128,10 +139,14 @@ class WebSocketServer
             $index = 2;
         } else if ($payloadLen == 126) {
             $index = 4;
+
+            // Calcul et récupération de l'extended payload length
             $payloadLen = (ord($buffer[2]) << 8) + ord($buffer[3]);
         } else if ($payloadLen == 127) {
             $index = 10;
             $start = 2;
+
+            // Calcul et récupération de l'extended payload length
             $payloadLen = 0;
             for ($i = 0; $i < 7; $i++) {
                 $payloadLen += ord($buffer[$i + $start]);
@@ -139,6 +154,11 @@ class WebSocketServer
             }
             $payloadLen += ord($buffer[9]);
         }
+
+        
+        // frame non complète on return
+        $frameLen = $index + 4 + $payloadLen;   // header + masque + payload
+        if (strlen($buffer) < $frameLen) return null;   // incomplète → on attend
 
         $maskingKey = [];
         $maskingKeyLength = 4;
