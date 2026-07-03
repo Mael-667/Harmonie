@@ -10,13 +10,13 @@ services:
     volumes:
       - .:/harmonie
       - /harmonie/var
-      - /harmonie/vendor
+      - vendor:/harmonie/vendor
     environment:
       APP_ENV: dev
       APP_DEBUG: 1
     depends_on:
       mysql:
-        condition: service_started
+        condition: service_healthy
     command: >
       sh -c "symfony composer install &&
             php bin/console doctrine:database:create --if-not-exists &&
@@ -28,11 +28,25 @@ services:
       - "443:8080"
     volumes:
       - .:/harmonie
+      - vendor:/harmonie/vendor
+    depends_on:
+      - web
+    # vendor/ est installe par le service web dans le volume partage 'vendor'.
+    # On attend que l'autoload existe avant de lancer le serveur, sinon crash
+    # "Failed opening required vendor/autoload.php" sur un clone frais.
+    command: >
+      sh -c "until [ -f vendor/autoload.php ]; do echo 'websocket: en attente de vendor/autoload.php...'; sleep 2; done &&
+            php websocket/ChatWebsocket.php"
   mysql:
     image: mysql:latest
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: harmonie_db 
+      MYSQL_DATABASE: harmonie_db
     # ports:
         # - "3306:3306"
     volumes:
@@ -53,3 +67,4 @@ services:
   #     # - "6379:6379"
 volumes:
   mysql-data:
+  vendor:
