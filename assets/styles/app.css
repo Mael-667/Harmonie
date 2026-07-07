@@ -464,7 +464,7 @@ body {
     box-shadow: 0 0 4px var(--main-color);
     border-radius: 1.4rem;
     padding: 2rem 1.5rem;
-    box-sizing: border-box;
+    box-sizing: content-box;
 }
 
 #popupNewServer {
