@@ -222,8 +222,9 @@ body {
 
 .pfpBox {
     width: 100%;
-    height: auto;
+    aspect-ratio: 1 / 1;
     border-radius: 50%;
+    overflow: hidden;
 }
 
 .messageInfo {
@@ -741,6 +742,7 @@ form {
     position: relative;
     & img{
         height: 100%;
+        width: 100%;
         border-radius: 50%;
     }
 }
