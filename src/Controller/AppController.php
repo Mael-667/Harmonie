@@ -691,6 +691,7 @@ final class AppController extends AbstractController
             }
         }
 
+        // Doctrine remove tout ce qui est associé en cascade
         $entityManager->remove($user);
         $entityManager->flush();
 
