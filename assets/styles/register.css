@@ -20,7 +20,7 @@ form>div:nth-child(1)>label:first-of-type{
     /* box-shadow: 0 0 5px 0px black; */
     border-radius: 50%;
     background: var(--field-bg);
-    background-position: center;
+    background-position: center !important;
     transition-duration: 150ms;
     background-size: contain !important;
     background-repeat: no-repeat !important;
